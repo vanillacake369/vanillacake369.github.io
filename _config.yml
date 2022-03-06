@@ -1,9 +1,9 @@
 # Site Settings
-title: Mere Blog Theme
+title: Vanilla의 Blog
 tagline: Mere Blog Theme
-email: your-email@domain.com
+email: vanillacake369@gmail.com
 description: >
-  The demo site for Mere Blog Theme, made for Jekyll and GitHub pages websites
+  세상을 이롭게 하는 개발을  지향하는 개발자vanilla의 블로그입니다.
 baseurl: ""
 url: "https://vanillacake369.github.io/"
 permalink: pretty
