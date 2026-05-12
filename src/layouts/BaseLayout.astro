@@ -65,7 +65,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
   <body>
     <header class="site-header">
       <div class="site-wrapper header-inner">
-        <a href="/" class="site-title" id="site-title-link">{siteTitle}</a>
+        <a href="/" class="site-title">{siteTitle}</a>
         <nav class="site-nav" aria-label="Main navigation">
           <a href="/"
             data-i18n="nav.home"
@@ -149,37 +149,6 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       });
     });
 
-    // Hidden analytics trigger: triple-click the site title within 500ms each click
-    const siteTitleLink = document.getElementById('site-title-link') as HTMLAnchorElement | null;
-    if (siteTitleLink) {
-      let clickCount = 0;
-      let clickTimer: ReturnType<typeof setTimeout> | null = null;
-
-      siteTitleLink.addEventListener('click', (event) => {
-        event.preventDefault();
-        clickCount += 1;
-
-        if (clickTimer !== null) {
-          clearTimeout(clickTimer);
-        }
-
-        if (clickCount >= 3) {
-          clickCount = 0;
-          window.location.href = '/analytics';
-          return;
-        }
-
-        // If not triple-clicked within 600ms, navigate to home
-        clickTimer = setTimeout(() => {
-          const count = clickCount;
-          clickCount = 0;
-          clickTimer = null;
-          if (count < 3) {
-            window.location.href = '/';
-          }
-        }, 600);
-      });
-    }
   }
 
   if (document.readyState === 'loading') {

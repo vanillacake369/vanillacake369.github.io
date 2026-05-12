@@ -13,7 +13,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "optimize-images": "node scripts/optimize-images.mjs"
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "lint:md": "node scripts/lint-markdown.mjs",
+    "lint:md:fix": "node scripts/lint-markdown.mjs --fix"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.4",

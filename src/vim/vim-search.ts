@@ -25,6 +25,14 @@ export function init(els: {
   inputEl.addEventListener('input', () => {
     setQuery(inputEl!.value);
   });
+
+  // Enter: confirm search, blur input so n/N work
+  inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputEl!.blur();
+    }
+  });
 }
 
 export function open(onClose: () => void): void {

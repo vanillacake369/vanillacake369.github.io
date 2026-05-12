@@ -111,21 +111,12 @@ function showOnboarding(): void {
 function handleKeydown(e: KeyboardEvent): void {
   // ─── Ctrl combos (our bindings FIRST, then let browser handle the rest) ───
   if (e.ctrlKey || e.metaKey) {
-    // Ctrl+K: leader key (command palette)
+    // Ctrl+K: open fuzzy finder directly (like VS Code command palette)
     if (e.key === 'k' || e.key === 'K') {
       e.preventDefault();
-      if (mode === 'whichkey') {
-        // Ctrl+K pressed twice → open fuzzy finder
-        whichKey.hide();
-        clearPrefix();
-        fuzzyFinder.open('files', resetToNormal);
-        mode = 'fuzzy';
-      } else {
-        prefixKey = 'ctrl+k';
-        mode = 'whichkey';
-        whichKey.show(LEADER_GROUPS);
-        startPrefixTimeout();
-      }
+      if (mode === 'whichkey') { whichKey.hide(); clearPrefix(); }
+      fuzzyFinder.open('files', resetToNormal);
+      mode = 'fuzzy';
       return;
     }
 
