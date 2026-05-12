@@ -12,6 +12,7 @@ import VimSearch from '../components/VimSearch.astro';
 import FuzzyFinder from '../components/FuzzyFinder.astro';
 import WhichKey from '../components/WhichKey.astro';
 import Analytics from '../components/Analytics.astro';
+import { SITE_CONFIG } from '../config';
 
 interface Props {
   title?: string;
@@ -23,15 +24,15 @@ interface Props {
 }
 
 const {
-  title = "Vanilla's Blog",
-  description = "A blog about software engineering, systems, and ideas.",
+  title = SITE_CONFIG.title,
+  description = SITE_CONFIG.description,
   lang = 'ko',
   seoType = 'website',
   publishedDate,
   tags,
 } = Astro.props;
 
-const siteTitle = "Vanilla's Blog";
+const siteTitle = SITE_CONFIG.title;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
@@ -116,15 +117,15 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       <div class="site-wrapper footer-inner">
         <span
           data-i18n="footer.rights"
-          data-i18n-ko={`© ${new Date().getFullYear()} vanillacake369. ${translations.ko['footer.rights']}`}
-          data-i18n-en={`© ${new Date().getFullYear()} vanillacake369. ${translations.en['footer.rights']}`}
+          data-i18n-ko={`© ${new Date().getFullYear()} ${SITE_CONFIG.author}. ${translations.ko['footer.rights']}`}
+          data-i18n-en={`© ${new Date().getFullYear()} ${SITE_CONFIG.author}. ${translations.en['footer.rights']}`}
         >
-          &copy; {new Date().getFullYear()} vanillacake369. {translations.ko['footer.rights']}
+          &copy; {new Date().getFullYear()} {SITE_CONFIG.author}. {translations.ko['footer.rights']}
         </span>
         <div class="footer-links">
-          <a href="https://github.com/vanillacake369" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
-          <a href="mailto:lonelynight1026@gmail.com" aria-label="Email">Email</a>
-          <a href="https://www.linkedin.com/in/vanillacake369/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">LinkedIn</a>
+          <a href={SITE_CONFIG.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
+          <a href={`mailto:${SITE_CONFIG.email}`} aria-label="Email">Email</a>
+          <a href={SITE_CONFIG.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">LinkedIn</a>
           <a href="/rss.xml" class="rss-link" aria-label="RSS Feed">RSS</a>
         </div>
       </div>

@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { sortPostsByDate, filterPublished } from '../domain/post';
 import type { Post } from '../domain/types';
 import { translations } from '../i18n/translations';
+import { SITE_CONFIG } from '../config';
 
 const rawEntries = await getCollection('posts');
 
@@ -27,7 +28,7 @@ function formatDate(date: Date): string {
 }
 ---
 
-<BaseLayout title="Vanilla's Blog" description="A blog about software engineering, systems, and ideas.">
+<BaseLayout title={SITE_CONFIG.title} description={SITE_CONFIG.description}>
   <section class="post-list-section">
     <h1
       class="page-title"
