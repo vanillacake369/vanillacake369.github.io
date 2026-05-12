@@ -38,7 +38,14 @@ const formattedDate = formatDate(date, locale);
 const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : null;
 ---
 
-<BaseLayout title={title} description={description} lang={lang}>
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  seoType="article"
+  publishedDate={date}
+  tags={tags}
+>
   <div class="post-with-toc">
     <div class="toc-trigger">
       <aside class="toc-sidebar">

@@ -3,20 +3,28 @@ import '../styles/global.css';
 import '../styles/themes/dark.css';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import SEO from '../components/SEO.astro';
 
 interface Props {
   title?: string;
   description?: string;
   lang?: 'ko' | 'en';
+  seoType?: 'article' | 'website';
+  publishedDate?: Date;
+  tags?: string[];
 }
 
 const {
   title = "Vanilla's Blog",
   description = "A blog about software engineering, systems, and ideas.",
   lang = 'ko',
+  seoType = 'website',
+  publishedDate,
+  tags,
 } = Astro.props;
 
 const siteTitle = "Vanilla's Blog";
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
@@ -26,11 +34,20 @@ const siteTitle = "Vanilla's Blog";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta name="robots" content="noai, noimageai" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
     <title>{title === siteTitle ? title : `${title} — ${siteTitle}`}</title>
+    <SEO
+      title={title}
+      description={description}
+      url={canonicalUrl}
+      type={seoType}
+      publishedDate={publishedDate}
+      tags={tags}
+    />
     <ThemeInitScript />
     <slot name="head" />
   </head>
