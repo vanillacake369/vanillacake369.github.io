@@ -217,6 +217,20 @@ function renderResults(): void {
   if (!resultListEl) return;
   resultListEl.innerHTML = '';
 
+  prevSelectedIndex = -1;
+
+  if (results.length === 0) {
+    if (inputEl?.value) {
+      const empty = document.createElement('div');
+      empty.className = 'vim-fuzzy-empty';
+      empty.textContent = 'No results found';
+      resultListEl.appendChild(empty);
+    }
+    return;
+  }
+
+  // Batch DOM insertion via DocumentFragment
+  const frag = document.createDocumentFragment();
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
     const item = document.createElement('div');
@@ -226,36 +240,48 @@ function renderResults(): void {
       <span class="vim-fuzzy-item-title">${highlightText(escapeHtml(result.title), currentQuery)}</span>
       <span class="vim-fuzzy-item-url">${escapeHtml(result.url)}</span>
     `;
-    item.addEventListener('click', () => {
-      selectedIndex = i;
-      updateSelection();
-      confirm();
-    });
-    item.addEventListener('mouseover', () => {
-      selectedIndex = i;
-      updateSelection();
-    });
-    resultListEl.appendChild(item);
+    frag.appendChild(item);
   }
+  resultListEl.appendChild(frag);
 
-  if (results.length === 0 && inputEl?.value) {
-    const empty = document.createElement('div');
-    empty.className = 'vim-fuzzy-empty';
-    empty.textContent = 'No results found';
-    resultListEl.appendChild(empty);
-  }
+  // Single delegated listener instead of per-item listeners
+  resultListEl.onclick = (e: MouseEvent) => {
+    const item = (e.target as HTMLElement).closest<HTMLElement>('.vim-fuzzy-item');
+    if (!item) return;
+    selectedIndex = Number(item.dataset.index);
+    updateSelection();
+    confirm();
+  };
+  resultListEl.onmouseover = (e: MouseEvent) => {
+    const item = (e.target as HTMLElement).closest<HTMLElement>('.vim-fuzzy-item');
+    if (!item) return;
+    const idx = Number(item.dataset.index);
+    if (idx === selectedIndex) return;
+    selectedIndex = idx;
+    updateSelection();
+  };
 }
+
+let prevSelectedIndex = -1;
 
 function updateSelection(): void {
   if (!resultListEl || !previewEl) return;
 
-  const items = resultListEl.querySelectorAll<HTMLElement>('.vim-fuzzy-item');
-  items.forEach((item, i) => {
-    item.classList.toggle('vim-fuzzy-item--active', i === selectedIndex);
-    if (i === selectedIndex) {
-      item.scrollIntoView({ block: 'nearest' });
+  // O(1): only touch previous and new active items
+  if (prevSelectedIndex !== selectedIndex) {
+    if (prevSelectedIndex >= 0) {
+      const prev = resultListEl.children[prevSelectedIndex] as HTMLElement | undefined;
+      prev?.classList.remove('vim-fuzzy-item--active');
     }
-  });
+    if (selectedIndex >= 0) {
+      const cur = resultListEl.children[selectedIndex] as HTMLElement | undefined;
+      if (cur) {
+        cur.classList.add('vim-fuzzy-item--active');
+        cur.scrollIntoView({ block: 'nearest' });
+      }
+    }
+    prevSelectedIndex = selectedIndex;
+  }
 
   if (selectedIndex >= 0 && selectedIndex < results.length) {
     const result = results[selectedIndex];

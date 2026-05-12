@@ -6,22 +6,16 @@ let el: HTMLElement | null = null;
 let innerEl: HTMLElement | null = null;
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Cache rendered fragments keyed by group identity (avoids re-creating static DOM)
+const renderedCache = new WeakMap<readonly WhichKeyGroup[], DocumentFragment>();
+
 export function init(els: { el: HTMLElement; inner: HTMLElement }): void {
   el = els.el;
   innerEl = els.inner;
 }
 
-export function show(groups: WhichKeyGroup[]): void {
-  if (!el || !innerEl) return;
-
-  // Cancel any pending hide
-  if (hideTimer !== null) {
-    clearTimeout(hideTimer);
-    hideTimer = null;
-  }
-
-  innerEl.innerHTML = '';
-
+function buildGroupFragment(groups: readonly WhichKeyGroup[]): DocumentFragment {
+  const frag = document.createDocumentFragment();
   for (const group of groups) {
     const groupEl = document.createElement('div');
     groupEl.className = 'vim-whichkey-group';
@@ -52,8 +46,29 @@ export function show(groups: WhichKeyGroup[]): void {
     }
 
     groupEl.appendChild(entriesEl);
-    innerEl.appendChild(groupEl);
+    frag.appendChild(groupEl);
   }
+  return frag;
+}
+
+export function show(groups: WhichKeyGroup[]): void {
+  if (!el || !innerEl) return;
+
+  // Cancel any pending hide
+  if (hideTimer !== null) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+
+  innerEl.innerHTML = '';
+
+  // Use cached fragment (cloneNode) for static group arrays
+  let cached = renderedCache.get(groups);
+  if (!cached) {
+    cached = buildGroupFragment(groups);
+    renderedCache.set(groups, cached);
+  }
+  innerEl.appendChild(cached.cloneNode(true));
 
   el.hidden = false;
   // Force reflow then show
