@@ -3,11 +3,15 @@ import '../styles/global.css';
 import '../styles/themes/dark.css';
 import '../styles/vim-ui.css';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
+import LangInitScript from '../components/LangInitScript.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import LangToggle from '../components/LangToggle.astro';
 import SEO from '../components/SEO.astro';
+import { translations } from '../i18n/translations';
 import VimSearch from '../components/VimSearch.astro';
 import FuzzyFinder from '../components/FuzzyFinder.astro';
 import WhichKey from '../components/WhichKey.astro';
+import Analytics from '../components/Analytics.astro';
 
 interface Props {
   title?: string;
@@ -42,6 +46,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
+    <link rel="alternate" hreflang="ko" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en" href={canonicalUrl} />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
     <title>{title === siteTitle ? title : `${title} — ${siteTitle}`}</title>
     <SEO
@@ -53,19 +59,41 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       tags={tags}
     />
     <ThemeInitScript />
+    <LangInitScript />
     <slot name="head" />
   </head>
   <body>
     <header class="site-header">
       <div class="site-wrapper header-inner">
-        <a href="/" class="site-title">{siteTitle}</a>
+        <a href="/" class="site-title" id="site-title-link">{siteTitle}</a>
         <nav class="site-nav" aria-label="Main navigation">
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/tags">Tags</a>
-          <a href="/calendar">Calendar</a>
-          <a href="/search">Search</a>
+          <a href="/"
+            data-i18n="nav.home"
+            data-i18n-ko={translations.ko['nav.home']}
+            data-i18n-en={translations.en['nav.home']}
+          >{translations.ko['nav.home']}</a>
+          <a href="/about"
+            data-i18n="nav.about"
+            data-i18n-ko={translations.ko['nav.about']}
+            data-i18n-en={translations.en['nav.about']}
+          >{translations.ko['nav.about']}</a>
+          <a href="/tags"
+            data-i18n="nav.tags"
+            data-i18n-ko={translations.ko['nav.tags']}
+            data-i18n-en={translations.en['nav.tags']}
+          >{translations.ko['nav.tags']}</a>
+          <a href="/calendar"
+            data-i18n="nav.calendar"
+            data-i18n-ko={translations.ko['nav.calendar']}
+            data-i18n-en={translations.en['nav.calendar']}
+          >{translations.ko['nav.calendar']}</a>
+          <a href="/search"
+            data-i18n="nav.search"
+            data-i18n-ko={translations.ko['nav.search']}
+            data-i18n-en={translations.en['nav.search']}
+          >{translations.ko['nav.search']}</a>
           <ThemeToggle />
+          <LangToggle />
           <button id="mobile-search-btn" class="mobile-search-btn" aria-label="Open search" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8"/>
@@ -84,8 +112,12 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
     <footer class="site-footer">
       <div class="site-wrapper footer-inner">
-        <span>
-          &copy; {new Date().getFullYear()} vanillacake369. All rights reserved.
+        <span
+          data-i18n="footer.rights"
+          data-i18n-ko={`© ${new Date().getFullYear()} vanillacake369. ${translations.ko['footer.rights']}`}
+          data-i18n-en={`© ${new Date().getFullYear()} vanillacake369. ${translations.en['footer.rights']}`}
+        >
+          &copy; {new Date().getFullYear()} vanillacake369. {translations.ko['footer.rights']}
         </span>
         <div class="footer-links">
           <a href="https://github.com/vanillacake369" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
@@ -99,6 +131,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     <VimSearch />
     <FuzzyFinder />
     <WhichKey />
+    <Analytics />
   </body>
 </html>
 
@@ -115,6 +148,33 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     if (mobileBtn) {
       mobileBtn.addEventListener('click', () => {
         vimSearch.open(() => {});
+      });
+    }
+
+    // Hidden analytics trigger: triple-click the site title within 500ms each click
+    const siteTitleLink = document.getElementById('site-title-link') as HTMLAnchorElement | null;
+    if (siteTitleLink) {
+      let clickCount = 0;
+      let clickTimer: ReturnType<typeof setTimeout> | null = null;
+
+      siteTitleLink.addEventListener('click', (event) => {
+        clickCount += 1;
+
+        if (clickTimer !== null) {
+          clearTimeout(clickTimer);
+        }
+
+        if (clickCount >= 3) {
+          clickCount = 0;
+          event.preventDefault();
+          window.location.href = '/analytics';
+          return;
+        }
+
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+          clickTimer = null;
+        }, 500);
       });
     }
   }

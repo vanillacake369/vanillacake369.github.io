@@ -1,0 +1,22 @@
+---
+---
+
+<script is:inline>
+  (function () {
+    var stored = localStorage.getItem('lang');
+    var lang = stored === 'ko' || stored === 'en' ? stored : 'ko';
+    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
+
+    // Update all elements that carry data-i18n-ko / data-i18n-en translations.
+    // This runs before paint so there is no flash of wrong-language text.
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var text = el.getAttribute('data-i18n-' + lang);
+      if (text !== null) {
+        el.textContent = text;
+      }
+    }
+  })();
+</script>

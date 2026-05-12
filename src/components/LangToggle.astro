@@ -1,0 +1,71 @@
+---
+---
+
+<button id="lang-toggle" aria-label="Toggle language" type="button">
+  <span class="lang-label-ko">한</span><span class="lang-sep">/</span><span class="lang-label-en">EN</span>
+</button>
+
+<style>
+  #lang-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    gap: 0;
+    line-height: 1;
+  }
+
+  #lang-toggle:hover {
+    background-color: var(--color-hover-bg);
+    color: var(--color-text);
+  }
+
+  .lang-sep {
+    color: var(--color-border);
+    margin: 0 0.15em;
+  }
+
+  /* Highlight the active language */
+  :global([data-lang='ko']) #lang-toggle .lang-label-ko {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  :global([data-lang='en']) #lang-toggle .lang-label-en {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  function applyLang(lang: 'ko' | 'en'): void {
+    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
+
+    const els = document.querySelectorAll<HTMLElement>('[data-i18n]');
+    els.forEach((el) => {
+      const text = el.getAttribute(`data-i18n-${lang}`);
+      if (text !== null) {
+        el.textContent = text;
+      }
+    });
+  }
+
+  const button = document.getElementById('lang-toggle');
+
+  if (button) {
+    button.addEventListener('click', () => {
+      const current = (localStorage.getItem('lang') ?? 'ko') as 'ko' | 'en';
+      const next = current === 'ko' ? 'en' : 'ko';
+      localStorage.setItem('lang', next);
+      applyLang(next);
+    });
+  }
+</script>

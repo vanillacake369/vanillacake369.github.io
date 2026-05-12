@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { sortPostsByDate, filterPublished } from '../domain/post';
 import type { Post } from '../domain/types';
+import { translations } from '../i18n/translations';
 
 const rawEntries = await getCollection('posts');
 
@@ -28,10 +29,20 @@ function formatDate(date: Date): string {
 
 <BaseLayout title="Vanilla's Blog" description="A blog about software engineering, systems, and ideas.">
   <section class="post-list-section">
-    <h1 class="page-title">Posts</h1>
+    <h1
+      class="page-title"
+      data-i18n="posts.title"
+      data-i18n-ko={translations.ko['posts.title']}
+      data-i18n-en={translations.en['posts.title']}
+    >{translations.ko['posts.title']}</h1>
 
     {publishedPosts.length === 0 ? (
-      <p class="no-posts">No posts yet. Check back soon.</p>
+      <p
+        class="no-posts"
+        data-i18n="posts.noPosts"
+        data-i18n-ko={translations.ko['posts.noPosts']}
+        data-i18n-en={translations.en['posts.noPosts']}
+      >{translations.ko['posts.noPosts']}</p>
     ) : (
       <ul class="post-list">
         {publishedPosts.map((post) => (
