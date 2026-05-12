@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as vimSearch from '../../vim/vim-search';
 
 // Build a minimal DOM environment for each test
@@ -386,7 +386,8 @@ describe('Korean IME compositionend handling', () => {
     expect(marks[0].textContent).toBe('안녕');
   });
 
-  it('input event triggers setQuery when NOT composing', () => {
+  it('input event triggers setQuery when NOT composing (after debounce)', () => {
+    vi.useFakeTimers();
     const p = document.createElement('p');
     p.textContent = 'hello world';
     document.body.appendChild(p);
@@ -394,16 +395,23 @@ describe('Korean IME compositionend handling', () => {
     const { input } = getUI();
     vimSearch.open(() => {});
 
-    // Normal (non-IME) input
+    // Normal (non-IME) input — debounced at 60ms
     input.value = 'hello';
     input.dispatchEvent(new Event('input'));
+
+    // Before debounce fires, no marks yet
+    expect(document.querySelectorAll('mark.vim-search-match').length).toBe(0);
+
+    // After debounce
+    vi.advanceTimersByTime(100);
 
     const marks = document.querySelectorAll('mark.vim-search-match');
     expect(marks.length).toBe(1);
     expect(marks[0].textContent).toBe('hello');
+    vi.useRealTimers();
   });
 
-  it('does not double-apply marks when compositionend fires after input during composition', () => {
+  it('does not double-apply marks when compositionend fires after input during composition (duplicate guard)', () => {
     const p = document.createElement('p');
     p.textContent = '고양이 고양이';
     document.body.appendChild(p);
@@ -429,5 +437,180 @@ describe('Korean IME compositionend handling', () => {
     // Now marks should reflect the final composed value
     marks = document.querySelectorAll('mark.vim-search-match');
     expect(marks.length).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildMarksWithWindowFind — infinite loop protection
+// ---------------------------------------------------------------------------
+
+describe('buildMarksWithWindowFind — infinite loop protection', () => {
+  let origGetSelection: typeof window.getSelection;
+
+  afterEach(() => {
+    // Restore window.find and getSelection
+    delete (window as unknown as Record<string, unknown>).find;
+    window.getSelection = origGetSelection;
+    vi.restoreAllMocks();
+  });
+
+  /**
+   * Helper: set up a mock window.find + getSelection that simulates
+   * Safari's wrap-around behaviour where window.find keeps returning true
+   * and the selection always lands inside an already-created <mark>.
+   */
+  function setupWrappingWindowFind(): { getCallCount: () => number } {
+    // A mark already in the DOM (simulates a previously highlighted match)
+    const mark = document.createElement('mark');
+    mark.className = 'vim-search-match';
+    mark.textContent = 'hello';
+    document.body.appendChild(mark);
+    const textInMark = mark.firstChild!;
+
+    let callCount = 0;
+
+    // window.find mock — always returns true (Safari wrap-around)
+    Object.defineProperty(window, 'find', {
+      value: () => {
+        callCount++;
+        // Hard safety net so the test runner itself won't hang
+        if (callCount > 50_000) {
+          throw new Error(`Infinite loop: window.find called ${callCount} times`);
+        }
+        return true;
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    // Selection mock — range always points inside the mark
+    const mockRange = {
+      startContainer: textInMark,
+      startOffset: 0,
+      commonAncestorContainer: textInMark,
+      surroundContents: vi.fn(),
+      extractContents: vi.fn(() => document.createDocumentFragment()),
+      insertNode: vi.fn(),
+    };
+
+    origGetSelection = window.getSelection.bind(window);
+    window.getSelection = () =>
+      ({
+        removeAllRanges: vi.fn(),
+        collapse: vi.fn(),
+        collapseToEnd: vi.fn(),
+        getRangeAt: () => mockRange,
+      }) as unknown as Selection;
+
+    return { getCallCount: () => callCount };
+  }
+
+  it('terminates when window.find wraps around to already-marked text', () => {
+    const { getCallCount } = setupWrappingWindowFind();
+
+    vimSearch.open(() => {});
+    // Should NOT throw — the loop must terminate on its own
+    expect(() => vimSearch.setQuery('hello')).not.toThrow();
+
+    // The loop should have stopped well before the 50k safety net
+    expect(getCallCount()).toBeLessThan(50_000);
+  });
+
+  it('creates no new marks when all matches are inside existing marks', () => {
+    setupWrappingWindowFind();
+
+    vimSearch.open(() => {});
+    vimSearch.setQuery('hello');
+
+    // Only the pre-existing mark should be in the DOM; no new ones added
+    const marks = document.querySelectorAll('mark.vim-search-match');
+    expect(marks.length).toBe(1);
+  });
+
+  /**
+   * Simulates a normal scenario: window.find returns true N times for
+   * real text, then wraps and hits already-marked text.
+   */
+  function setupNormalThenWrap(realMatches: number): { getCallCount: () => number } {
+    const p = document.createElement('p');
+    p.textContent = Array(realMatches).fill('hello').join(' world ');
+    document.body.appendChild(p);
+
+    let callCount = 0;
+    let realPhase = true;
+    let realFound = 0;
+
+    // Pre-create a mark to return in wrap-around phase
+    const wrapMark = document.createElement('mark');
+    wrapMark.className = 'vim-search-match';
+    wrapMark.textContent = 'hello';
+
+    // Text nodes for real and wrap phases
+    const realTextNodes: Text[] = [];
+    const walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+    let node: Node | null;
+    while ((node = walker.nextNode())) realTextNodes.push(node as Text);
+
+    Object.defineProperty(window, 'find', {
+      value: () => {
+        callCount++;
+        if (callCount > 50_000) {
+          throw new Error(`Infinite loop: window.find called ${callCount} times`);
+        }
+        if (realPhase && realFound < realMatches) {
+          realFound++;
+          return true;
+        }
+        // Wrap-around phase: always returns true but points to mark
+        realPhase = false;
+        return true;
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    origGetSelection = window.getSelection.bind(window);
+    const wrapTextNode = wrapMark.firstChild!;
+
+    window.getSelection = () => {
+      // In real phase, range points to a real text node
+      // In wrap phase, range points inside the pre-existing mark
+      const targetNode = realPhase
+        ? (realTextNodes[0] ?? wrapTextNode)
+        : wrapTextNode;
+      const targetParent = realPhase ? p : wrapMark;
+
+      const mockRange = {
+        startContainer: targetNode,
+        startOffset: 0,
+        commonAncestorContainer: targetParent,
+        surroundContents: vi.fn((mark: HTMLElement) => {
+          mark.textContent = 'hello';
+        }),
+        extractContents: vi.fn(() => {
+          const frag = document.createDocumentFragment();
+          frag.appendChild(document.createTextNode('hello'));
+          return frag;
+        }),
+        insertNode: vi.fn(),
+      };
+
+      return {
+        removeAllRanges: vi.fn(),
+        collapse: vi.fn(),
+        collapseToEnd: vi.fn(),
+        getRangeAt: () => mockRange,
+      } as unknown as Selection;
+    };
+
+    return { getCallCount: () => callCount };
+  }
+
+  it('finds real matches then terminates on wrap-around', () => {
+    const { getCallCount } = setupNormalThenWrap(3);
+
+    vimSearch.open(() => {});
+    expect(() => vimSearch.setQuery('hello')).not.toThrow();
+    expect(getCallCount()).toBeLessThan(50_000);
   });
 });
