@@ -138,7 +138,7 @@ function fallbackSearch(query: string): FuzzyResult[] {
     .map((item) => ({
       url: item.url,
       title: item.title,
-      excerpt: item.excerpt || item.description,
+      excerpt: extractContext(item.excerpt || item.description, q),
       tags: item.tags,
     }));
 }
@@ -307,9 +307,20 @@ function highlightText(escapedHtml: string, query: string): string {
 // in its excerpts, so we only add marks for fallback (plain text) excerpts.
 function highlightExcerpt(text: string, query: string): string {
   if (!query) return text;
-  // If the text already contains <mark> tags (Pagefind), leave it as-is
   if (text.includes('<mark')) return text;
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp(`(${escaped})`, 'gi');
   return text.replace(re, '<mark class="vim-search-match">$1</mark>');
+}
+
+// Extract context around the first match of query in text (~120 chars window)
+function extractContext(text: string, query: string): string {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text.slice(0, 200);
+  const start = Math.max(0, idx - 60);
+  const end = Math.min(text.length, idx + query.length + 60);
+  let snippet = text.slice(start, end);
+  if (start > 0) snippet = '...' + snippet;
+  if (end < text.length) snippet = snippet + '...';
+  return snippet;
 }
