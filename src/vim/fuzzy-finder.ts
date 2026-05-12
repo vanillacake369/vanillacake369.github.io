@@ -29,6 +29,7 @@ let statusEl: HTMLElement | null = null;
 // State
 let results: FuzzyResult[] = [];
 let selectedIndex = -1;
+let currentQuery = '';
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let onCloseCallback: (() => void) | null = null;
 
@@ -47,6 +48,7 @@ export function init(els: {
 
   inputEl.addEventListener('input', () => {
     const q = inputEl!.value.trim();
+    currentQuery = q;
     if (debounceTimer !== null) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => runSearch(q), 120);
   });
@@ -67,6 +69,7 @@ export function open(_mode: 'files' | 'grep', onClose: () => void): void {
   inputEl.focus();
   results = [];
   selectedIndex = -1;
+  currentQuery = '';
   renderResults();
   updateStatus();
   loadPagefind();
@@ -158,6 +161,7 @@ async function loadPagefind(): Promise<void> {
 }
 
 async function runSearch(query: string): Promise<void> {
+  currentQuery = query;
   if (!query) {
     results = [];
     selectedIndex = -1;
@@ -216,7 +220,7 @@ function renderResults(): void {
     item.className = 'vim-fuzzy-item';
     item.dataset.index = String(i);
     item.innerHTML = `
-      <span class="vim-fuzzy-item-title">${escapeHtml(result.title)}</span>
+      <span class="vim-fuzzy-item-title">${highlightText(escapeHtml(result.title), currentQuery)}</span>
       <span class="vim-fuzzy-item-url">${escapeHtml(result.url)}</span>
     `;
     item.addEventListener('click', () => {
@@ -253,8 +257,8 @@ function updateSelection(): void {
   if (selectedIndex >= 0 && selectedIndex < results.length) {
     const result = results[selectedIndex];
     previewEl.innerHTML = `
-      <div class="vim-fuzzy-preview-title">${escapeHtml(result.title)}</div>
-      <div class="vim-fuzzy-preview-excerpt">${result.excerpt}</div>
+      <div class="vim-fuzzy-preview-title">${highlightText(escapeHtml(result.title), currentQuery)}</div>
+      <div class="vim-fuzzy-preview-excerpt">${highlightExcerpt(result.excerpt, currentQuery)}</div>
       ${result.tags && result.tags.length > 0
         ? `<div class="vim-fuzzy-preview-tags">${result.tags.map((t) => `<span class="vim-fuzzy-tag">${escapeHtml(t)}</span>`).join('')}</div>`
         : ''}
@@ -286,4 +290,23 @@ function escapeHtml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// Highlight query matches in already-escaped HTML text (plain text regions only)
+function highlightText(escapedHtml: string, query: string): string {
+  if (!query) return escapedHtml;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${escaped})`, 'gi');
+  return escapedHtml.replace(re, '<mark class="vim-search-match">$1</mark>');
+}
+
+// Highlight query matches in excerpt HTML; Pagefind already inserts <mark> tags
+// in its excerpts, so we only add marks for fallback (plain text) excerpts.
+function highlightExcerpt(text: string, query: string): string {
+  if (!query) return text;
+  // If the text already contains <mark> tags (Pagefind), leave it as-is
+  if (text.includes('<mark')) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${escaped})`, 'gi');
+  return text.replace(re, '<mark class="vim-search-match">$1</mark>');
 }

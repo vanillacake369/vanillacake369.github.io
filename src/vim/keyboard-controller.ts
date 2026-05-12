@@ -36,6 +36,7 @@ const G_GROUPS: WhichKeyGroup[] = [
     label: 'Go to',
     prefix: 'g',
     entries: [
+      { key: 'g', description: 'Top of page' },
       { key: 'h', description: 'Home' },
       { key: 't', description: 'Tags' },
       { key: 'a', description: 'About' },
@@ -52,6 +53,9 @@ const ONBOARDING_GROUPS: WhichKeyGroup[] = [
       { key: 'Ctrl+K', description: 'Command palette' },
       { key: 'Ctrl+P', description: 'Fuzzy find' },
       { key: 'g', description: 'Go to...' },
+      { key: 'G', description: 'Bottom of page' },
+      { key: '{', description: 'Prev heading' },
+      { key: '}', description: 'Next heading' },
     ],
   },
 ];
@@ -104,6 +108,26 @@ function showOnboarding(): void {
       if (mode === 'normal') whichKey.hide();
     }, 5000);
   }, 1500);
+}
+
+// ── Heading navigation helpers ────────────────────────────────────────────────
+
+function getHeadings(): HTMLElement[] {
+  return Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id]'));
+}
+
+function jumpToNextHeading(): void {
+  const headings = getHeadings();
+  const scrollY = window.scrollY + 100; // offset for sticky header
+  const next = headings.find((h) => (h as HTMLElement).offsetTop > scrollY);
+  if (next) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function jumpToPrevHeading(): void {
+  const headings = getHeadings();
+  const scrollY = window.scrollY + 50;
+  const prev = [...headings].reverse().find((h) => (h as HTMLElement).offsetTop < scrollY);
+  if (prev) prev.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -201,6 +225,10 @@ function handleKeydown(e: KeyboardEvent): void {
       }
     } else if (prefixKey === 'g') {
       switch (e.key) {
+        case 'g':
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          e.preventDefault();
+          break;
         case 'h': window.location.href = '/'; e.preventDefault(); break;
         case 't': window.location.href = '/tags'; e.preventDefault(); break;
         case 'a': window.location.href = '/about'; e.preventDefault(); break;
@@ -222,6 +250,21 @@ function handleKeydown(e: KeyboardEvent): void {
       mode = 'whichkey';
       whichKey.show(G_GROUPS);
       startPrefixTimeout();
+      e.preventDefault();
+      break;
+
+    case 'G':
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      e.preventDefault();
+      break;
+
+    case '{':
+      jumpToPrevHeading();
+      e.preventDefault();
+      break;
+
+    case '}':
+      jumpToNextHeading();
       e.preventDefault();
       break;
   }
