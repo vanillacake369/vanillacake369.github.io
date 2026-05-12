@@ -141,9 +141,34 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 <script>
   import { init as initKeyboard } from '../vim/keyboard-controller';
   import * as vimSearch from '../vim/vim-search';
+  import * as fuzzyFinder from '../vim/fuzzy-finder';
+  import * as whichKey from '../vim/which-key';
 
   function initLayout(): void {
-    // Start the single global keyboard listener
+    // Initialize vim components (ensure DOM refs are bound before keyboard controller)
+    const searchBar = document.getElementById('vim-search-bar');
+    const searchInput = searchBar?.querySelector<HTMLInputElement>('.vim-search-input');
+    const searchCount = searchBar?.querySelector<HTMLElement>('.vim-search-count');
+    if (searchBar && searchInput && searchCount) {
+      vimSearch.init({ bar: searchBar, input: searchInput, count: searchCount });
+    }
+
+    const fuzzyOverlay = document.getElementById('vim-fuzzy-overlay');
+    const fuzzyInput = fuzzyOverlay?.querySelector<HTMLInputElement>('.vim-fuzzy-input');
+    const fuzzyResults = fuzzyOverlay?.querySelector<HTMLElement>('.vim-fuzzy-results');
+    const fuzzyPreview = fuzzyOverlay?.querySelector<HTMLElement>('.vim-fuzzy-preview');
+    const fuzzyStatus = fuzzyOverlay?.querySelector<HTMLElement>('.vim-fuzzy-status');
+    if (fuzzyOverlay && fuzzyInput && fuzzyResults && fuzzyPreview && fuzzyStatus) {
+      fuzzyFinder.init({ overlay: fuzzyOverlay, input: fuzzyInput, resultList: fuzzyResults, preview: fuzzyPreview, status: fuzzyStatus });
+    }
+
+    const whichKeyEl = document.getElementById('vim-whichkey');
+    const whichKeyInner = whichKeyEl?.querySelector<HTMLElement>('.vim-whichkey-inner');
+    if (whichKeyEl && whichKeyInner) {
+      whichKey.init({ el: whichKeyEl, inner: whichKeyInner });
+    }
+
+    // Start the single global keyboard listener (AFTER components are initialized)
     initKeyboard();
 
     // Search buttons open VimSearch (fallback to direct DOM if module not yet initialized)
