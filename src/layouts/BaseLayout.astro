@@ -158,6 +158,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       let clickTimer: ReturnType<typeof setTimeout> | null = null;
 
       siteTitleLink.addEventListener('click', (event) => {
+        event.preventDefault();
         clickCount += 1;
 
         if (clickTimer !== null) {
@@ -166,15 +167,19 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
         if (clickCount >= 3) {
           clickCount = 0;
-          event.preventDefault();
           window.location.href = '/analytics';
           return;
         }
 
+        // If not triple-clicked within 600ms, navigate to home
         clickTimer = setTimeout(() => {
+          const count = clickCount;
           clickCount = 0;
           clickTimer = null;
-        }, 500);
+          if (count < 3) {
+            window.location.href = '/';
+          }
+        }, 600);
       });
     }
   }

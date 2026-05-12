@@ -84,8 +84,8 @@ describe('prefix timeout', () => {
     const spaceEvent = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
     _handleKeydown(spaceEvent);
 
-    // Fast-forward 800ms
-    vi.advanceTimersByTime(800);
+    // Fast-forward 2000ms (PREFIX_TIMEOUT_MS)
+    vi.advanceTimersByTime(2000);
 
     expect(hideSpy).toHaveBeenCalled();
   });

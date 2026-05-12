@@ -11,7 +11,8 @@ let mode: VimMode = 'normal';
 let prefixKey: string | null = null;
 let prefixTimer: ReturnType<typeof setTimeout> | null = null;
 
-const PREFIX_TIMEOUT_MS = 800;
+const PREFIX_TIMEOUT_MS = 2000;
+const FIRST_VISIT_KEY = 'vim-onboarded';
 
 // ── Binding groups shown in which-key popup ───────────────────────────────────
 
@@ -20,6 +21,7 @@ const SPACE_GROUPS: WhichKeyGroup[] = [
     label: 'Search',
     prefix: 'Space',
     entries: [
+      { key: 'Space', description: 'Fuzzy find' },
       { key: 'f', description: 'Find files' },
       { key: 'g', description: 'Grep content' },
     ],
@@ -39,6 +41,24 @@ const G_GROUPS: WhichKeyGroup[] = [
       { key: 'h', description: 'Home' },
       { key: 't', description: 'Tags' },
       { key: 'a', description: 'About' },
+    ],
+  },
+];
+
+const ALL_GROUPS: WhichKeyGroup[] = [
+  {
+    label: 'Search',
+    prefix: '',
+    entries: [
+      { key: '/', description: 'Search in page' },
+      { key: 'Space', description: 'Show commands' },
+    ],
+  },
+  {
+    label: 'Navigation',
+    prefix: '',
+    entries: [
+      { key: 'g', description: 'Go to...' },
     ],
   },
 ];
@@ -90,6 +110,21 @@ function resetToNormal(): void {
   mode = 'normal';
 }
 
+// ── First visit onboarding ────────────────────────────────────────────────────
+
+function showOnboarding(): void {
+  if (localStorage.getItem(FIRST_VISIT_KEY)) return;
+  localStorage.setItem(FIRST_VISIT_KEY, '1');
+
+  // Show a brief hint after page settles
+  setTimeout(() => {
+    whichKey.show(ALL_GROUPS);
+    setTimeout(() => {
+      if (mode === 'normal') whichKey.hide();
+    }, 4000);
+  }, 1500);
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 function handleKeydown(e: KeyboardEvent): void {
@@ -114,12 +149,12 @@ function handleKeydown(e: KeyboardEvent): void {
     return;
   }
 
-  // In search mode, delegate n/N to vimSearch; all other keys are handled by the input
+  // In search mode, delegate n/N to vimSearch; all other keys go to the input
   if (mode === 'search') {
-    if (e.key === 'n' && !e.shiftKey) {
+    if (e.key === 'n' && !e.shiftKey && !isInputFocused()) {
       vimSearch.next();
       e.preventDefault();
-    } else if (e.key === 'N' || (e.key === 'n' && e.shiftKey)) {
+    } else if ((e.key === 'N' || (e.key === 'n' && e.shiftKey)) && !isInputFocused()) {
       vimSearch.prev();
       e.preventDefault();
     }
@@ -128,16 +163,21 @@ function handleKeydown(e: KeyboardEvent): void {
 
   // In fuzzy mode, delegate navigation keys
   if (mode === 'fuzzy') {
-    if (e.key === 'j' || e.key === 'ArrowDown') {
+    if (e.key === 'ArrowDown') {
       fuzzyFinder.moveDown();
       e.preventDefault();
-    } else if (e.key === 'k' || e.key === 'ArrowUp') {
+    } else if (e.key === 'ArrowUp') {
       fuzzyFinder.moveUp();
       e.preventDefault();
     } else if (e.key === 'Enter') {
       fuzzyFinder.confirm();
       e.preventDefault();
+    } else if (e.key === 'Escape') {
+      fuzzyFinder.close();
+      resetToNormal();
+      e.preventDefault();
     }
+    // Let other keys (typing) pass through to the fuzzy input
     return;
   }
 
@@ -152,6 +192,12 @@ function handleKeydown(e: KeyboardEvent): void {
 
     if (prefixKey === ' ') {
       switch (e.key) {
+        case ' ':
+          // Space+Space → open fuzzy finder
+          fuzzyFinder.open('files', resetToNormal);
+          mode = 'fuzzy';
+          e.preventDefault();
+          break;
         case 'f':
           fuzzyFinder.open('files', resetToNormal);
           mode = 'fuzzy';
@@ -167,7 +213,6 @@ function handleKeydown(e: KeyboardEvent): void {
           e.preventDefault();
           break;
         default:
-          // Unknown second key — just dismiss
           break;
       }
     } else if (prefixKey === 'g') {
@@ -200,7 +245,6 @@ function handleKeydown(e: KeyboardEvent): void {
       break;
 
     case ' ':
-      // Start Space prefix
       prefixKey = ' ';
       mode = 'whichkey';
       whichKey.show(SPACE_GROUPS);
@@ -209,7 +253,6 @@ function handleKeydown(e: KeyboardEvent): void {
       break;
 
     case 'g':
-      // Start g prefix
       prefixKey = 'g';
       mode = 'whichkey';
       whichKey.show(G_GROUPS);
@@ -226,6 +269,7 @@ function handleKeydown(e: KeyboardEvent): void {
 
 export function init(): void {
   document.addEventListener('keydown', handleKeydown);
+  showOnboarding();
 }
 
 // Exported for testing
