@@ -1,0 +1,183 @@
+---
+// Hidden analytics page — not linked anywhere in the UI.
+// Access by triple-clicking the site title in the header.
+//
+// To set your own access code:
+//   1. Pick a passphrase, e.g. "mysecretcode"
+//   2. Run:  echo -n "mysecretcode" | sha256sum
+//   3. Replace the ACCESS_CODE_HASH value below with the output hash.
+//
+// Default code is "owner2025" — change it before deploying.
+const ACCESS_CODE_HASH = '87b2c8ee8ae5ab76ca0d91ccf14552c05563194d164aef5b1cc9b1a9deef3017';
+
+// Replace with your actual Cloudflare Web Analytics dashboard URL or Umami URL.
+// e.g. https://dash.cloudflare.com/YOUR_ACCOUNT/web-analytics
+const ANALYTICS_DASHBOARD_URL = 'https://dash.cloudflare.com/';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Analytics</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background-color: #fafaf9;
+        color: #1c1917;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 380px;
+        border: 1px solid #e7e5e4;
+        border-radius: 8px;
+        padding: 2.5rem 2rem;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1c1917;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.01em;
+      }
+
+      .card-subtitle {
+        font-size: 0.875rem;
+        color: #57534e;
+        margin-bottom: 1.75rem;
+        line-height: 1.5;
+      }
+
+      label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #57534e;
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      input[type='password'] {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e7e5e4;
+        border-radius: 5px;
+        font-size: 0.95rem;
+        color: #1c1917;
+        background: #fafaf9;
+        outline: none;
+        transition: border-color 0.15s ease;
+      }
+
+      input[type='password']:focus {
+        border-color: #00a86b;
+      }
+
+      button[type='submit'] {
+        margin-top: 1rem;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        background-color: #00a86b;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+      }
+
+      button[type='submit']:hover {
+        background-color: #009960;
+      }
+
+      .error-msg {
+        display: none;
+        margin-top: 0.75rem;
+        font-size: 0.82rem;
+        color: #b91c1c;
+      }
+
+      .error-msg.visible {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <p class="card-title">Owner Access</p>
+      <p class="card-subtitle">This page is for the blog owner. Enter the access code to continue.</p>
+
+      <form id="access-form" novalidate>
+        <label for="access-code">Access code</label>
+        <input
+          id="access-code"
+          name="access-code"
+          type="password"
+          autocomplete="off"
+          placeholder="Enter access code"
+          autofocus
+        />
+        <button type="submit">Continue</button>
+        <p id="error-msg" class="error-msg" role="alert">Incorrect access code. Please try again.</p>
+      </form>
+    </div>
+
+    <script define:vars={{ ACCESS_CODE_HASH, ANALYTICS_DASHBOARD_URL }}>
+      const form = document.getElementById('access-form');
+      const input = document.getElementById('access-code');
+      const errorMsg = document.getElementById('error-msg');
+
+      /**
+       * Compute the SHA-256 hex digest of a string using the Web Crypto API.
+       * @param {string} message
+       * @returns {Promise<string>}
+       */
+      async function sha256(message) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        errorMsg.classList.remove('visible');
+
+        const code = input.value.trim();
+        if (!code) return;
+
+        const digest = await sha256(code);
+
+        if (digest === ACCESS_CODE_HASH) {
+          window.location.href = ANALYTICS_DASHBOARD_URL;
+        } else {
+          errorMsg.classList.add('visible');
+          input.value = '';
+          input.focus();
+        }
+      });
+    </script>
+  </body>
+</html>
