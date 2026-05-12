@@ -1,9 +1,13 @@
 ---
 import '../styles/global.css';
 import '../styles/themes/dark.css';
+import '../styles/vim-ui.css';
 import ThemeInitScript from '../components/ThemeInitScript.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import SEO from '../components/SEO.astro';
+import VimSearch from '../components/VimSearch.astro';
+import FuzzyFinder from '../components/FuzzyFinder.astro';
+import WhichKey from '../components/WhichKey.astro';
 
 interface Props {
   title?: string;
@@ -62,6 +66,12 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
           <a href="/calendar">Calendar</a>
           <a href="/search">Search</a>
           <ThemeToggle />
+          <button id="mobile-search-btn" class="mobile-search-btn" aria-label="Open search" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
         </nav>
       </div>
     </header>
@@ -85,8 +95,36 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
         </div>
       </div>
     </footer>
+
+    <VimSearch />
+    <FuzzyFinder />
+    <WhichKey />
   </body>
 </html>
+
+<script>
+  import { init as initKeyboard } from '../vim/keyboard-controller';
+  import * as vimSearch from '../vim/vim-search';
+
+  function initLayout(): void {
+    // Start the single global keyboard listener
+    initKeyboard();
+
+    // Mobile search button opens VimSearch directly
+    const mobileBtn = document.getElementById('mobile-search-btn') as HTMLButtonElement | null;
+    if (mobileBtn) {
+      mobileBtn.addEventListener('click', () => {
+        vimSearch.open(() => {});
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLayout);
+  } else {
+    initLayout();
+  }
+</script>
 
 <style>
   /* Header */
@@ -187,6 +225,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
   .rss-link:hover {
     border-color: var(--color-accent);
+  }
+
+  /* Mobile search button — hidden on desktop, shown via vim-ui.css media query */
+  .mobile-search-btn {
+    display: none;
   }
 
   /* Responsive */

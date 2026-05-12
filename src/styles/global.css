@@ -41,6 +41,12 @@ select {
   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
   --max-width: 768px;
+
+  /* Vim UI */
+  --vim-overlay-bg: rgba(0, 0, 0, 0.5);
+  --vim-modal-bg: var(--color-bg);
+  --vim-highlight-bg: rgba(255, 214, 0, 0.35);
+  --vim-highlight-active-bg: rgba(255, 140, 0, 0.55);
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;

@@ -1,0 +1,382 @@
+/* vim-ui.css — Styles for VimSearch, FuzzyFinder, and WhichKey UI layers */
+
+/* ── VimSearch bar ────────────────────────────────────────────────────────── */
+
+#vim-search-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+#vim-search-bar[hidden] {
+  display: none;
+}
+
+.vim-search-prompt {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 1rem;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.vim-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  caret-color: var(--color-accent);
+}
+
+.vim-search-count {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 3rem;
+  text-align: right;
+}
+
+/* Search highlights */
+mark.vim-search-match {
+  background-color: var(--vim-highlight-bg);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+mark.vim-search-match--active {
+  background-color: var(--vim-highlight-active-bg);
+  outline: 1px solid var(--color-accent);
+}
+
+/* ── FuzzyFinder overlay ─────────────────────────────────────────────────── */
+
+#vim-fuzzy-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background-color: var(--vim-overlay-bg);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8vh;
+}
+
+#vim-fuzzy-overlay[hidden] {
+  display: none;
+}
+
+#vim-fuzzy-modal {
+  background-color: var(--vim-modal-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.vim-fuzzy-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.vim-fuzzy-prompt {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.vim-fuzzy-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  caret-color: var(--color-accent);
+}
+
+.vim-fuzzy-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.vim-fuzzy-results {
+  flex: 1;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+  padding: var(--spacing-xs) 0;
+}
+
+.vim-fuzzy-item {
+  padding: var(--spacing-xs) var(--spacing-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 2px solid transparent;
+  transition: background-color 0.1s ease;
+}
+
+.vim-fuzzy-item:hover {
+  background-color: var(--color-code-bg);
+}
+
+.vim-fuzzy-item--active {
+  background-color: var(--color-code-bg);
+  border-left-color: var(--color-accent);
+}
+
+.vim-fuzzy-item-title {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vim-fuzzy-item-url {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vim-fuzzy-empty,
+.vim-fuzzy-error {
+  padding: var(--spacing-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.vim-fuzzy-error code {
+  font-size: 0.85em;
+}
+
+.vim-fuzzy-preview {
+  flex: 1.2;
+  padding: var(--spacing-md);
+  overflow-y: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.vim-fuzzy-preview-title {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+  font-size: 1rem;
+}
+
+.vim-fuzzy-preview-excerpt {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.vim-fuzzy-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.vim-fuzzy-tag {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+}
+
+.vim-fuzzy-preview-placeholder {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.vim-fuzzy-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.vim-fuzzy-status {
+  font-family: var(--font-mono);
+}
+
+.vim-fuzzy-hints {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.vim-fuzzy-hints kbd {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+}
+
+/* ── WhichKey popup ──────────────────────────────────────────────────────── */
+
+#vim-whichkey {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1002;
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-sm) 0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 80ms ease, transform 80ms ease;
+  pointer-events: none;
+}
+
+#vim-whichkey[hidden] {
+  display: none;
+}
+
+#vim-whichkey.vim-whichkey--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.vim-whichkey-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.vim-whichkey-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.vim-whichkey-group-label {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-right: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.vim-whichkey-entries {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.vim-whichkey-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.vim-whichkey-key {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-style: normal;
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 0.1em 0.5em;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.vim-whichkey-desc {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Mobile search button ────────────────────────────────────────────────── */
+
+.mobile-search-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--color-text);
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+.mobile-search-btn:hover {
+  background-color: var(--color-code-bg);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  /* Hide WhichKey — touch users don't use keyboard shortcuts */
+  #vim-whichkey {
+    display: none !important;
+  }
+
+  /* Hide preview pane in FuzzyFinder on mobile */
+  .vim-fuzzy-preview {
+    display: none;
+  }
+
+  #vim-fuzzy-modal {
+    max-height: 85vh;
+    margin: 0 var(--spacing-md);
+  }
+
+  /* Show mobile search button */
+  .mobile-search-btn {
+    display: flex;
+  }
+}

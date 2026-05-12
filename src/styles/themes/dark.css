@@ -10,4 +10,8 @@
   --color-tag-bg: #1a1a1a;
   --color-tag-text: #cccccc;
   --color-hover-bg: #1a1a1a;
+
+  /* Vim UI — dark overrides */
+  --vim-highlight-bg: rgba(255, 214, 0, 0.2);
+  --vim-highlight-active-bg: rgba(255, 165, 0, 0.45);
 }

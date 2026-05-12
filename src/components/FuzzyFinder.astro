@@ -1,0 +1,59 @@
+---
+// FuzzyFinder.astro — Telescope-style modal for cross-post search via Pagefind
+---
+
+<div id="vim-fuzzy-overlay" hidden role="dialog" aria-modal="true" aria-label="Fuzzy file finder">
+  <div id="vim-fuzzy-modal">
+    <div class="vim-fuzzy-header">
+      <span class="vim-fuzzy-prompt" aria-hidden="true">&gt;</span>
+      <input
+        class="vim-fuzzy-input"
+        type="text"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-label="Search posts"
+        placeholder="Type to search..."
+      />
+    </div>
+
+    <div class="vim-fuzzy-body">
+      <div class="vim-fuzzy-results" role="listbox" aria-label="Search results"></div>
+      <div class="vim-fuzzy-preview" aria-live="polite">
+        <div class="vim-fuzzy-preview-placeholder">Select a result to preview</div>
+      </div>
+    </div>
+
+    <div class="vim-fuzzy-footer">
+      <span class="vim-fuzzy-status"></span>
+      <div class="vim-fuzzy-hints">
+        <span><kbd>↑↓</kbd> / <kbd>j</kbd><kbd>k</kbd> navigate</span>
+        <span><kbd>Enter</kbd> open</span>
+        <span><kbd>Esc</kbd> close</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import * as fuzzyFinder from '../vim/fuzzy-finder';
+
+  function init(): void {
+    const overlay = document.getElementById('vim-fuzzy-overlay') as HTMLElement | null;
+    const input = overlay?.querySelector<HTMLInputElement>('.vim-fuzzy-input') ?? null;
+    const resultList = overlay?.querySelector<HTMLElement>('.vim-fuzzy-results') ?? null;
+    const preview = overlay?.querySelector<HTMLElement>('.vim-fuzzy-preview') ?? null;
+    const status = overlay?.querySelector<HTMLElement>('.vim-fuzzy-status') ?? null;
+
+    if (!overlay || !input || !resultList || !preview || !status) return;
+
+    fuzzyFinder.init({ overlay, input, resultList, preview, status });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

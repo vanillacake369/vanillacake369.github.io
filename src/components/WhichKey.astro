@@ -1,0 +1,26 @@
+---
+// WhichKey.astro — Key-hint popup displayed at the bottom when a prefix key is pressed
+---
+
+<div id="vim-whichkey" hidden aria-hidden="true">
+  <div class="vim-whichkey-inner"></div>
+</div>
+
+<script>
+  import * as whichKey from '../vim/which-key';
+
+  function init(): void {
+    const el = document.getElementById('vim-whichkey') as HTMLElement | null;
+    const inner = el?.querySelector<HTMLElement>('.vim-whichkey-inner') ?? null;
+
+    if (!el || !inner) return;
+
+    whichKey.init({ el, inner });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>
