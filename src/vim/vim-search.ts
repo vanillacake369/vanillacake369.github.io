@@ -36,7 +36,6 @@ export function init(els: {
   });
 
   // Enter: confirm search, blur input so n/N work
-  // stopPropagation prevents Korean IME from firing a duplicate keydown after compositionend
   inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -44,6 +43,16 @@ export function init(els: {
       inputEl!.blur();
     }
   });
+
+  // Auto-highlight from ?highlight= URL param (from fuzzy finder navigation)
+  const params = new URLSearchParams(window.location.search);
+  const highlight = params.get('highlight');
+  if (highlight) {
+    setQuery(highlight);
+    // Clean up URL without reloading
+    const clean = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, '', clean);
+  }
 }
 
 export function open(onClose: () => void): void {

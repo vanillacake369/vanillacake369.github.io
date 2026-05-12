@@ -112,24 +112,43 @@ function showOnboarding(): void {
 // ── Heading navigation helpers ────────────────────────────────────────────────
 
 function getHeadings(): HTMLElement[] {
-  return Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id]'));
+  return Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]'));
 }
+
+// Track current heading index for deterministic {/} navigation
+let currentHeadingIndex = -1;
 
 function jumpToNextHeading(): void {
   const headings = getHeadings();
-  // Find first heading below current viewport top (accounting for sticky header ~80px)
-  const next = headings.find((h) => h.getBoundingClientRect().top > 80);
-  if (next) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (headings.length === 0) return;
+  currentHeadingIndex = Math.min(currentHeadingIndex + 1, headings.length - 1);
+  headings[currentHeadingIndex].scrollIntoView({ block: 'start' });
 }
 
 function jumpToPrevHeading(): void {
   const headings = getHeadings();
-  // Current viewport top minus a small buffer (must be strictly above current position)
-  const scrollY = window.scrollY - 10;
-  const prev = [...headings].reverse().find((h) => h.getBoundingClientRect().top < -10);
-  if (prev) prev.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  else if (headings.length > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (headings.length === 0) return;
+  if (currentHeadingIndex <= 0) {
+    currentHeadingIndex = -1;
+    window.scrollTo({ top: 0 });
+    return;
+  }
+  currentHeadingIndex = currentHeadingIndex - 1;
+  headings[currentHeadingIndex].scrollIntoView({ block: 'start' });
 }
+
+// Sync heading index with scroll position (for when user scrolls manually)
+function syncHeadingIndex(): void {
+  const headings = getHeadings();
+  currentHeadingIndex = -1;
+  for (let i = headings.length - 1; i >= 0; i--) {
+    if (headings[i].getBoundingClientRect().top <= 100) {
+      currentHeadingIndex = i;
+      break;
+    }
+  }
+}
+
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 
@@ -272,11 +291,13 @@ function handleKeydown(e: KeyboardEvent): void {
       break;
 
     case '{':
+      syncHeadingIndex();
       jumpToPrevHeading();
       e.preventDefault();
       break;
 
     case '}':
+      syncHeadingIndex();
       jumpToNextHeading();
       e.preventDefault();
       break;

@@ -11,7 +11,7 @@ export const GET: APIRoute = async () => {
       url: `/posts/${p.id}/`,
       tags: p.data.tags,
       date: p.data.date.toISOString(),
-      excerpt: p.body?.slice(0, 500) ?? '',
+      excerpt: p.body ?? '',
     }));
 
   return new Response(JSON.stringify(index), {

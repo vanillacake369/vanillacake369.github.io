@@ -1,9 +1,10 @@
-// which-key.ts — Key-hint popup rendered at bottom of screen
+// which-key.ts — Key-hint popup rendered at center of screen
 
 import type { WhichKeyGroup } from './types';
 
 let el: HTMLElement | null = null;
 let innerEl: HTMLElement | null = null;
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function init(els: { el: HTMLElement; inner: HTMLElement }): void {
   el = els.el;
@@ -12,6 +13,12 @@ export function init(els: { el: HTMLElement; inner: HTMLElement }): void {
 
 export function show(groups: WhichKeyGroup[]): void {
   if (!el || !innerEl) return;
+
+  // Cancel any pending hide
+  if (hideTimer !== null) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
 
   innerEl.innerHTML = '';
 
@@ -49,22 +56,18 @@ export function show(groups: WhichKeyGroup[]): void {
   }
 
   el.hidden = false;
-  // Trigger animation: force reflow then add visible class
-  el.getBoundingClientRect();
+  // Force reflow then show
+  void el.offsetHeight;
   el.classList.add('vim-whichkey--visible');
 }
 
 export function hide(): void {
   if (!el) return;
   el.classList.remove('vim-whichkey--visible');
-  // Wait for transition then hide
-  const handleTransitionEnd = (): void => {
+  // Simple timeout to hide after transition (no transitionend stacking)
+  if (hideTimer !== null) clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
     if (el) el.hidden = true;
-    el?.removeEventListener('transitionend', handleTransitionEnd);
-  };
-  el.addEventListener('transitionend', handleTransitionEnd);
-  // Fallback in case transition doesn't fire (e.g., prefers-reduced-motion)
-  setTimeout(() => {
-    if (el && !el.hidden) el.hidden = true;
-  }, 200);
+    hideTimer = null;
+  }, 150);
 }

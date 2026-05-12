@@ -102,7 +102,10 @@ export function moveUp(): void {
 
 export function confirm(): void {
   if (selectedIndex < 0 || selectedIndex >= results.length) return;
-  window.location.href = results[selectedIndex].url;
+  // Append search query as URL param so the page can highlight it on load
+  const url = results[selectedIndex].url;
+  const q = currentQuery ? `?highlight=${encodeURIComponent(currentQuery)}` : '';
+  window.location.href = url + q;
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
