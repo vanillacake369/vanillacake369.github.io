@@ -1,23 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { filterPublished, extractTags } from '../../domain/post';
-import type { Post } from '../../domain/types';
+import { filterPublished, extractTags, entryToPost } from '../../domain/post';
 
 const rawEntries = await getCollection('posts');
 
-const posts: Post[] = rawEntries.map((entry) => ({
-  slug: entry.id,
-  title: entry.data.title,
-  description: entry.data.description,
-  date: entry.data.date,
-  updatedDate: entry.data.updatedDate,
-  tags: entry.data.tags,
-  category: entry.data.category,
-  lang: entry.data.lang,
-  draft: entry.data.draft,
-  heroImage: entry.data.heroImage,
-}));
+const posts = rawEntries.map(entryToPost);
 
 const publishedPosts = filterPublished(posts);
 const tags = extractTags(publishedPosts);

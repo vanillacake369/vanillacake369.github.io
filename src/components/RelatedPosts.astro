@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { entryToPost } from '../domain/post';
 
 interface Props {
   currentSlug: string;
@@ -12,11 +13,11 @@ const allPosts = await getCollection('posts');
 const related = allPosts
   .filter(p => !p.data.draft && p.id !== currentSlug)
   .map(p => ({
-    ...p,
+    post: entryToPost(p),
     sharedTags: p.data.tags.filter(t => tags.includes(t)),
   }))
   .filter(p => p.sharedTags.length > 0)
-  .sort((a, b) => b.sharedTags.length - a.sharedTags.length || b.data.date.getTime() - a.data.date.getTime())
+  .sort((a, b) => b.sharedTags.length - a.sharedTags.length || b.post.date.getTime() - a.post.date.getTime())
   .slice(0, 5);
 ---
 
@@ -24,11 +25,11 @@ const related = allPosts
   <section class="related-posts">
     <h2 class="related-title">Related Posts</h2>
     <ul class="related-list">
-      {related.map(post => (
+      {related.map(({ post, sharedTags }) => (
         <li class="related-item">
-          <a href={`/posts/${post.id}/`} class="related-link">{post.data.title}</a>
+          <a href={`/posts/${post.slug}/`} class="related-link">{post.title}</a>
           <div class="related-tags">
-            {post.sharedTags.map(tag => (
+            {sharedTags.map(tag => (
               <span class="related-tag">#{tag}</span>
             ))}
           </div>

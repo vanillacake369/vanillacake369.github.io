@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import TOC from '../../components/TOC.astro';
+import { titleFromId } from '../../domain/post';
 
 export async function getStaticPaths() {
   const entries = await getCollection('posts');
@@ -14,7 +15,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 
-const { title, description, date, updatedDate, tags, category, lang, heroImage } = entry.data;
+const { description, date, updatedDate, tags, category, lang, heroImage } = entry.data;
+const title = entry.data.title || titleFromId(entry.id);
 ---
 
 <PostLayout

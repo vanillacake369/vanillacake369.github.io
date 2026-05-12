@@ -1,5 +1,49 @@
 import type { Post, TagInfo, CalendarDay } from './types';
 
+/**
+ * Derive a human-readable title from a file ID (slug).
+ * "linux-원시자원과-컨테이너" → "linux 원시자원과 컨테이너"
+ * "hello-world" → "hello world"
+ */
+export function titleFromId(id: string): string {
+  return id
+    .replace(/\.mdx?$/, '')    // strip extension if present
+    .replace(/[-_]/g, ' ')     // hyphens/underscores → spaces
+    .trim();
+}
+
+/**
+ * Map a content collection entry to a domain Post.
+ * If title is missing in frontmatter, derives it from the file ID.
+ */
+export function entryToPost(entry: {
+  id: string;
+  data: {
+    title?: string;
+    description?: string;
+    date: Date;
+    updatedDate?: Date;
+    tags?: string[];
+    category?: string;
+    lang?: 'ko' | 'en';
+    draft?: boolean;
+    heroImage?: string;
+  };
+}): Post {
+  return {
+    slug: entry.id,
+    title: entry.data.title || titleFromId(entry.id),
+    description: entry.data.description ?? '',
+    date: entry.data.date,
+    updatedDate: entry.data.updatedDate,
+    tags: entry.data.tags ?? [],
+    category: entry.data.category ?? 'uncategorized',
+    lang: entry.data.lang ?? 'ko',
+    draft: entry.data.draft ?? false,
+    heroImage: entry.data.heroImage,
+  };
+}
+
 export function sortPostsByDate(posts: Post[]): Post[] {
   return [...posts].sort((a, b) => b.date.getTime() - a.date.getTime());
 }
