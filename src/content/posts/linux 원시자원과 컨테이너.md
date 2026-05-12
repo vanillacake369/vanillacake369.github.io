@@ -1,16 +1,14 @@
 ---
 title: "linux 원시자원과 컨테이너"
-description: "The first post of this blog. Introducing a blog built with Astro."
-date: 2026-05-02
-tags: [blog, astro]
+description: "컨테이너는 정확히 무엇으로 만들어져 있는가?"
+date: 2026-05-01
+tags: [k8s, infra]
 category: dev
 lang: en
 draft: false
 ---
 
 # Why? 왜 배움?
-
-![linux-container-example](/images/linux-container-example.jpg)
 
 K8s 를 운영하다 보면 한 가지 장면이 반복된다.
 
