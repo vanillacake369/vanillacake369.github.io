@@ -120,74 +120,85 @@ function clearMarks(): void {
 }
 
 function buildMarks(query: string): void {
+  // Try window.find first (handles cross-element matches like Shiki code blocks)
+  // Falls back to TreeWalker for test environments where window.find is unavailable
+  if (typeof (window as unknown as { find?: unknown }).find === 'function') {
+    buildMarksWithWindowFind(query);
+  } else {
+    buildMarksWithTreeWalker(query);
+  }
+}
+
+function buildMarksWithWindowFind(query: string): void {
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  sel.removeAllRanges();
+  sel.collapse(document.body, 0);
+
+  // @ts-expect-error window.find is non-standard but widely supported
+  while (window.find(query, false, false, false, false, false, false)) {
+    const range = sel.getRangeAt(0);
+    const container = range.commonAncestorContainer;
+    const parentEl = container.nodeType === Node.ELEMENT_NODE
+      ? container as Element : container.parentElement;
+    if (parentEl?.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey')) continue;
+
+    const mark = document.createElement('mark');
+    mark.className = 'vim-search-match';
+    try {
+      range.surroundContents(mark);
+    } catch {
+      const fragment = range.extractContents();
+      mark.appendChild(fragment);
+      range.insertNode(mark);
+    }
+    matches.push({ node: mark.firstChild as Text, highlight: mark });
+    sel.collapse(mark, mark.childNodes.length);
+  }
+  sel.removeAllRanges();
+}
+
+function buildMarksWithTreeWalker(query: string): void {
   const re = new RegExp(escapeRegExp(query), 'gi');
 
-  // Walk all text nodes in body, skipping unwanted elements
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node: Node): number {
-        const parent = node.parentElement;
-        if (!parent) return NodeFilter.FILTER_REJECT;
-        // Skip vim UI elements
-        if (parent.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey')) {
-          return NodeFilter.FILTER_REJECT;
-        }
-        if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      },
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node: Node): number {
+      const parent = node.parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      if (parent.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey')) return NodeFilter.FILTER_REJECT;
+      if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
     },
-  );
+  });
 
-  // Collect all text nodes first (cannot mutate DOM while walking)
   const textNodes: Text[] = [];
   let node: Node | null;
-  while ((node = walker.nextNode()) !== null) {
-    textNodes.push(node as Text);
-  }
+  while ((node = walker.nextNode()) !== null) textNodes.push(node as Text);
 
   for (const textNode of textNodes) {
     const text = textNode.nodeValue ?? '';
-    if (!re.test(text)) {
-      re.lastIndex = 0;
-      continue;
-    }
+    re.lastIndex = 0;
+    if (!re.test(text)) continue;
     re.lastIndex = 0;
 
-    // Split the text node and insert <mark> elements for each match
     const parent = textNode.parentNode;
     if (!parent) continue;
 
     const fragment = document.createDocumentFragment();
     let lastIndex = 0;
     let m: RegExpExecArray | null;
-
     re.lastIndex = 0;
     while ((m = re.exec(text)) !== null) {
-      const start = m.index;
-      const end = start + m[0].length;
-
-      // Text before match
-      if (start > lastIndex) {
-        fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)));
-      }
-
-      // The <mark> element
+      if (m.index > lastIndex) fragment.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
       const mark = document.createElement('mark');
       mark.className = 'vim-search-match';
       mark.textContent = m[0];
       fragment.appendChild(mark);
-
       matches.push({ node: textNode, highlight: mark });
-      lastIndex = end;
+      lastIndex = m.index + m[0].length;
     }
-
-    // Remaining text after last match
-    if (lastIndex < text.length) {
-      fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-    }
-
+    if (lastIndex < text.length) fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
     parent.replaceChild(fragment, textNode);
   }
 }
