@@ -1,8 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { filterPublished } from '../domain/post';
+import { filterPublished, sortPostsByDate } from '../domain/post';
 import { generateCalendarGrid } from '../domain/calendar';
+import { translations } from '../i18n/translations';
 import type { Post } from '../domain/types';
 
 const rawEntries = await getCollection('posts');
@@ -21,11 +22,12 @@ const posts: Post[] = rawEntries.map((entry) => ({
 }));
 
 const publishedPosts = filterPublished(posts);
+const sortedPosts = sortPostsByDate(publishedPosts);
+
 const MONTHS = 12;
 const weeks = generateCalendarGrid(publishedPosts, MONTHS);
 
-// Build month labels: for each week, record which months start in that column
-// so we can render a label row above.
+// Build month labels: for each week, record which months start in that column.
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -37,7 +39,6 @@ interface MonthLabel {
 const monthLabels: MonthLabel[] = [];
 let lastMonth = -1;
 for (let wi = 0; wi < weeks.length; wi++) {
-  // Use the first non-null cell in the week to determine its month
   const firstCell = weeks[wi].cells.find((c) => c !== null);
   if (!firstCell) continue;
   const month = new Date(firstCell.date).getMonth();
@@ -47,21 +48,37 @@ for (let wi = 0; wi < weeks.length; wi++) {
   }
 }
 
-const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
+// Day-of-week labels: rows 0-6 = Sun-Sat.
+// Only display Mon (row 1), Wed (row 3), Fri (row 5) labels.
+const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+}
 ---
 
-<BaseLayout title="Calendar" description="Post contribution calendar.">
+<BaseLayout
+  title={translations.ko['calendar.title']}
+  description="Post contribution calendar."
+>
   <section class="calendar-section">
-    <h1 class="page-title">Calendar</h1>
+    <h1
+      class="page-title"
+      data-i18n="calendar.title"
+      data-i18n-ko={translations.ko['calendar.title']}
+      data-i18n-en={translations.en['calendar.title']}
+    >{translations.ko['calendar.title']}</h1>
     <p class="page-subtitle">
-      Posting activity over the last {MONTHS} months.
+      최근 {MONTHS}개월 간의 포스팅 활동입니다.
     </p>
 
+    <!-- ================================================================ -->
+    <!-- Contribution graph                                               -->
+    <!-- ================================================================ -->
     <div class="calendar-outer">
       <!-- Month label row -->
       <div class="calendar-month-row">
-        <div class="day-label-spacer"></div>
+        <div class="day-label-spacer" aria-hidden="true"></div>
         <div
           class="month-labels"
           style={`grid-template-columns: repeat(${weeks.length}, 15px);`}
@@ -80,42 +97,57 @@ const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
       <!-- Calendar body: day-of-week labels + grid -->
       <div class="calendar-body">
         <!-- Day-of-week labels -->
-        <div class="day-labels">
-          {DAY_LABELS.map((label, dow) => (
-            <span class="day-label">
-              {SHOW_DAY_ROWS.includes(dow) ? label : ''}
-            </span>
+        <div class="day-labels" aria-hidden="true">
+          {DAY_LABELS.map((label) => (
+            <span class="day-label">{label}</span>
           ))}
         </div>
 
-        <!-- Grid: columns = weeks, rows = days of week -->
+        <!-- Grid: columns = weeks, rows = days of week (0=Sun … 6=Sat) -->
         <div
           class="calendar-grid"
+          role="grid"
+          aria-label={`Posting activity for the last ${MONTHS} months`}
           style={`grid-template-columns: repeat(${weeks.length}, 15px);`}
         >
           {weeks.map((week, wi) =>
             week.cells.map((cell, dow) => {
               if (cell === null) {
+                // Padding cell outside the date range — invisible, non-interactive
                 return (
                   <span
-                    class="cal-cell cal-cell--empty"
+                    class="cal-cell cal-cell--pad"
                     style={`grid-column: ${wi + 1}; grid-row: ${dow + 1};`}
+                    aria-hidden="true"
                   />
                 );
               }
+
               const tooltipText = cell.posts.length > 0
                 ? `${cell.date}: ${cell.posts.map((p) => p.title).join(', ')}`
                 : cell.date;
+
+              if (cell.count > 0) {
+                return (
+                  <a
+                    href={`/posts/${cell.posts[0].slug}`}
+                    class={`cal-cell cal-cell--level-${cell.level}`}
+                    style={`grid-column: ${wi + 1}; grid-row: ${dow + 1};`}
+                    title={tooltipText}
+                    aria-label={tooltipText}
+                    data-date={cell.date}
+                    data-count={cell.count}
+                  />
+                );
+              }
+
               return (
-                <a
-                  href={`/posts/${cell.posts[0]?.slug ?? ''}`}
-                  class={`cal-cell cal-cell--level-${cell.level}`}
+                <span
+                  class="cal-cell cal-cell--level-0"
                   style={`grid-column: ${wi + 1}; grid-row: ${dow + 1};`}
-                  title={tooltipText}
-                  aria-label={tooltipText}
-                  tabindex={cell.count > 0 ? 0 : -1}
+                  title={cell.date}
+                  aria-label={cell.date}
                   data-date={cell.date}
-                  data-count={cell.count}
                 />
               );
             })
@@ -124,18 +156,52 @@ const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
       </div>
 
       <!-- Legend -->
-      <div class="calendar-legend">
+      <div class="calendar-legend" aria-label="Color legend">
         <span class="legend-label">Less</span>
-        {[0, 1, 2, 3, 4].map((level) => (
-          <span class={`cal-cell cal-cell--level-${level} legend-cell`} />
+        {([0, 1, 2, 3, 4] as const).map((level) => (
+          <span class={`cal-cell cal-cell--level-${level} legend-cell`} aria-hidden="true" />
         ))}
         <span class="legend-label">More</span>
       </div>
     </div>
+
+    <!-- ================================================================ -->
+    <!-- Post list                                                        -->
+    <!-- ================================================================ -->
+    <section class="post-list-section" aria-label="All posts">
+      <h2 class="post-list-title">All Posts</h2>
+
+      {sortedPosts.length === 0 ? (
+        <p class="no-posts">{translations.ko['posts.noPosts']}</p>
+      ) : (
+        <ul class="post-list">
+          {sortedPosts.map((post) => (
+            <li class="post-item">
+              <time class="post-item-date" datetime={post.date.toISOString()}>
+                {formatDate(post.date)}
+              </time>
+              <a href={`/posts/${post.slug}`} class="post-item-title">
+                {post.title}
+              </a>
+              {post.tags.length > 0 && (
+                <div class="post-item-tags">
+                  {post.tags.map((tag) => (
+                    <a href={`/tags/${tag}`} class="post-item-tag">#{tag}</a>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   </section>
 </BaseLayout>
 
 <style>
+  /* ------------------------------------------------------------------ */
+  /* Page header                                                         */
+  /* ------------------------------------------------------------------ */
   .page-title {
     font-size: 1.5rem;
     font-weight: 700;
@@ -151,11 +217,13 @@ const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
   }
 
   /* ------------------------------------------------------------------ */
-  /* Outer wrapper — allows horizontal scroll on narrow viewports       */
+  /* Outer wrapper — horizontal scroll on narrow viewports              */
   /* ------------------------------------------------------------------ */
   .calendar-outer {
     overflow-x: auto;
     padding-bottom: var(--spacing-sm);
+    /* Ensure the graph always has enough room to breathe */
+    min-width: min-content;
   }
 
   /* ------------------------------------------------------------------ */
@@ -232,33 +300,38 @@ const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
     transition: opacity 0.1s ease;
   }
 
-  .cal-cell--empty {
-    /* padding cell outside the date range */
+  /* Padding — completely invisible */
+  .cal-cell--pad {
     background: transparent;
     border-color: transparent;
     pointer-events: none;
   }
 
+  /* Level 0: no posts — faint border only */
   .cal-cell--level-0 {
     background: transparent;
     border-color: var(--color-border);
   }
 
+  /* Level 1: 1 post — 40% accent */
   .cal-cell--level-1 {
-    background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 40%, transparent);
     border-color: transparent;
   }
 
+  /* Level 2: 2 posts — 65% accent */
   .cal-cell--level-2 {
-    background: color-mix(in srgb, var(--color-accent) 50%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 65%, transparent);
     border-color: transparent;
   }
 
+  /* Level 3: 3-4 posts — 85% accent */
   .cal-cell--level-3 {
-    background: color-mix(in srgb, var(--color-accent) 75%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 85%, transparent);
     border-color: transparent;
   }
 
+  /* Level 4: 5+ posts — full accent */
   .cal-cell--level-4 {
     background: var(--color-accent);
     border-color: transparent;
@@ -278,6 +351,8 @@ const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
     align-items: center;
     gap: 4px;
     margin-top: var(--spacing-md);
+    /* Align with the grid (account for the day-label column + gap) */
+    padding-left: calc(32px + 6px);
   }
 
   .legend-label {
@@ -287,5 +362,126 @@ const SHOW_DAY_ROWS = [1, 3, 5]; // Mon, Wed, Fri (0-indexed: Sun=0)
 
   .legend-cell {
     flex-shrink: 0;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Post list below calendar                                           */
+  /* ------------------------------------------------------------------ */
+  .post-list-section {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-list-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-lg);
+    letter-spacing: -0.02em;
+  }
+
+  .no-posts {
+    color: var(--color-text-secondary);
+  }
+
+  .post-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .post-item {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--spacing-md);
+    row-gap: 0.15rem;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+    align-items: baseline;
+  }
+
+  .post-item:last-child {
+    border-bottom: none;
+  }
+
+  .post-item-date {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .post-item-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    line-height: 1.5;
+    grid-column: 2;
+    grid-row: 1;
+    transition: color 0.15s ease;
+  }
+
+  .post-item-title:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .post-item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .post-item-tag {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .post-item-tag:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Responsive                                                          */
+  /* ------------------------------------------------------------------ */
+  @media (max-width: 640px) {
+    .calendar-outer {
+      /* Allow horizontal scroll for graph on mobile */
+      margin-left: calc(-1 * var(--spacing-md));
+      margin-right: calc(-1 * var(--spacing-md));
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-md);
+    }
+
+    .post-item {
+      grid-template-columns: 1fr;
+    }
+
+    .post-item-date {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .post-item-title {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .post-item-tags {
+      grid-column: 1;
+      grid-row: 3;
+    }
   }
 </style>
