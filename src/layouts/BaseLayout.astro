@@ -1,0 +1,185 @@
+---
+import '../styles/global.css';
+import '../styles/themes/dark.css';
+import ThemeInitScript from '../components/ThemeInitScript.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  lang?: 'ko' | 'en';
+}
+
+const {
+  title = "Vanilla's Blog",
+  description = "A blog about software engineering, systems, and ideas.",
+  lang = 'ko',
+} = Astro.props;
+
+const siteTitle = "Vanilla's Blog";
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+    <title>{title === siteTitle ? title : `${title} — ${siteTitle}`}</title>
+    <ThemeInitScript />
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-wrapper header-inner">
+        <a href="/" class="site-title">{siteTitle}</a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/tags">Tags</a>
+          <a href="/calendar">Calendar</a>
+          <a href="/search">Search</a>
+          <ThemeToggle />
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <div class="site-wrapper">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-wrapper footer-inner">
+        <span>
+          &copy; {new Date().getFullYear()} vanillacake369. All rights reserved.
+        </span>
+        <div class="footer-links">
+          <a href="https://github.com/vanillacake369" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
+          <a href="mailto:lonelynight1026@gmail.com" aria-label="Email">Email</a>
+          <a href="https://www.linkedin.com/in/vanillacake369/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">LinkedIn</a>
+          <a href="/rss.xml" class="rss-link" aria-label="RSS Feed">RSS</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  /* Header */
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-md) 0;
+    background-color: var(--color-bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+  }
+
+  .site-title {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .site-title:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .site-nav {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: center;
+  }
+
+  .site-nav a {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .site-nav a:hover {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  /* Main */
+  .site-main {
+    flex: 1;
+    padding: var(--spacing-2xl) 0;
+  }
+
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-lg) 0;
+    margin-top: auto;
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+  }
+
+  .footer-links a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.15s ease;
+  }
+
+  .footer-links a:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .rss-link {
+    border: 1px solid var(--color-border);
+    padding: 0.15em 0.5em;
+    border-radius: 3px;
+  }
+
+  .rss-link:hover {
+    border-color: var(--color-accent);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .site-nav {
+      gap: var(--spacing-md);
+    }
+
+    .site-nav a {
+      font-size: 0.85rem;
+    }
+  }
+</style>

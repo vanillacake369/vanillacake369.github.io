@@ -1,0 +1,205 @@
+---
+// TOC.astro
+// Table of Contents component that accepts Astro's getHeadings() output.
+// - Sticky on desktop (right side)
+// - Highlights the current section via IntersectionObserver
+// - Collapsible on mobile
+
+export interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Only include h2-h4
+const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+---
+
+{filtered.length > 0 && (
+  <nav class="toc" aria-label="Table of contents">
+    <button class="toc-toggle" aria-expanded="true" aria-controls="toc-list">
+      Contents
+      <span class="toc-toggle-icon" aria-hidden="true">▾</span>
+    </button>
+    <ol id="toc-list" class="toc-list">
+      {filtered.map((h) => (
+        <li class={`toc-item toc-depth-${h.depth}`}>
+          <a class="toc-link" href={`#${h.slug}`} data-slug={h.slug}>
+            {h.text}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .toc {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .toc-toggle {
+    display: none;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.25rem 0;
+    color: inherit;
+  }
+
+  .toc-toggle-icon {
+    float: right;
+    transition: transform 0.2s ease;
+  }
+
+  .toc-toggle[aria-expanded='false'] .toc-toggle-icon {
+    transform: rotate(-90deg);
+  }
+
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-list[hidden] {
+    display: none;
+  }
+
+  .toc-item {
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-depth-2 {
+    padding-left: 0;
+  }
+
+  .toc-depth-3 {
+    padding-left: 0.9rem;
+  }
+
+  .toc-depth-4 {
+    padding-left: 1.8rem;
+  }
+
+  .toc-link {
+    display: block;
+    padding: 0.15rem 0.4rem;
+    border-left: 2px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.65;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toc-link:hover {
+    opacity: 1;
+  }
+
+  .toc-link.active {
+    border-left-color: currentColor;
+    opacity: 1;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .toc {
+      position: static;
+      max-height: none;
+      border: 1px solid rgba(128, 128, 128, 0.25);
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+    }
+
+    .toc-toggle {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  // Collapsible toggle on mobile
+  const toggle = document.querySelector<HTMLButtonElement>('.toc-toggle');
+  const list = document.getElementById('toc-list');
+
+  if (toggle && list) {
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      list.hidden = expanded;
+    });
+  }
+
+  // Highlight active section via IntersectionObserver
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc-link'));
+
+  if (links.length > 0) {
+    const slugToLink = new Map<string, HTMLAnchorElement>();
+    for (const link of links) {
+      const slug = link.dataset.slug;
+      if (slug) slugToLink.set(slug, link);
+    }
+
+    const headingElements = Array.from(
+      document.querySelectorAll<HTMLElement>('h2[id], h3[id], h4[id]'),
+    );
+
+    let activeSlug = '';
+
+    function setActive(slug: string): void {
+      if (slug === activeSlug) return;
+      activeSlug = slug;
+      for (const link of links) {
+        link.classList.remove('active');
+      }
+      const active = slugToLink.get(slug);
+      if (active) active.classList.add('active');
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActive((entry.target as HTMLElement).id);
+          }
+        }
+      },
+      {
+        rootMargin: '0px 0px -60% 0px',
+        threshold: 0,
+      },
+    );
+
+    for (const el of headingElements) {
+      observer.observe(el);
+    }
+
+    // When scrolled to bottom, activate the last visible heading
+    window.addEventListener('scroll', () => {
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+      if (atBottom && headingElements.length > 0) {
+        setActive(headingElements[headingElements.length - 1].id);
+      }
+    }, { passive: true });
+  }
+</script>

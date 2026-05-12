@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About Me" description="About vanillacake369 — software engineer.">
+  <section class="about">
+    <h1 class="about-title">About Me</h1>
+
+    <div class="about-body prose">
+      <p>
+        안녕하세요, <strong>vanillacake369</strong>입니다.<br />
+        세상을 이롭게 하는 개발을 지향하는 서버 엔지니어입니다.
+      </p>
+
+      <p>
+        Kubernetes, Go, Nix, 분산 시스템, AI, 클라우드 등 다양한 주제에 관심을 가지고 있으며,
+        배운 것을 기록하고 공유하는 것을 좋아합니다.
+      </p>
+
+      <h2>Contact</h2>
+      <ul class="contact-list">
+        <li>
+          <a href="https://github.com/vanillacake369" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </li>
+        <li>
+          <a href="mailto:lonelynight1026@gmail.com">lonelynight1026@gmail.com</a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/in/vanillacake369/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about {
+    max-width: 100%;
+  }
+
+  .about-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-2xl);
+    letter-spacing: -0.02em;
+  }
+
+  .about-body {
+    font-family: var(--font-serif);
+    line-height: 1.8;
+  }
+
+  .contact-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .contact-list li {
+    margin-bottom: 0.5em;
+  }
+
+  .contact-list a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .contact-list a:hover {
+    text-decoration: underline;
+  }
+</style>

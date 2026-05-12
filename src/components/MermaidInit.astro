@@ -1,0 +1,75 @@
+---
+// MermaidInit.astro
+// Loads mermaid from CDN and renders mermaid code blocks.
+// Shiki renders ```mermaid as <pre class="astro-code ..."><code>...</code></pre>
+// without a language-mermaid class, so we detect by text content.
+---
+
+<script>
+  type MermaidAPI = {
+    initialize: (config: Record<string, unknown>) => void;
+    run: (opts: { nodes: Element[] }) => Promise<void>;
+  };
+
+  function isMermaidCode(pre: Element): boolean {
+    const code = pre.querySelector('code');
+    if (!code) return false;
+    const text = code.textContent?.trim() ?? '';
+    return /^(flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|graph\s)/.test(text);
+  }
+
+  function renderMermaid(mermaid: MermaidAPI): void {
+    const preTags = Array.from(document.querySelectorAll('pre'));
+    const mermaidBlocks = preTags.filter(isMermaidCode);
+
+    if (mermaidBlocks.length === 0) return;
+
+    const divBlocks: Element[] = [];
+    for (const pre of mermaidBlocks) {
+      const code = pre.querySelector('code')!;
+      const diagram = code.textContent ?? '';
+      const div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = diagram;
+      pre.replaceWith(div);
+      divBlocks.push(div);
+    }
+
+    mermaid.run({ nodes: divBlocks });
+  }
+
+  function loadMermaid(): void {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+    script.async = true;
+    script.onload = () => {
+      const mermaid = (window as unknown as { mermaid: MermaidAPI }).mermaid;
+      const theme = document.documentElement.getAttribute('data-theme');
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme === 'dark' ? 'dark' : 'default',
+      });
+      renderMermaid(mermaid);
+    };
+    document.head.appendChild(script);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadMermaid);
+  } else {
+    loadMermaid();
+  }
+</script>
+
+<style is:global>
+  .mermaid {
+    display: flex;
+    justify-content: center;
+    margin: 1.5em 0;
+    padding: 1rem;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+</style>

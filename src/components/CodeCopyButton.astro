@@ -1,0 +1,106 @@
+---
+// CodeCopyButton.astro
+// Adds a copy button inside each <pre> code block (Obsidian-style, top-right overlay).
+// Excludes mermaid blocks.
+---
+
+<style is:global>
+  pre.astro-code {
+    position: relative;
+  }
+
+  .code-copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.7rem;
+    font-family: var(--font-sans);
+    line-height: 1.4;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.15);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+    z-index: 2;
+    user-select: none;
+    backdrop-filter: blur(4px);
+  }
+
+  pre.astro-code:hover .code-copy-btn {
+    opacity: 1;
+  }
+
+  .code-copy-btn:hover {
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--color-text);
+  }
+
+  .code-copy-btn.copied {
+    color: #22c55e;
+    border-color: #22c55e;
+  }
+
+  [data-theme='dark'] .code-copy-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-secondary);
+  }
+
+  [data-theme='dark'] .code-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--color-text);
+  }
+</style>
+
+<script>
+  function isMermaidPre(pre: Element): boolean {
+    const code = pre.querySelector('code');
+    if (!code) return false;
+    const text = code.textContent?.trim() ?? '';
+    return /^(flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|graph\s)/.test(text);
+  }
+
+  function addCopyButton(pre: HTMLElement): void {
+    const button = document.createElement('button');
+    button.className = 'code-copy-btn';
+    button.textContent = 'Copy';
+    button.setAttribute('aria-label', 'Copy code to clipboard');
+    pre.appendChild(button);
+
+    button.addEventListener('click', async () => {
+      const code = pre.querySelector('code');
+      const text = code?.innerText ?? pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'Copied!';
+        button.classList.add('copied');
+        setTimeout(() => {
+          button.textContent = 'Copy';
+          button.classList.remove('copied');
+        }, 2000);
+      } catch {
+        button.textContent = 'Error';
+        setTimeout(() => {
+          button.textContent = 'Copy';
+        }, 2000);
+      }
+    });
+  }
+
+  function initCopyButtons(): void {
+    const preTags = Array.from(document.querySelectorAll('pre.astro-code')) as HTMLElement[];
+    for (const pre of preTags) {
+      if (!isMermaidPre(pre)) {
+        addCopyButton(pre);
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCopyButtons);
+  } else {
+    initCopyButtons();
+  }
+</script>
