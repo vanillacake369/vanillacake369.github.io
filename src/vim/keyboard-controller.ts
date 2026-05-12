@@ -111,8 +111,17 @@ function showOnboarding(): void {
 
 // ── Heading navigation helpers ────────────────────────────────────────────────
 
+let cachedHeadings: HTMLElement[] | null = null;
+
 function getHeadings(): HTMLElement[] {
-  return Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]'));
+  if (cachedHeadings === null) {
+    cachedHeadings = Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]'));
+  }
+  return cachedHeadings;
+}
+
+function invalidateHeadingCache(): void {
+  cachedHeadings = null;
 }
 
 // Track current heading index for deterministic {/} navigation
@@ -210,7 +219,10 @@ function handleKeydown(e: KeyboardEvent): void {
 
   // ─── Search mode ───────────────────────────────────────────────────────
   if (mode === 'search') {
-    if (e.key === 'n' && !e.shiftKey && !isInputFocused()) {
+    if (e.key === '/' && !isInputFocused()) {
+      vimSearch.refocus();
+      e.preventDefault();
+    } else if (e.key === 'n' && !e.shiftKey && !isInputFocused()) {
       vimSearch.next();
       e.preventDefault();
     } else if ((e.key === 'N' || (e.key === 'n' && e.shiftKey)) && !isInputFocused()) {
@@ -308,6 +320,11 @@ function handleKeydown(e: KeyboardEvent): void {
 
 export function init(): void {
   document.addEventListener('keydown', handleKeydown);
+  // Invalidate heading cache when DOM changes (e.g. View Transitions, SPA nav)
+  new MutationObserver(invalidateHeadingCache)
+    .observe(document.body, { childList: true, subtree: true });
+  // Allow vim-search to activate search mode (e.g. ?highlight= from fuzzy finder)
+  document.addEventListener('vim:search-activated', () => { mode = 'search'; });
   showOnboarding();
 }
 

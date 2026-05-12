@@ -13,6 +13,10 @@ let currentIndex = -1;
 // Nodes that should not be walked for text matches
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'MARK']);
 
+// Debounce timer for input → setQuery
+let queryDebounce: ReturnType<typeof setTimeout> | null = null;
+const QUERY_DEBOUNCE_MS = 60;
+
 export function init(els: {
   bar: HTMLElement;
   input: HTMLInputElement;
@@ -32,7 +36,9 @@ export function init(els: {
     setQuery(inputEl!.value);
   });
   inputEl.addEventListener('input', () => {
-    if (!composing) setQuery(inputEl!.value);
+    if (composing) return;
+    if (queryDebounce !== null) clearTimeout(queryDebounce);
+    queryDebounce = setTimeout(() => setQuery(inputEl!.value), QUERY_DEBOUNCE_MS);
   });
 
   // Enter: confirm search, blur input so n/N work
@@ -40,6 +46,12 @@ export function init(els: {
     if (e.key === 'Enter') {
       e.preventDefault();
       e.stopPropagation();
+      // Flush pending debounce immediately on Enter
+      if (queryDebounce !== null) {
+        clearTimeout(queryDebounce);
+        queryDebounce = null;
+        setQuery(inputEl!.value);
+      }
       inputEl!.blur();
     }
   });
@@ -48,9 +60,17 @@ export function init(els: {
   const params = new URLSearchParams(window.location.search);
   const highlight = params.get('highlight');
   if (highlight) {
-    // Delay to ensure page is fully rendered
+    // Delay to ensure page is fully rendered and keyboard-controller is ready
     setTimeout(() => {
-      setQuery(highlight);
+      setQuery(highlight, { crossElement: true });
+
+      // Show search bar with the query so user sees context + can refine with /
+      if (barEl && inputEl) {
+        barEl.hidden = false;
+        inputEl.value = highlight;
+        // Keep input blurred so n/N work immediately
+      }
+
       // Scroll to first match in the prose/article area (skip footnotes, header, nav)
       if (matches.length > 0) {
         const proseMatch = matches.find(m => {
@@ -64,6 +84,9 @@ export function init(els: {
           updateCount();
         }
       }
+
+      // Signal keyboard-controller to enter search mode
+      document.dispatchEvent(new CustomEvent('vim:search-activated'));
     }, 100);
     const clean = window.location.pathname + window.location.hash;
     window.history.replaceState({}, '', clean);
@@ -80,6 +103,13 @@ export function open(onClose: () => void): void {
   updateCount();
 }
 
+export function refocus(): void {
+  if (!inputEl) return;
+  inputEl.focus();
+  const len = inputEl.value.length;
+  inputEl.setSelectionRange(len, len);
+}
+
 export function close(): void {
   if (!barEl || !inputEl) return;
   barEl.hidden = true;
@@ -91,13 +121,13 @@ export function close(): void {
   }
 }
 
-export function setQuery(query: string): void {
+export function setQuery(query: string, opts?: { crossElement?: boolean }): void {
   clearMarks();
   if (!query) {
     updateCount();
     return;
   }
-  buildMarks(query);
+  buildMarks(query, opts?.crossElement);
   if (matches.length > 0) {
     currentIndex = 0;
     activateMatch(currentIndex);
@@ -122,22 +152,27 @@ export function prev(): void {
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 function clearMarks(): void {
+  // Collect unique parents first, then normalize once per parent (avoids O(n) reflows)
+  const parents = new Set<Node>();
   for (const match of matches) {
     const mark = match.highlight;
     const parent = mark.parentNode;
     if (!parent) continue;
-    // Replace <mark> with its text content
     parent.replaceChild(document.createTextNode(mark.textContent ?? ''), mark);
-    parent.normalize();
+    parents.add(parent);
   }
+  for (const parent of parents) parent.normalize();
   matches = [];
   currentIndex = -1;
+  prevActiveIndex = -1;
 }
 
-function buildMarks(query: string): void {
-  // Try window.find first (handles cross-element matches like Shiki code blocks)
-  // Falls back to TreeWalker for test environments where window.find is unavailable
-  if (typeof (window as unknown as { find?: unknown }).find === 'function') {
+function buildMarks(query: string, crossElement = false): void {
+  // window.find: can match across element boundaries (e.g. Shiki code spans)
+  //   but it hijacks the browser selection → disrupts typing in the input.
+  // TreeWalker: selection-safe, used for live-as-you-type highlighting.
+  // window.find is reserved for non-interactive cases (?highlight= on page load).
+  if (crossElement && typeof (window as unknown as { find?: unknown }).find === 'function') {
     buildMarksWithWindowFind(query);
   } else {
     buildMarksWithTreeWalker(query);
@@ -151,13 +186,26 @@ function buildMarksWithWindowFind(query: string): void {
   sel.removeAllRanges();
   sel.collapse(document.body, 0);
 
+  // Safety caps — MAX_MATCHES limits real hits, MAX_ITERATIONS limits total
+  // loop cycles (including skipped ones) to guard against Safari wrap-around.
+  const MAX_MATCHES = 5000;
+  const MAX_ITERATIONS = 10_000;
+  let iterations = 0;
+
   // @ts-expect-error window.find is non-standard but widely supported
   while (window.find(query, false, false, false, false, false, false)) {
+    if (++iterations > MAX_ITERATIONS) break;
+
     const range = sel.getRangeAt(0);
-    const container = range.commonAncestorContainer;
+    const container = range.startContainer;
     const parentEl = container.nodeType === Node.ELEMENT_NODE
       ? container as Element : container.parentElement;
-    if (parentEl?.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey')) continue;
+
+    // Skip matches inside our own UI or already-created marks
+    if (parentEl?.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey, .toc-sidebar, mark.vim-search-match')) {
+      sel.collapseToEnd();
+      continue;
+    }
 
     const mark = document.createElement('mark');
     mark.className = 'vim-search-match';
@@ -170,6 +218,8 @@ function buildMarksWithWindowFind(query: string): void {
     }
     matches.push({ node: mark.firstChild as Text, highlight: mark });
     sel.collapse(mark, mark.childNodes.length);
+
+    if (matches.length >= MAX_MATCHES) break;
   }
   sel.removeAllRanges();
 }
@@ -181,7 +231,7 @@ function buildMarksWithTreeWalker(query: string): void {
     acceptNode(node: Node): number {
       const parent = node.parentElement;
       if (!parent) return NodeFilter.FILTER_REJECT;
-      if (parent.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey')) return NodeFilter.FILTER_REJECT;
+      if (parent.closest('#vim-search-bar, #vim-fuzzy-overlay, #vim-whichkey, .toc-sidebar')) return NodeFilter.FILTER_REJECT;
       if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
@@ -218,11 +268,18 @@ function buildMarksWithTreeWalker(query: string): void {
   }
 }
 
+let prevActiveIndex = -1;
+
 function activateMatch(index: number): void {
-  for (let i = 0; i < matches.length; i++) {
-    matches[i].highlight.classList.toggle('vim-search-match--active', i === index);
+  // O(1): only touch the previous and new active elements
+  if (prevActiveIndex >= 0 && prevActiveIndex < matches.length) {
+    matches[prevActiveIndex].highlight.classList.remove('vim-search-match--active');
   }
-  matches[index]?.highlight.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  if (index >= 0 && index < matches.length) {
+    matches[index].highlight.classList.add('vim-search-match--active');
+    matches[index].highlight.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  prevActiveIndex = index;
 }
 
 function updateCount(): void {
