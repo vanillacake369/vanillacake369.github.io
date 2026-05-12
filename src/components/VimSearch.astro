@@ -1,5 +1,6 @@
 ---
 // VimSearch.astro — Fixed bottom search bar for in-page "/" vim search
+// Initialization is handled by BaseLayout.astro's unified script
 ---
 
 <div id="vim-search-bar" hidden role="search" aria-label="In-page search">
@@ -16,23 +17,3 @@
   />
   <span class="vim-search-count" aria-live="polite" aria-atomic="true"></span>
 </div>
-
-<script>
-  import * as vimSearch from '../vim/vim-search';
-
-  function init(): void {
-    const bar = document.getElementById('vim-search-bar') as HTMLElement | null;
-    const input = bar?.querySelector<HTMLInputElement>('.vim-search-input') ?? null;
-    const count = bar?.querySelector<HTMLElement>('.vim-search-count') ?? null;
-
-    if (!bar || !input || !count) return;
-
-    vimSearch.init({ bar, input, count });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-</script>

@@ -48,8 +48,23 @@ export function init(els: {
   const params = new URLSearchParams(window.location.search);
   const highlight = params.get('highlight');
   if (highlight) {
-    setQuery(highlight);
-    // Clean up URL without reloading
+    // Delay to ensure page is fully rendered
+    setTimeout(() => {
+      setQuery(highlight);
+      // Scroll to first match in the prose/article area (skip footnotes, header, nav)
+      if (matches.length > 0) {
+        const proseMatch = matches.find(m => {
+          const el = m.highlight;
+          return !el.closest('.footnotes, header, nav, footer, .site-header');
+        });
+        if (proseMatch) {
+          const idx = matches.indexOf(proseMatch);
+          currentIndex = idx;
+          activateMatch(idx);
+          updateCount();
+        }
+      }
+    }, 100);
     const clean = window.location.pathname + window.location.hash;
     window.history.replaceState({}, '', clean);
   }
