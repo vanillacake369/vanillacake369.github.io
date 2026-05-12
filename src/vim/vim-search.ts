@@ -22,14 +22,25 @@ export function init(els: {
   inputEl = els.input;
   countEl = els.count;
 
-  inputEl.addEventListener('input', () => {
+  // Track Korean IME composition state to avoid duplicate characters
+  let composing = false;
+  inputEl.addEventListener('compositionstart', () => {
+    composing = true;
+  });
+  inputEl.addEventListener('compositionend', () => {
+    composing = false;
     setQuery(inputEl!.value);
+  });
+  inputEl.addEventListener('input', () => {
+    if (!composing) setQuery(inputEl!.value);
   });
 
   // Enter: confirm search, blur input so n/N work
+  // stopPropagation prevents Korean IME from firing a duplicate keydown after compositionend
   inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      e.stopPropagation();
       inputEl!.blur();
     }
   });

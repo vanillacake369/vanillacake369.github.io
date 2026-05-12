@@ -1,4 +1,4 @@
-// fuzzy-finder.ts — Telescope-style modal backed by Pagefind
+// fuzzy-finder.ts — Telescope-style modal backed by Pagefind with JSON fallback
 
 import type { FuzzyResult } from './types';
 
@@ -6,6 +6,18 @@ import type { FuzzyResult } from './types';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let pagefind: any = null;
 let pagefindLoading = false;
+
+// Fallback search index (used in dev when pagefind bundle is unavailable)
+interface SearchIndexEntry {
+  title: string;
+  description: string;
+  url: string;
+  tags: string[];
+  date: string;
+  excerpt: string;
+}
+let searchIndex: SearchIndexEntry[] | null = null;
+let searchIndexLoading = false;
 
 // DOM refs (injected by FuzzyFinder.astro)
 let overlayEl: HTMLElement | null = null;
@@ -92,6 +104,39 @@ export function confirm(): void {
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
+async function loadFallbackIndex(): Promise<void> {
+  if (searchIndex !== null || searchIndexLoading) return;
+  searchIndexLoading = true;
+  try {
+    const res = await fetch('/search-index.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    searchIndex = (await res.json()) as SearchIndexEntry[];
+  } catch {
+    searchIndex = [];
+  } finally {
+    searchIndexLoading = false;
+  }
+}
+
+function fallbackSearch(query: string): FuzzyResult[] {
+  if (!searchIndex) return [];
+  const q = query.toLowerCase();
+  return searchIndex
+    .filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.excerpt.toLowerCase().includes(q) ||
+        item.tags.some((t) => t.toLowerCase().includes(q)),
+    )
+    .map((item) => ({
+      url: item.url,
+      title: item.title,
+      excerpt: item.description,
+      tags: item.tags,
+    }));
+}
+
 async function loadPagefind(): Promise<void> {
   if (pagefind !== null || pagefindLoading) return;
   pagefindLoading = true;
@@ -105,7 +150,8 @@ async function loadPagefind(): Promise<void> {
   } catch {
     pagefind = null;
     pagefindLoading = false;
-    showError('Search index not found. Run <code>npm run build</code> first.');
+    // Pagefind unavailable (dev mode) — load the static JSON fallback instead
+    void loadFallbackIndex();
   } finally {
     pagefindLoading = false;
   }
@@ -121,7 +167,18 @@ async function runSearch(query: string): Promise<void> {
   }
 
   if (pagefind === null) {
-    showError('Search index not found. Run <code>npm run build</code> first.');
+    // Use fallback JSON index when pagefind is unavailable (dev mode)
+    if (searchIndex === null) {
+      // Still loading — wait briefly and retry
+      if (!searchIndexLoading) void loadFallbackIndex();
+      showError('Loading search index…');
+      return;
+    }
+    results = fallbackSearch(query);
+    selectedIndex = results.length > 0 ? 0 : -1;
+    renderResults();
+    updateStatus();
+    updateSelection();
     return;
   }
 
