@@ -218,31 +218,20 @@ describe('Ctrl+K opens fuzzy finder', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Ctrl+P opens fuzzy finder
+// Ctrl+P does NOT open fuzzy finder (removed — only Ctrl+K is bound)
 // ---------------------------------------------------------------------------
 
-describe('Ctrl+P opens fuzzy finder', () => {
+describe('Ctrl+P passes through', () => {
   beforeEach(() => {
     vi.resetModules();
   });
 
-  it('Ctrl+P calls fuzzyFinder.open with files mode', async () => {
+  it('Ctrl+P does not open fuzzy finder', async () => {
     const { fuzzyOpenSpy, _handleKeydown } = await setupController();
 
-    const ctrlP = new KeyboardEvent('keydown', { key: 'p', ctrlKey: true, bubbles: true });
-    _handleKeydown(ctrlP);
+    _handleKeydown(new KeyboardEvent('keydown', { key: 'p', ctrlKey: true, bubbles: true }));
 
-    expect(fuzzyOpenSpy).toHaveBeenCalledOnce();
-    expect(fuzzyOpenSpy).toHaveBeenCalledWith('files', expect.any(Function));
-  });
-
-  it('Ctrl+P (uppercase P) also opens fuzzy finder', async () => {
-    const { fuzzyOpenSpy, _handleKeydown } = await setupController();
-
-    const ctrlPUpper = new KeyboardEvent('keydown', { key: 'P', ctrlKey: true, bubbles: true });
-    _handleKeydown(ctrlPUpper);
-
-    expect(fuzzyOpenSpy).toHaveBeenCalledOnce();
+    expect(fuzzyOpenSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -433,12 +422,18 @@ describe('unhandled Ctrl combos pass through', () => {
 describe('Ctrl+/ shows which-key', () => {
   beforeEach(() => {
     vi.resetModules();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('Ctrl+/ calls whichKey.show with all groups', async () => {
     const { showSpy, _handleKeydown } = await setupController();
 
     _handleKeydown(new KeyboardEvent('keydown', { key: '/', ctrlKey: true, bubbles: true }));
+    vi.advanceTimersByTime(20);
 
     expect(showSpy).toHaveBeenCalledOnce();
   });
@@ -447,6 +442,7 @@ describe('Ctrl+/ shows which-key', () => {
     const { showSpy, _handleKeydown } = await setupController();
 
     _handleKeydown(new KeyboardEvent('keydown', { key: '/', metaKey: true, bubbles: true }));
+    vi.advanceTimersByTime(20);
 
     expect(showSpy).toHaveBeenCalledOnce();
   });

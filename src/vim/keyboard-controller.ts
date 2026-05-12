@@ -50,8 +50,7 @@ const ONBOARDING_GROUPS: WhichKeyGroup[] = [
     prefix: '',
     entries: [
       { key: '/', description: 'Search in page' },
-      { key: 'Ctrl+K', description: 'Command palette' },
-      { key: 'Ctrl+P', description: 'Fuzzy find' },
+      { key: 'Ctrl+K', description: 'Fuzzy find' },
       { key: 'g', description: 'Go to...' },
       { key: 'G', description: 'Bottom of page' },
       { key: '{', description: 'Prev heading' },
@@ -118,16 +117,18 @@ function getHeadings(): HTMLElement[] {
 
 function jumpToNextHeading(): void {
   const headings = getHeadings();
-  const scrollY = window.scrollY + 100; // offset for sticky header
-  const next = headings.find((h) => (h as HTMLElement).offsetTop > scrollY);
+  // Find first heading below current viewport top (accounting for sticky header ~80px)
+  const next = headings.find((h) => h.getBoundingClientRect().top > 80);
   if (next) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function jumpToPrevHeading(): void {
   const headings = getHeadings();
-  const scrollY = window.scrollY + 50;
-  const prev = [...headings].reverse().find((h) => (h as HTMLElement).offsetTop < scrollY);
+  // Current viewport top minus a small buffer (must be strictly above current position)
+  const scrollY = window.scrollY - 10;
+  const prev = [...headings].reverse().find((h) => h.getBoundingClientRect().top < -10);
   if (prev) prev.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else if (headings.length > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -144,21 +145,20 @@ function handleKeydown(e: KeyboardEvent): void {
       return;
     }
 
-    // Ctrl+P: fuzzy finder directly
-    if (e.key === 'p' || e.key === 'P') {
-      e.preventDefault();
-      fuzzyFinder.open('files', resetToNormal);
-      mode = 'fuzzy';
-      return;
-    }
-
-    // Ctrl+/ or Cmd+/: show which-key (all shortcuts)
+    // Ctrl+/ or Cmd+/: toggle which-key
     if (e.key === '/') {
       e.preventDefault();
-      if (mode === 'whichkey') { whichKey.hide(); resetToNormal(); }
-      else {
+      if (mode === 'whichkey') {
+        whichKey.hide();
+        resetToNormal();
+      } else {
+        // Cancel any pending hide transition
+        whichKey.hide();
         mode = 'whichkey';
-        whichKey.show(ONBOARDING_GROUPS);
+        // Small delay to let hide() complete before re-showing
+        setTimeout(() => {
+          whichKey.show(ONBOARDING_GROUPS);
+        }, 10);
         startPrefixTimeout();
       }
       return;

@@ -135,7 +135,7 @@ function fallbackSearch(query: string): FuzzyResult[] {
     .map((item) => ({
       url: item.url,
       title: item.title,
-      excerpt: item.description,
+      excerpt: item.excerpt || item.description,
       tags: item.tags,
     }));
 }
