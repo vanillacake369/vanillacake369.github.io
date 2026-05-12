@@ -33,7 +33,8 @@ export const translations = {
   },
 } as const;
 
-export type Lang = 'ko' | 'en';
+import type { Lang } from '../domain/types';
+export type { Lang };
 export type TranslationKey = keyof typeof translations.ko;
 
 export function t(lang: Lang, key: TranslationKey): string {

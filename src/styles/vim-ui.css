@@ -1,4 +1,12 @@
 /* vim-ui.css — Styles for VimSearch, FuzzyFinder, and WhichKey UI layers */
+/*
+ * Z-index scale (all values must sit above the sticky header and TOC trigger):
+ *   Site header (sticky):  10   — BaseLayout.astro
+ *   TOC trigger (fixed):   100  — PostLayout.astro
+ *   VimSearch bar (fixed): 1000 — #vim-search-bar
+ *   FuzzyFinder overlay:   1001 — #vim-fuzzy-overlay
+ *   WhichKey popup:        1002 — #vim-whichkey
+ */
 
 /* ── VimSearch bar ────────────────────────────────────────────────────────── */
 
