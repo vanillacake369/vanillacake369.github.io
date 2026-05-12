@@ -161,15 +161,20 @@ sup a {
   font-size: 0.85em;
 }
 
-/* Footnote scroll-margin — offset for sticky header (~60px / ~4rem) */
+/* Footnote scroll-margin — offset for sticky header + breathing room */
 .footnotes :target {
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 6rem;
 }
 
 sup:target,
 [id^="fn"]:target,
 [id^="fnref"]:target {
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 6rem;
+}
+
+/* Any element with an id that gets targeted via hash link */
+:target {
+  scroll-margin-top: 6rem;
 }
 
 /* KaTeX */

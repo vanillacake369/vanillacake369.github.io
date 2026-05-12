@@ -173,7 +173,11 @@ const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
         link.classList.remove('active');
       }
       const active = slugToLink.get(slug);
-      if (active) active.classList.add('active');
+      if (active) {
+        active.classList.add('active');
+        // Scroll the TOC panel so the active item is visible
+        active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
     }
 
     const observer = new IntersectionObserver(

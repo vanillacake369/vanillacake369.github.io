@@ -146,11 +146,23 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     // Start the single global keyboard listener
     initKeyboard();
 
-    // Search buttons open VimSearch
+    // Search buttons open VimSearch (fallback to direct DOM if module not yet initialized)
     const searchBtns = document.querySelectorAll('#mobile-search-btn, #nav-search-btn');
     searchBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        vimSearch.open(() => {});
+        // Try the module API first
+        try {
+          vimSearch.open(() => {});
+        } catch {
+          // Fallback: directly show the search bar and focus input
+          const bar = document.getElementById('vim-search-bar');
+          const input = bar?.querySelector<HTMLInputElement>('.vim-search-input');
+          if (bar && input) {
+            bar.hidden = false;
+            input.value = '';
+            input.focus();
+          }
+        }
       });
     });
 
