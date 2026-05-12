@@ -1,0 +1,100 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  currentSlug: string;
+  tags: string[];
+}
+
+const { currentSlug, tags } = Astro.props;
+
+const allPosts = await getCollection('posts');
+const related = allPosts
+  .filter(p => !p.data.draft && p.id !== currentSlug)
+  .map(p => ({
+    ...p,
+    sharedTags: p.data.tags.filter(t => tags.includes(t)),
+  }))
+  .filter(p => p.sharedTags.length > 0)
+  .sort((a, b) => b.sharedTags.length - a.sharedTags.length || b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 5);
+---
+
+{related.length > 0 && (
+  <section class="related-posts">
+    <h2 class="related-title">Related Posts</h2>
+    <ul class="related-list">
+      {related.map(post => (
+        <li class="related-item">
+          <a href={`/posts/${post.id}/`} class="related-link">{post.data.title}</a>
+          <div class="related-tags">
+            {post.sharedTags.map(tag => (
+              <span class="related-tag">#{tag}</span>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .related-posts {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .related-title {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .related-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .related-link {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .related-link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .related-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .related-tag {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    background-color: var(--color-code-bg);
+    border: 1px solid var(--color-border);
+    padding: 0.1em 0.5em;
+    border-radius: 9999px;
+  }
+</style>

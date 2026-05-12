@@ -3,6 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import MermaidInit from '../components/MermaidInit.astro';
 import CodeCopyButton from '../components/CodeCopyButton.astro';
 import Comments from '../components/Comments.astro';
+import RelatedPosts from '../components/RelatedPosts.astro';
 
 interface Props {
   title: string;
@@ -13,6 +14,7 @@ interface Props {
   category?: string;
   lang?: 'ko' | 'en';
   heroImage?: string;
+  currentSlug?: string;
 }
 
 const {
@@ -24,6 +26,7 @@ const {
   category = 'uncategorized',
   lang = 'ko',
   heroImage,
+  currentSlug = '',
 } = Astro.props;
 
 function formatDate(d: Date, locale: string): string {
@@ -91,12 +94,13 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
       <div class="post-body prose">
         <slot />
       </div>
-
-      <MermaidInit />
-      <CodeCopyButton />
     </article>
 
+    <RelatedPosts currentSlug={currentSlug} tags={tags} />
     <Comments />
+
+    <MermaidInit />
+    <CodeCopyButton />
   </div>
 </BaseLayout>
 
