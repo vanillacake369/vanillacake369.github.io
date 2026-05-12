@@ -1,12 +1,11 @@
 ---
 // Cloudflare Web Analytics beacon
-// Replace CLOUDFLARE_ANALYTICS_TOKEN with your actual token from:
-// https://dash.cloudflare.com/ → Web Analytics → your site → Manage site → copy the token
-const token = '67d018780362450ba560b299a9a30456'; // 여기에 복사한 토큰값을 넣으세요.
+// 이 토큰은 공개되어도 안전한 클라이언트 사이드 식별자입니다.
+const token = import.meta.env.PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN;
 const isProd = import.meta.env.PROD;
 ---
 
-{isProd && (
+{isProd && token && (
   <script
     defer
     src="https://static.cloudflareinsights.com/beacon.min.js"
