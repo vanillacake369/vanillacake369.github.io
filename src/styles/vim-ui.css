@@ -267,17 +267,20 @@ mark.vim-search-match--active {
 
 #vim-whichkey {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
   z-index: 1002;
   background-color: var(--color-bg);
-  border-top: 1px solid var(--color-border);
-  padding: var(--spacing-sm) 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 80ms ease, transform 80ms ease;
+  transition: opacity 120ms ease, transform 120ms ease;
   pointer-events: none;
+  min-width: 280px;
+  max-width: 480px;
 }
 
 #vim-whichkey[hidden] {
@@ -286,7 +289,7 @@ mark.vim-search-match--active {
 
 #vim-whichkey.vim-whichkey--visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
 }
 

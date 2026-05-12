@@ -425,3 +425,85 @@ describe('unhandled Ctrl combos pass through', () => {
     expect(fuzzyOpenSpy).not.toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Ctrl+/ (or Cmd+/) shows which-key
+// ---------------------------------------------------------------------------
+
+describe('Ctrl+/ shows which-key', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('Ctrl+/ calls whichKey.show with all groups', async () => {
+    const { showSpy, _handleKeydown } = await setupController();
+
+    _handleKeydown(new KeyboardEvent('keydown', { key: '/', ctrlKey: true, bubbles: true }));
+
+    expect(showSpy).toHaveBeenCalledOnce();
+  });
+
+  it('Cmd+/ (macOS) also calls whichKey.show', async () => {
+    const { showSpy, _handleKeydown } = await setupController();
+
+    _handleKeydown(new KeyboardEvent('keydown', { key: '/', metaKey: true, bubbles: true }));
+
+    expect(showSpy).toHaveBeenCalledOnce();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// gg scrolls to top
+// ---------------------------------------------------------------------------
+
+describe('gg scrolls to top', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('g then g calls window.scrollTo with top: 0', async () => {
+    const { hideSpy, showSpy, _handleKeydown } = await setupController();
+
+    // Mock scrollTo
+    const origScrollTo = window.scrollTo;
+    let scrollArgs: unknown = null;
+    window.scrollTo = ((...args: unknown[]) => { scrollArgs = args[0]; }) as typeof window.scrollTo;
+
+    // First g — enters whichkey
+    _handleKeydown(new KeyboardEvent('keydown', { key: 'g', bubbles: true }));
+    expect(showSpy).toHaveBeenCalled();
+
+    // Second g — gg motion
+    _handleKeydown(new KeyboardEvent('keydown', { key: 'g', bubbles: true }));
+
+    expect(scrollArgs).toEqual({ top: 0, behavior: 'smooth' });
+    expect(hideSpy).toHaveBeenCalled();
+
+    window.scrollTo = origScrollTo;
+  });
+});
+
+// ---------------------------------------------------------------------------
+// G scrolls to bottom
+// ---------------------------------------------------------------------------
+
+describe('G scrolls to bottom', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('Shift+G scrolls to document bottom', async () => {
+    const { _handleKeydown } = await setupController();
+    const origScrollTo = window.scrollTo;
+    let scrollArgs: unknown = null;
+    window.scrollTo = ((...args: unknown[]) => { scrollArgs = args[0]; }) as typeof window.scrollTo;
+
+    _handleKeydown(new KeyboardEvent('keydown', { key: 'G', bubbles: true }));
+
+    expect(scrollArgs).toEqual({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+    window.scrollTo = origScrollTo;
+  });
+});

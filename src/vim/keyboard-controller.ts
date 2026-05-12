@@ -152,6 +152,18 @@ function handleKeydown(e: KeyboardEvent): void {
       return;
     }
 
+    // Ctrl+/ or Cmd+/: show which-key (all shortcuts)
+    if (e.key === '/') {
+      e.preventDefault();
+      if (mode === 'whichkey') { whichKey.hide(); resetToNormal(); }
+      else {
+        mode = 'whichkey';
+        whichKey.show(ONBOARDING_GROUPS);
+        startPrefixTimeout();
+      }
+      return;
+    }
+
     // All other Ctrl combos: let browser handle (Ctrl+C, Ctrl+V, etc.)
     return;
   }
@@ -200,13 +212,14 @@ function handleKeydown(e: KeyboardEvent): void {
   // ─── Input guard for non-modifier keys ─────────────────────────────────
   if (isInputFocused()) return;
 
-  // ─── Which-key second key (Ctrl+K → f/g/t) ────────────────────────────
+  // ─── Which-key second key (prefix → action) ────────────────────────────
   if (mode === 'whichkey' && prefixKey !== null) {
+    const savedPrefix = prefixKey;
     clearPrefix();
     whichKey.hide();
     mode = 'normal';
 
-    if (prefixKey === 'ctrl+k') {
+    if (savedPrefix === 'ctrl+k') {
       switch (e.key) {
         case 'f':
           fuzzyFinder.open('files', resetToNormal);
@@ -223,7 +236,7 @@ function handleKeydown(e: KeyboardEvent): void {
           e.preventDefault();
           break;
       }
-    } else if (prefixKey === 'g') {
+    } else if (savedPrefix === 'g') {
       switch (e.key) {
         case 'g':
           window.scrollTo({ top: 0, behavior: 'smooth' });
