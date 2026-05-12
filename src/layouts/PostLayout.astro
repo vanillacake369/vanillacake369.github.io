@@ -57,7 +57,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     <article class="post">
       {heroImage && (
         <figure class="post-hero">
-          <img src={heroImage} alt={title} />
+          <img src={heroImage} alt={title} loading="lazy" decoding="async" />
         </figure>
       )}
 
@@ -362,7 +362,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     background-color: var(--color-blockquote-bg);
   }
 
-  /* Images */
+  /* Images — lazy loading applied via loading="lazy" on elements */
   .prose :global(img) {
     max-width: 100%;
     height: auto;
@@ -370,6 +370,18 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     margin: 1.5em auto;
     border-radius: 4px;
     border: 1px solid var(--color-border);
+  }
+
+  /* Ensure optimized <picture> wrappers (from astro:assets) also behave correctly */
+  .prose :global(picture) {
+    display: block;
+    margin: 1.5em auto;
+  }
+
+  .prose :global(picture img) {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
   }
 
   .prose :global(figure) {

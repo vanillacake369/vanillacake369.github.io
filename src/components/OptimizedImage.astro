@@ -1,0 +1,38 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  class?: string;
+}
+
+const { src, alt, width, class: className } = Astro.props;
+
+// Treat absolute URLs (http/https/protocol-relative) as external
+const isExternal = /^https?:\/\//.test(src) || src.startsWith('//');
+---
+
+{isExternal ? (
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    class={className}
+    loading="lazy"
+    decoding="async"
+    style="max-width: 100%; height: auto;"
+  />
+) : (
+  <Image
+    src={src}
+    alt={alt}
+    width={width ?? 1200}
+    height={0}
+    inferSize={true}
+    class={className}
+    loading="lazy"
+    decoding="async"
+  />
+)}
