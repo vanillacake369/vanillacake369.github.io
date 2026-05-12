@@ -1,0 +1,74 @@
+---
+// Comments.astro
+// Renders Giscus comment section with dynamic theme support.
+// IMPORTANT: Before deploying, visit https://giscus.app to generate your
+// repo-id and category-id, then replace the "REPO_ID" and "CATEGORY_ID"
+// placeholder values in the script tag below.
+---
+
+<section class="comments-section">
+  <hr class="comments-divider" />
+
+  <div class="giscus"></div>
+</section>
+
+<style>
+  .comments-section {
+    margin-top: 3rem;
+  }
+
+  .comments-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin-bottom: 3rem;
+  }
+</style>
+
+<script>
+  // Load Giscus with the correct initial theme and lang from <html>
+  function initGiscus(): void {
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const lang = document.documentElement.lang || 'ko';
+
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    // IMPORTANT: Replace REPO_ID and CATEGORY_ID with values from https://giscus.app
+    script.setAttribute('data-repo', 'vanillacake369/tonys-blog');
+    script.setAttribute('data-repo-id', 'REPO_ID');
+    script.setAttribute('data-category', 'Announcements');
+    script.setAttribute('data-category-id', 'CATEGORY_ID');
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', theme);
+    script.setAttribute('data-lang', lang);
+    script.setAttribute('data-loading', 'lazy');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.async = true;
+
+    const container = document.querySelector('.giscus');
+    if (container) {
+      container.appendChild(script);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGiscus);
+  } else {
+    initGiscus();
+  }
+
+  // Sync Giscus theme whenever data-theme changes on <html>
+  const observer = new MutationObserver(() => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+    if (iframe) {
+      iframe.contentWindow?.postMessage(
+        { giscus: { setConfig: { theme: theme === 'dark' ? 'dark' : 'light' } } },
+        'https://giscus.app'
+      );
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>

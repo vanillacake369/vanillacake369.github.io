@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import MermaidInit from '../components/MermaidInit.astro';
 import CodeCopyButton from '../components/CodeCopyButton.astro';
+import Comments from '../components/Comments.astro';
 
 interface Props {
   title: string;
@@ -94,6 +95,8 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
       <MermaidInit />
       <CodeCopyButton />
     </article>
+
+    <Comments />
   </div>
 </BaseLayout>
 
