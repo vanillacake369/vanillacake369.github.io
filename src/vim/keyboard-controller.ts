@@ -1,11 +1,10 @@
-// keyboard-controller.ts — Single global keydown listener routing vim-style keys
+// keyboard-controller.ts — Single global keydown listener
+// Keybindings: Ctrl+K (leader), Ctrl+P (fuzzy), / (page search), g (nav prefix)
 
 import type { VimMode, WhichKeyGroup } from './types';
 import * as vimSearch from './vim-search';
 import * as fuzzyFinder from './fuzzy-finder';
 import * as whichKey from './which-key';
-
-// ── State ─────────────────────────────────────────────────────────────────────
 
 let mode: VimMode = 'normal';
 let prefixKey: string | null = null;
@@ -14,28 +13,27 @@ let prefixTimer: ReturnType<typeof setTimeout> | null = null;
 const PREFIX_TIMEOUT_MS = 2000;
 const FIRST_VISIT_KEY = 'vim-onboarded';
 
-// ── Binding groups shown in which-key popup ───────────────────────────────────
+// ── Bindings shown in which-key ──────────────────────────────────────────────
 
-const SPACE_GROUPS: WhichKeyGroup[] = [
+const LEADER_GROUPS: WhichKeyGroup[] = [
   {
     label: 'Search',
-    prefix: 'Space',
+    prefix: 'Ctrl+K',
     entries: [
-      { key: 'Space', description: 'Fuzzy find' },
       { key: 'f', description: 'Find files' },
       { key: 'g', description: 'Grep content' },
     ],
   },
   {
     label: 'Theme',
-    prefix: 'Space',
+    prefix: 'Ctrl+K',
     entries: [{ key: 't', description: 'Toggle theme' }],
   },
 ];
 
 const G_GROUPS: WhichKeyGroup[] = [
   {
-    label: 'Navigation',
+    label: 'Go to',
     prefix: 'g',
     entries: [
       { key: 'h', description: 'Home' },
@@ -45,25 +43,20 @@ const G_GROUPS: WhichKeyGroup[] = [
   },
 ];
 
-const ALL_GROUPS: WhichKeyGroup[] = [
+const ONBOARDING_GROUPS: WhichKeyGroup[] = [
   {
-    label: 'Search',
+    label: 'Shortcuts',
     prefix: '',
     entries: [
       { key: '/', description: 'Search in page' },
-      { key: 'Space', description: 'Show commands' },
-    ],
-  },
-  {
-    label: 'Navigation',
-    prefix: '',
-    entries: [
+      { key: 'Ctrl+K', description: 'Command palette' },
+      { key: 'Ctrl+P', description: 'Fuzzy find' },
       { key: 'g', description: 'Go to...' },
     ],
   },
 ];
 
-// ── Guard ─────────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function isInputFocused(): boolean {
   const el = document.activeElement;
@@ -74,13 +67,9 @@ function isInputFocused(): boolean {
   return false;
 }
 
-// ── Prefix timer helpers ──────────────────────────────────────────────────────
-
 function clearPrefix(): void {
-  if (prefixTimer !== null) {
-    clearTimeout(prefixTimer);
-    prefixTimer = null;
-  }
+  if (prefixTimer !== null) clearTimeout(prefixTimer);
+  prefixTimer = null;
   prefixKey = null;
 }
 
@@ -93,8 +82,6 @@ function startPrefixTimeout(): void {
   }, PREFIX_TIMEOUT_MS);
 }
 
-// ── Theme toggle (mirrors ThemeToggle.astro logic) ────────────────────────────
-
 function toggleTheme(): void {
   const html = document.documentElement;
   const current = html.getAttribute('data-theme') as 'light' | 'dark';
@@ -103,35 +90,61 @@ function toggleTheme(): void {
   localStorage.setItem('theme', next);
 }
 
-// ── Mode reset ────────────────────────────────────────────────────────────────
-
 function resetToNormal(): void {
   clearPrefix();
   mode = 'normal';
 }
 
-// ── First visit onboarding ────────────────────────────────────────────────────
-
 function showOnboarding(): void {
   if (localStorage.getItem(FIRST_VISIT_KEY)) return;
   localStorage.setItem(FIRST_VISIT_KEY, '1');
-
-  // Show a brief hint after page settles
   setTimeout(() => {
-    whichKey.show(ALL_GROUPS);
+    whichKey.show(ONBOARDING_GROUPS);
     setTimeout(() => {
       if (mode === 'normal') whichKey.hide();
-    }, 4000);
+    }, 5000);
   }, 1500);
 }
 
-// ── Main handler ──────────────────────────────────────────────────────────────
+// ── Main handler ─────────────────────────────────────────────────────────────
 
 function handleKeydown(e: KeyboardEvent): void {
-  // Skip modifier-key combos (Ctrl+F etc.)
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  // ─── Ctrl combos (our bindings FIRST, then let browser handle the rest) ───
+  if (e.ctrlKey || e.metaKey) {
+    // Ctrl+K: leader key (command palette)
+    if (e.key === 'k' || e.key === 'K') {
+      e.preventDefault();
+      if (mode === 'whichkey') {
+        // Ctrl+K pressed twice → open fuzzy finder
+        whichKey.hide();
+        clearPrefix();
+        fuzzyFinder.open('files', resetToNormal);
+        mode = 'fuzzy';
+      } else {
+        prefixKey = 'ctrl+k';
+        mode = 'whichkey';
+        whichKey.show(LEADER_GROUPS);
+        startPrefixTimeout();
+      }
+      return;
+    }
 
-  // Escape always closes everything regardless of input focus
+    // Ctrl+P: fuzzy finder directly
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      fuzzyFinder.open('files', resetToNormal);
+      mode = 'fuzzy';
+      return;
+    }
+
+    // All other Ctrl combos: let browser handle (Ctrl+C, Ctrl+V, etc.)
+    return;
+  }
+
+  // Alt combos: let browser handle
+  if (e.altKey) return;
+
+  // ─── Escape: always close active UI ────────────────────────────────────
   if (e.key === 'Escape') {
     if (mode === 'search') {
       vimSearch.close();
@@ -149,7 +162,7 @@ function handleKeydown(e: KeyboardEvent): void {
     return;
   }
 
-  // In search mode, delegate n/N to vimSearch; all other keys go to the input
+  // ─── Search mode ───────────────────────────────────────────────────────
   if (mode === 'search') {
     if (e.key === 'n' && !e.shiftKey && !isInputFocused()) {
       vimSearch.next();
@@ -161,43 +174,25 @@ function handleKeydown(e: KeyboardEvent): void {
     return;
   }
 
-  // In fuzzy mode, delegate navigation keys
+  // ─── Fuzzy mode ────────────────────────────────────────────────────────
   if (mode === 'fuzzy') {
-    if (e.key === 'ArrowDown') {
-      fuzzyFinder.moveDown();
-      e.preventDefault();
-    } else if (e.key === 'ArrowUp') {
-      fuzzyFinder.moveUp();
-      e.preventDefault();
-    } else if (e.key === 'Enter') {
-      fuzzyFinder.confirm();
-      e.preventDefault();
-    } else if (e.key === 'Escape') {
-      fuzzyFinder.close();
-      resetToNormal();
-      e.preventDefault();
-    }
-    // Let other keys (typing) pass through to the fuzzy input
+    if (e.key === 'ArrowDown') { fuzzyFinder.moveDown(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { fuzzyFinder.moveUp(); e.preventDefault(); }
+    else if (e.key === 'Enter') { fuzzyFinder.confirm(); e.preventDefault(); }
     return;
   }
 
-  // Guard: do not fire normal/whichkey bindings when an input is focused
+  // ─── Input guard for non-modifier keys ─────────────────────────────────
   if (isInputFocused()) return;
 
-  // In whichkey mode (prefix active), handle second key
+  // ─── Which-key second key (Ctrl+K → f/g/t) ────────────────────────────
   if (mode === 'whichkey' && prefixKey !== null) {
     clearPrefix();
     whichKey.hide();
     mode = 'normal';
 
-    if (prefixKey === ' ') {
+    if (prefixKey === 'ctrl+k') {
       switch (e.key) {
-        case ' ':
-          // Space+Space → open fuzzy finder
-          fuzzyFinder.open('files', resetToNormal);
-          mode = 'fuzzy';
-          e.preventDefault();
-          break;
         case 'f':
           fuzzyFinder.open('files', resetToNormal);
           mode = 'fuzzy';
@@ -212,43 +207,22 @@ function handleKeydown(e: KeyboardEvent): void {
           toggleTheme();
           e.preventDefault();
           break;
-        default:
-          break;
       }
     } else if (prefixKey === 'g') {
       switch (e.key) {
-        case 'h':
-          window.location.href = '/';
-          e.preventDefault();
-          break;
-        case 't':
-          window.location.href = '/tags';
-          e.preventDefault();
-          break;
-        case 'a':
-          window.location.href = '/about';
-          e.preventDefault();
-          break;
-        default:
-          break;
+        case 'h': window.location.href = '/'; e.preventDefault(); break;
+        case 't': window.location.href = '/tags'; e.preventDefault(); break;
+        case 'a': window.location.href = '/about'; e.preventDefault(); break;
       }
     }
     return;
   }
 
-  // Normal mode key dispatch
+  // ─── Normal mode ──────────────────────────────────────────────────────
   switch (e.key) {
     case '/':
       vimSearch.open(resetToNormal);
       mode = 'search';
-      e.preventDefault();
-      break;
-
-    case ' ':
-      prefixKey = ' ';
-      mode = 'whichkey';
-      whichKey.show(SPACE_GROUPS);
-      startPrefixTimeout();
       e.preventDefault();
       break;
 
@@ -258,9 +232,6 @@ function handleKeydown(e: KeyboardEvent): void {
       whichKey.show(G_GROUPS);
       startPrefixTimeout();
       e.preventDefault();
-      break;
-
-    default:
       break;
   }
 }
@@ -272,5 +243,4 @@ export function init(): void {
   showOnboarding();
 }
 
-// Exported for testing
 export { isInputFocused, handleKeydown as _handleKeydown, mode as _mode };

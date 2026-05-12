@@ -80,9 +80,9 @@ describe('prefix timeout', () => {
 
     const { _handleKeydown } = await import('../../vim/keyboard-controller');
 
-    // Press Space to start prefix
-    const spaceEvent = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-    _handleKeydown(spaceEvent);
+    // Press g to start prefix
+    const gEvent = new KeyboardEvent('keydown', { key: 'g', bubbles: true });
+    _handleKeydown(gEvent);
 
     // Fast-forward 2000ms (PREFIX_TIMEOUT_MS)
     vi.advanceTimersByTime(2000);
