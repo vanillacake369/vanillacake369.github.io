@@ -1,44 +1,23 @@
 ---
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const entry = await getEntry('pages', 'about');
+const { Content } = await render(entry);
+const { title, description, lang } = entry.data;
 ---
 
-<BaseLayout title="About Me" description="About vanillacake369 — software engineer.">
-  <section class="about">
-    <h1 class="about-title">About Me</h1>
-
-    <div class="about-body prose">
-      <p>
-        안녕하세요, <strong>vanillacake369</strong>입니다.<br />
-        세상을 이롭게 하는 개발을 지향하는 서버 엔지니어입니다.
-      </p>
-
-      <p>
-        Kubernetes, Go, Nix, 분산 시스템, AI, 클라우드 등 다양한 주제에 관심을 가지고 있으며,
-        배운 것을 기록하고 공유하는 것을 좋아합니다.
-      </p>
-
-      <h2>Contact</h2>
-      <ul class="contact-list">
-        <li>
-          <a href="https://github.com/vanillacake369" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </li>
-        <li>
-          <a href="mailto:lonelynight1026@gmail.com">lonelynight1026@gmail.com</a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/in/vanillacake369/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        </li>
-      </ul>
+<BaseLayout title={title} description={description} lang={lang}>
+  <section class="page">
+    <h1 class="page-title">{title}</h1>
+    <div class="page-body prose">
+      <Content />
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .about {
-    max-width: 100%;
-  }
-
-  .about-title {
+  .page-title {
     font-family: var(--font-serif);
     font-size: 2rem;
     font-weight: 700;
@@ -47,26 +26,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     letter-spacing: -0.02em;
   }
 
-  .about-body {
+  .page-body {
     font-family: var(--font-serif);
     line-height: 1.8;
   }
 
-  .contact-list {
+  .page-body :global(ul) {
     list-style: none;
     padding: 0;
   }
 
-  .contact-list li {
+  .page-body :global(li) {
     margin-bottom: 0.5em;
   }
 
-  .contact-list a {
+  .page-body :global(a) {
     color: var(--color-accent);
     text-decoration: none;
   }
 
-  .contact-list a:hover {
+  .page-body :global(a:hover) {
     text-decoration: underline;
   }
 </style>
