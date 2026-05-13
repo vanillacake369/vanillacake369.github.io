@@ -71,11 +71,6 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       <div class="site-wrapper header-inner">
         <a href="/" class="site-title">{siteTitle}</a>
         <nav class="site-nav" aria-label="Main navigation">
-          <a href="/"
-            data-i18n="nav.home"
-            data-i18n-ko={translations.ko['nav.home']}
-            data-i18n-en={translations.en['nav.home']}
-          >{translations.ko['nav.home']}</a>
           <a href="/about"
             data-i18n="nav.about"
             data-i18n-ko={translations.ko['nav.about']}
@@ -114,13 +109,6 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
     <footer class="site-footer">
       <div class="site-wrapper footer-inner">
-        <span
-          data-i18n="footer.rights"
-          data-i18n-ko={`© ${new Date().getFullYear()} ${SITE_CONFIG.author}. ${translations.ko['footer.rights']}`}
-          data-i18n-en={`© ${new Date().getFullYear()} ${SITE_CONFIG.author}. ${translations.en['footer.rights']}`}
-        >
-          &copy; {new Date().getFullYear()} {SITE_CONFIG.author}. {translations.ko['footer.rights']}
-        </span>
         <div class="footer-links">
           <a href={SITE_CONFIG.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
           <a href={`mailto:${SITE_CONFIG.email}`} aria-label="Email">Email</a>
@@ -170,23 +158,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     // Start the single global keyboard listener (AFTER components are initialized)
     initKeyboard();
 
-    // Search buttons open VimSearch (fallback to direct DOM if module not yet initialized)
+    // Search buttons open fuzzy finder
     const searchBtns = document.querySelectorAll('#mobile-search-btn, #nav-search-btn');
     searchBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        // Try the module API first
-        try {
-          vimSearch.open(() => {});
-        } catch {
-          // Fallback: directly show the search bar and focus input
-          const bar = document.getElementById('vim-search-bar');
-          const input = bar?.querySelector<HTMLInputElement>('.vim-search-input');
-          if (bar && input) {
-            bar.hidden = false;
-            input.value = '';
-            input.focus();
-          }
-        }
+        fuzzyFinder.open('files', () => {});
       });
     });
 

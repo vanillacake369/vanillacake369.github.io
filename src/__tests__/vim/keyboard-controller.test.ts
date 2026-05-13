@@ -98,22 +98,23 @@ describe('isInputFocused', () => {
 // Slash key opens search mode
 // ---------------------------------------------------------------------------
 
-describe('slash key opens search', () => {
+describe('slash key opens fuzzy finder', () => {
   beforeEach(() => {
     vi.resetModules();
   });
 
-  it('pressing / calls vimSearch.open and enters search mode', async () => {
-    const { searchOpenSpy, _handleKeydown } = await setupController();
+  it('pressing / calls fuzzyFinder.open and enters fuzzy mode', async () => {
+    const { fuzzyOpenSpy, _handleKeydown } = await setupController();
 
     const slashEvent = new KeyboardEvent('keydown', { key: '/', bubbles: true });
     _handleKeydown(slashEvent);
 
-    expect(searchOpenSpy).toHaveBeenCalledOnce();
+    expect(fuzzyOpenSpy).toHaveBeenCalledOnce();
+    expect(fuzzyOpenSpy).toHaveBeenCalledWith('files', expect.any(Function));
   });
 
-  it('pressing / does not open search when input is focused', async () => {
-    const { searchOpenSpy, _handleKeydown } = await setupController();
+  it('pressing / does not open fuzzy finder when input is focused', async () => {
+    const { fuzzyOpenSpy, _handleKeydown } = await setupController();
 
     const input = document.createElement('input');
     document.body.appendChild(input);
@@ -122,7 +123,7 @@ describe('slash key opens search', () => {
     const slashEvent = new KeyboardEvent('keydown', { key: '/', bubbles: true });
     _handleKeydown(slashEvent);
 
-    expect(searchOpenSpy).not.toHaveBeenCalled();
+    expect(fuzzyOpenSpy).not.toHaveBeenCalled();
     document.body.removeChild(input);
   });
 });
@@ -134,39 +135,6 @@ describe('slash key opens search', () => {
 describe('n/N navigation in search mode', () => {
   beforeEach(() => {
     vi.resetModules();
-  });
-
-  it('n advances to next match when in search mode', async () => {
-    const { searchNextSpy, _handleKeydown } = await setupController();
-
-    // Enter search mode
-    _handleKeydown(new KeyboardEvent('keydown', { key: '/', bubbles: true }));
-    // Press n
-    _handleKeydown(new KeyboardEvent('keydown', { key: 'n', bubbles: true }));
-
-    expect(searchNextSpy).toHaveBeenCalledOnce();
-  });
-
-  it('N goes to previous match when in search mode', async () => {
-    const { searchPrevSpy, _handleKeydown } = await setupController();
-
-    // Enter search mode
-    _handleKeydown(new KeyboardEvent('keydown', { key: '/', bubbles: true }));
-    // Press N
-    _handleKeydown(new KeyboardEvent('keydown', { key: 'N', bubbles: true }));
-
-    expect(searchPrevSpy).toHaveBeenCalledOnce();
-  });
-
-  it('n with shiftKey goes to previous match when in search mode', async () => {
-    const { searchPrevSpy, _handleKeydown } = await setupController();
-
-    // Enter search mode
-    _handleKeydown(new KeyboardEvent('keydown', { key: '/', bubbles: true }));
-    // Press Shift+n
-    _handleKeydown(new KeyboardEvent('keydown', { key: 'n', shiftKey: true, bubbles: true }));
-
-    expect(searchPrevSpy).toHaveBeenCalledOnce();
   });
 
   it('n does not cycle when NOT in search mode', async () => {
@@ -244,15 +212,15 @@ describe('Escape resets from all modes', () => {
     vi.resetModules();
   });
 
-  it('Escape closes search mode and calls vimSearch.close', async () => {
-    const { searchCloseSpy, _handleKeydown } = await setupController();
+  it('Escape closes fuzzy mode when opened via /', async () => {
+    const { fuzzyCloseSpy, _handleKeydown } = await setupController();
 
-    // Open search
+    // Open fuzzy finder via /
     _handleKeydown(new KeyboardEvent('keydown', { key: '/', bubbles: true }));
     // Press Escape
     _handleKeydown(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
-    expect(searchCloseSpy).toHaveBeenCalledOnce();
+    expect(fuzzyCloseSpy).toHaveBeenCalledOnce();
   });
 
   it('Escape closes fuzzy finder when in fuzzy mode', async () => {
