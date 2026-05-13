@@ -71,6 +71,7 @@ export function show(groups: WhichKeyGroup[]): void {
   innerEl.appendChild(cached.cloneNode(true));
 
   el.hidden = false;
+  el.removeAttribute('aria-hidden');
   // Force reflow then show
   void el.offsetHeight;
   el.classList.add('vim-whichkey--visible');
@@ -82,7 +83,10 @@ export function hide(): void {
   // Simple timeout to hide after transition (no transitionend stacking)
   if (hideTimer !== null) clearTimeout(hideTimer);
   hideTimer = setTimeout(() => {
-    if (el) el.hidden = true;
+    if (el) {
+      el.hidden = true;
+      el.setAttribute('aria-hidden', 'true');
+    }
     hideTimer = null;
   }, 150);
 }

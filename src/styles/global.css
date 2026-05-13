@@ -183,6 +183,13 @@ sup:target,
   padding: 0.5em 0;
 }
 
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   html {

@@ -175,8 +175,15 @@ const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
       const active = slugToLink.get(slug);
       if (active) {
         active.classList.add('active');
-        // Scroll the TOC panel so the active item is visible
-        active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // Scroll the TOC panel so the active item is visible (within container only)
+        const tocContainer = active.closest('.toc');
+        if (tocContainer) {
+          const containerRect = tocContainer.getBoundingClientRect();
+          const activeRect = active.getBoundingClientRect();
+          if (activeRect.top < containerRect.top || activeRect.bottom > containerRect.bottom) {
+            tocContainer.scrollTop += activeRect.top - containerRect.top - containerRect.height / 2;
+          }
+        }
       }
     }
 
