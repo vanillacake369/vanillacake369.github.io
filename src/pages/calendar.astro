@@ -14,10 +14,11 @@ const sortedPosts = sortPostsByDate(publishedPosts);
 const calendarDays = groupByCalendarDay(publishedPosts);
 
 // Build a map of date → posts for client-side lookup
+const postsBySlug = new Map(publishedPosts.map(p => [p.slug, p]));
 const dayPostsMap: Record<string, { slug: string; title: string; tags: string[] }[]> = {};
 for (const day of calendarDays) {
   dayPostsMap[day.date] = day.posts.map(p => {
-    const full = publishedPosts.find(fp => fp.slug === p.slug);
+    const full = postsBySlug.get(p.slug);
     return { slug: p.slug, title: p.title, tags: full?.tags ?? [] };
   });
 }
@@ -31,7 +32,9 @@ const availableYears = [...new Set([currentYear, ...postYears])].sort((a, b) => 
 const yearGrids: Record<number, ReturnType<typeof generateCalendarGrid>> = {};
 for (const year of availableYears) {
   const yearPosts = publishedPosts.filter(p => p.date.getFullYear() === year);
-  yearGrids[year] = generateCalendarGrid(yearPosts, 12);
+  // For the current year, use today as reference; for past years, use Dec 31 of that year
+  const refDate = year === currentYear ? new Date() : new Date(year, 11, 31);
+  yearGrids[year] = generateCalendarGrid(yearPosts, 12, refDate);
 }
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -164,6 +167,15 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
 </BaseLayout>
 
 <script define:vars={{ dayPostsMap, availableYears, currentYear }}>
+  // HTML escape helper to prevent XSS
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   // Year navigation
   let activeYear = currentYear;
   const yearLabel = document.getElementById('year-label');
@@ -205,9 +217,9 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
       for (const p of posts) {
         const li = document.createElement('li');
         li.className = 'day-post-item';
-        li.innerHTML = `<a href="/posts/${p.slug}/" class="day-post-link">${p.title}</a>` +
+        li.innerHTML = `<a href="/posts/${encodeURIComponent(p.slug)}/" class="day-post-link">${escapeHtml(p.title)}</a>` +
           (p.tags.length > 0
-            ? `<span class="day-post-tags">${p.tags.map(t => '#' + t).join(' ')}</span>`
+            ? `<span class="day-post-tags">${p.tags.map(t => '#' + escapeHtml(t)).join(' ')}</span>`
             : '');
         list.appendChild(li);
       }
