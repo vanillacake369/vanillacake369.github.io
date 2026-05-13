@@ -2,7 +2,7 @@
 title: "왜 대형 기업에서 Galera Cluster 대신 AWS Aurora 를 채택할까?"
 description: "왜 Master-Slave 구조에서 Multi-Master 를 필요로 하고, 이를 사용하는 곳이 많지 않은지 알아보자."
 date: 2024-03-05
-tags: [Aurora, Database, Galera Cluster, aws]
+tags: [aurora, database, galera-cluster, aws]
 category: uncategorized
 lang: ko
 draft: false

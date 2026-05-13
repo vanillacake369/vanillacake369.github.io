@@ -1,8 +1,8 @@
 ---
 title: "Unable to use ibus on specific apps"
-description: ""
+description: "현재 확인된 app 들은 slack, ticktick, youtube-music, vscode 인데 모두 electron 기반 앱들이였다."
 date: 2025-05-11
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

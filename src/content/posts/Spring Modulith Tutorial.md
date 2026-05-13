@@ -1,8 +1,8 @@
 ---
 title: "Spring Modulith Tutorial"
-description: ""
+description: "https://github.com/vanillacake369/spring-modulith-tutorial"
 date: 2025-03-19
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

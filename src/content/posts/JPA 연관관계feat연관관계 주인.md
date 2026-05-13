@@ -1,8 +1,8 @@
 ---
 title: "JPA 연관관계(feat.연관관계 주인)"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "JPA에서는 **두 객체 연관관계 중 하나를 정해서 테이블의 외래키를 관리**"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

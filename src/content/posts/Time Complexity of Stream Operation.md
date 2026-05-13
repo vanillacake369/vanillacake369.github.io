@@ -1,8 +1,8 @@
 ---
 title: "Time Complexity of Stream Operation"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "ss Stream에서 max(), sort(), filter() 등등을 자주 사용하곤 한다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

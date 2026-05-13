@@ -1,8 +1,8 @@
 ---
 title: "단일서버에서 호스트와 VM 간 클러스터 연결이 어려운 이유"
-description: ""
+description: "현재 홈랩 환경은 다음과 같이 구성되어 있습니다:"
 date: 2026-01-29
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "DHCP 원리부터 예약 IP 설정까지"
-description: ""
+description: "ISP 에서 보안 상의 이유로 IP 를 계속 바꾼다."
 date: 2025-12-19
-tags: [Network, Linux]
+tags: [network, linux]
 category: uncategorized
 lang: ko
 draft: false

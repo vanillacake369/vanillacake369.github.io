@@ -1,8 +1,8 @@
 ---
 title: "NixOS MicroVM 으로 VM 생성 및 관리"
-description: ""
+description: "1."
 date: 2026-01-16
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

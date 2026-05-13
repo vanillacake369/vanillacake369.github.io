@@ -1,8 +1,8 @@
 ---
 title: "Request는 어떤 프로세스를 거쳐 Response로 반환될까? :: Flow of data in Spring Boot"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "스프링은 서블릿 컨테이너와 함께 동작한다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

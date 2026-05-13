@@ -1,8 +1,8 @@
 ---
 title: "NixOS :: can’t mount mnt-root"
-description: ""
+description: "NixOS 가 한 번 망가져서 망가진 이유를 찾았다."
 date: 2025-05-19
-tags: [Nix]
+tags: [nix]
 category: uncategorized
 lang: ko
 draft: false

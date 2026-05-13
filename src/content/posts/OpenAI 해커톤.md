@@ -1,11 +1,11 @@
 ---
 title: "OpenAI 해커톤"
-description: ""
+description: "10일 킥오프 - 17일 완성"
 date: 2026-02-09
-tags: [AI, Conference]
+tags: [ai, conference]
 category: uncategorized
 lang: ko
-draft: false
+draft: true
 ---
 
 # 밋업

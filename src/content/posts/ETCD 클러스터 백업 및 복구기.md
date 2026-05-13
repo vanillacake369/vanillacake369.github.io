@@ -2,10 +2,10 @@
 title: "ETCD & 클러스터 백업 및 복구기"
 description: ""
 date: 2026-05-08
-tags: [Homelab, Infra, Kubernetes]
+tags: [homelab, infra, kubernetes]
 category: uncategorized
 lang: ko
-draft: false
+draft: true
 ---
 
 # Why? 왜 배움?

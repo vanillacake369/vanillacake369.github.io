@@ -1,8 +1,8 @@
 ---
 title: "JPA 단방향, 양방향 연관관계 설정과 주의점"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "1."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

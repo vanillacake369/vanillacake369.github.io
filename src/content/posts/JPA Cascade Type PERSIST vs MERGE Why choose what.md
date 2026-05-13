@@ -2,7 +2,7 @@
 title: "JPA Cascade Type : PERSIST vs MERGE (Why choose what?)"
 description: "주문에 대한 로직 수정 중, Detached Entity Passed to Persist를 만나보았다.우리의 엔티티에 대해서 돌아보게 되었다.그러던 중 우리가 왜 MERGE 대신 PERSIST 를 사용하게 되었는지 기억이 안 났다.어떤 차이점이 있을까?? 3줄 요약1\\"
 date: 2024-02-04
-tags: [JPA, Spring boot]
+tags: [jpa, spring-boot]
 category: uncategorized
 lang: ko
 draft: false

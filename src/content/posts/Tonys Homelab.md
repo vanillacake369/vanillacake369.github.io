@@ -1,8 +1,8 @@
 ---
 title: "Tony’s Homelab"
-description: ""
+description: "홈랩을 만들게 된 계기는 간단하다."
 date: 2025-08-05
-tags: [System Design, Homelab, Network]
+tags: [system-design, homelab, network]
 category: uncategorized
 lang: ko
 draft: false

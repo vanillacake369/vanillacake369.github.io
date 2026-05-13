@@ -1,8 +1,8 @@
 ---
 title: "아이템 65. 리플렉션보다는 인터페이스를 사용하라(feat. Spring 에서의 리플렉션 활용)"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://www.oracle.com/technical-resources/articles/java/javareflection.html"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

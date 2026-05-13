@@ -1,8 +1,8 @@
 ---
 title: "출근 첫 날, 나는 뭘 해야할까? Checklist"
-description: ""
+description: "https://www.youtube.com/watch?v=MGgKWA-rX2s&ab_channel=tvNDENT"
 date: 2024-05-27
-tags: [Talk]
+tags: [talk]
 category: uncategorized
 lang: ko
 draft: false

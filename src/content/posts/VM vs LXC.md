@@ -1,8 +1,8 @@
 ---
 title: "VM vs LXC"
-description: ""
+description: "Proxmox 를 운영하면서 VM 은 언제 쓰고, LXC 는 언제 쓰는지 애매모호하여 정리해보기로 하였다."
 date: 2025-12-29
-tags: [Infra]
+tags: [infra]
 category: uncategorized
 lang: ko
 draft: false

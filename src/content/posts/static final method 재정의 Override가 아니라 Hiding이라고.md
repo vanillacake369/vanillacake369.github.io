@@ -1,8 +1,8 @@
 ---
 title: "static final method 재정의 : Override가 아니라 Hiding이라고?"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "utils 클래스에서 클래스 레벨 메서드를 작성하기 위해 다음을 신경써주었다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

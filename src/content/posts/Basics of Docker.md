@@ -1,8 +1,8 @@
 ---
 title: "Basics of Docker"
-description: ""
+description: "컨테이너를 위한 리눅스 기능: cgroup, namespace, union mount"
 date: 2024-04-20
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

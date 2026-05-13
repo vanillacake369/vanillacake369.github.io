@@ -1,8 +1,8 @@
 ---
 title: "LFCS"
-description: ""
+description: "홈랩을 운영하면서 리눅스 기초에 대한 공부가 부족하다고 느꼈고"
 date: 2025-12-29
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

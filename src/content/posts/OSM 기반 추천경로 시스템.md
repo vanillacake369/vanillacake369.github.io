@@ -1,8 +1,8 @@
 ---
 title: "OSM 기반 추천경로 시스템"
-description: ""
+description: "필자는 Valhalla 를 PoC 로 삼았다."
 date: 2025-06-17
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

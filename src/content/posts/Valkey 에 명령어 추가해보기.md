@@ -1,8 +1,8 @@
 ---
 title: "Valkey 에 명령어 추가해보기"
-description: ""
+description: "직접 명령어를 추가해보는 과제"
 date: 2026-05-10
-tags: [Tools, OpenSource]
+tags: [tools, opensource]
 category: uncategorized
 lang: ko
 draft: false

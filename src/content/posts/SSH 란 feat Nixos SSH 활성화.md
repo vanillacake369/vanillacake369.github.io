@@ -1,8 +1,8 @@
 ---
 title: "SSH 란? (feat. Nixos SSH 활성화)"
-description: ""
+description: "안전한 데이터 송수신을 해야할 때가 있다."
 date: 2025-06-11
-tags: [Linux, Infra, Nix]
+tags: [linux, infra, nix]
 category: uncategorized
 lang: ko
 draft: false

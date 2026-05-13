@@ -1,8 +1,8 @@
 ---
 title: "String의 단점 :: 문자열 추가 시 새로운 객체 생성"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "String은 문자열을 추가할 때마다 String객체를 생성해 메모리에 쌓는다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

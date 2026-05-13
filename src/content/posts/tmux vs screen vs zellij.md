@@ -1,8 +1,8 @@
 ---
 title: "tmux vs screen vs zellij"
-description: ""
+description: "화면 분할 및 여러 세션 관리를 위해 tmux 와 screen 을 사용해보고자 소개 및 장단점 비교를 해보았다."
 date: 2025-05-25
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "Subquery의 함정과 LEFT JOIN의 이점"
-description: ""
+description: "https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50"
 date: 2024-05-31
-tags: [DB]
+tags: [database]
 category: uncategorized
 lang: ko
 draft: false

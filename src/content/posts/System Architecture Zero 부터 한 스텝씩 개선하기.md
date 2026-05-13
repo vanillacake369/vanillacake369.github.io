@@ -1,8 +1,8 @@
 ---
 title: "System Architecture :: Zero 부터 한 스텝씩 개선하기"
-description: ""
+description: "로직처리, 데이터저장 등등 모든 일을 하나의 서버에서 맡아서 하는 아키텍처이다."
 date: 2024-01-04
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

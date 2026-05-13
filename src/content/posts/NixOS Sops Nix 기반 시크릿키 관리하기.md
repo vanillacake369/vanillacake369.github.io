@@ -1,8 +1,8 @@
 ---
 title: "NixOS Sops Nix 기반 시크릿키 관리하기"
-description: ""
+description: "먼저 본인이 파일을 암호화하고 수정할 때 쓸 키를 만듭니다."
 date: 2026-01-15
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "Go 테스트 모듈 구성 방법 (feat. TestContainer)"
-description: ""
+description: "이후 아래와 같이 connection 확인하는 로직 구성함"
 date: 2025-04-25
-tags: [Go]
+tags: [go]
 category: uncategorized
 lang: ko
 draft: false

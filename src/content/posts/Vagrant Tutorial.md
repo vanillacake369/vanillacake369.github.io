@@ -1,8 +1,8 @@
 ---
 title: "Vagrant Tutorial"
-description: ""
+description: "간혹 nix 설정이 꼬여서 패키지가 제대로 작동이 안 될 때가 있다."
 date: 2025-05-15
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

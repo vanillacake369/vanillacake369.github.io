@@ -1,8 +1,8 @@
 ---
 title: "Advance architecture"
-description: ""
+description: "하나의 프로젝트가 장기화 되면 될수록 유지보수는 커녕 점점 더러워지는 코드베이스에 신물이 나기 시작했다."
 date: 2025-05-12
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

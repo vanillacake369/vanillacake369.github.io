@@ -2,7 +2,7 @@
 title: "NixOS TailScale 적용"
 description: ""
 date: 2026-01-21
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "About ZFS"
-description: ""
+description: "홈랩을 구축하면서 파일시스템을 구축할 일이 있었다."
 date: 2025-12-30
-tags: [Linux, Infra]
+tags: [linux, infra]
 category: uncategorized
 lang: ko
 draft: false

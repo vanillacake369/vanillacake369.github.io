@@ -1,8 +1,8 @@
 ---
 title: "Self N:M 관계는 어떻게 구현할 수 있을까??"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "보통은 엔티티 A, 엔티티 B 간의 다대다 연관관계는 아래와 같이 구현한다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "CKA 스터디"
-description: ""
+description: "CKA 응시할 때 nvim 설정을 조작할 수 있을까 궁금하여 찾아보았다."
 date: 2025-12-25
-tags: [Kubernetes]
+tags: [kubernetes]
 category: uncategorized
 lang: ko
 draft: false

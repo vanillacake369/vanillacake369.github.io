@@ -2,7 +2,7 @@
 title: "단일노드와 Pod"
 description: "단일노드와 Pod"
 date: 2026-05-01
-tags: [k8s, infra]
+tags: [kubernetes, infra]
 category: dev
 lang: en
 draft: false

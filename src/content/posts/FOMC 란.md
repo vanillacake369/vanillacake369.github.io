@@ -1,8 +1,8 @@
 ---
 title: "FOMC 란 ?"
-description: ""
+description: "**Federal Open Market Committee (FOMC)**"
 date: 2025-10-28
-tags: [Investment]
+tags: [investment]
 category: uncategorized
 lang: ko
 draft: false

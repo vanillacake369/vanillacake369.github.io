@@ -2,7 +2,7 @@
 title: "NixOS k8s 클러스터 구축기 — tonys-homelab 에서 겪은 원리 딥다이브"
 description: "NixOS k8s 클러스터 구축기 — tonys-homelab 에서 겪은 원리 딥다이브"
 date: 2026-05-01
-tags: [k8s, infra]
+tags: [kubernetes, infra]
 category: dev
 lang: en
 draft: false

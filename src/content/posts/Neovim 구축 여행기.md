@@ -1,8 +1,8 @@
 ---
 title: "Neovim 구축 여행기"
-description: ""
+description: "IntelliJ IDEA 를 주력 IDE 로 사용해왔다."
 date: 2025-06-06
-tags: [Neovim]
+tags: [neovim]
 category: uncategorized
 lang: ko
 draft: false

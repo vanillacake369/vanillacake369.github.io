@@ -2,7 +2,7 @@
 title: "AWS ELB :: ALB vs NLB"
 description: "우리 팀은 다량의 트래픽에 따른 Scale-Out 을 지원하기 위해 Load Balancer 를 도입하기로 하였다.Load Balancer 의 L 짜도 모르던 초짜에게 LB 의 개념과 더불어 \"왜 어떤 LB를 선택했는지\" 를 결정짓기가 어려웠다.다음 과정을 통해 의사결"
 date: 2024-02-12
-tags: [ALB, NLB, aws, load balancer]
+tags: [alb, nlb, aws, load balancer]
 category: uncategorized
 lang: ko
 draft: false

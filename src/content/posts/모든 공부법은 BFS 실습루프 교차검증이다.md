@@ -1,8 +1,8 @@
 ---
 title: "모든 공부법은 BFS 실습루프 + 교차검증이다 "
-description: ""
+description: "요 근래 알고리즘, 쿠버네티스, 리눅스, 투자의 기초를 탄탄히 다져나가고 있다"
 date: 2026-05-07
-tags: [Talk]
+tags: [talk]
 category: uncategorized
 lang: ko
 draft: false

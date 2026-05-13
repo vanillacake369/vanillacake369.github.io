@@ -1,8 +1,8 @@
 ---
 title: "NixOS Tailscale Exit Node를 통한 Outbound 트래픽 라우팅"
-description: ""
+description: "공공 WiFi(카페, 공항, 호텔 등)는 다음과 같은 보안 위협에 노출됩니다:"
 date: 2026-01-27
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

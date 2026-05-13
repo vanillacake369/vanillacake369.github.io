@@ -1,8 +1,8 @@
 ---
 title: "OSIV 위치를 바꾸어, Spring Security 단에서 영속화된 User 를 가져오자 !"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://tecoble.techcourse.co.kr/post/2020-09-20-entity-lifecycle-2/"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "JPA Entity Lifecycle"
-description: ""
+description: "최근에 사내에 코드 아키텍처를 새로 도입하였다."
 date: 2025-05-30
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

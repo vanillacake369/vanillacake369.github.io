@@ -1,8 +1,8 @@
 ---
 title: "스레드,synchronized 사용 가이드라인(feat. 자바성능튜닝이야기)"
-description: ""
+description: "동기화를 처리하려면 서로 다른 스레드의 작업으로 인해 간섭받는 행위를 임계영역으로써 지정해주면 된다."
 date: 2024-04-22
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

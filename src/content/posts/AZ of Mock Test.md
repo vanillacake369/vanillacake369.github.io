@@ -1,8 +1,8 @@
 ---
 title: "A~Z of Mock Test"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://velog.io/@yyong3519/Mockito"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

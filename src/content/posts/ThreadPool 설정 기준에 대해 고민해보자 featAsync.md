@@ -2,7 +2,7 @@
 title: "ThreadPool 설정 기준에 대해 고민해보자 (feat.@Async)"
 description: "올바른 스레드 풀 설정값을 찾음으로써 극강의 효율성을 챙길 수 있기 때문이다.\n\n여기서 여러 의문점이 제기되었다.\n\n우리는 과연 스레드에 대해서 알고 사용하는 것인가?\n\n스레드 풀에 대한 기본설정값은 어떻게 잡혀있으며, 어떤 공식에 따라 설정할 수 있을까??"
 date: 2024-02-23
-tags: [CorePoolSize, MaxPoolSize, QueueCapacity, async]
+tags: [corepoolsize, maxpoolsize, queuecapacity, async]
 category: uncategorized
 lang: ko
 draft: false

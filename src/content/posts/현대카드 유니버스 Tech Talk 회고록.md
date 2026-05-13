@@ -1,8 +1,8 @@
 ---
 title: "현대카드 유니버스 Tech Talk 회고록"
-description: ""
+description: "이미 시장성이 레드오션인 곳에서 어떻게 밟고 올라왔나"
 date: 2024-11-26
-tags: [Talk]
+tags: [talk]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "@Repository vs @Component"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "둘 다 DI를 위한 어노테이션이지만 쓰임새와 역할이 다르다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "Left Join 대신 Cross Join 을 해야하는 경우는 언제일까?"
-description: ""
+description: "https://leetcode.com/problems/students-and-examinations/description/?envType=study-plan-v2&envId=top-sql-50"
 date: 2024-05-27
-tags: [DB]
+tags: [database]
 category: uncategorized
 lang: ko
 draft: false

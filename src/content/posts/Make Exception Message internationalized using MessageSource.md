@@ -1,8 +1,8 @@
 ---
 title: "Make Exception Message internationalized using MessageSource "
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "모든 소스코드는 해당 깃허브를 참고하면 된다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

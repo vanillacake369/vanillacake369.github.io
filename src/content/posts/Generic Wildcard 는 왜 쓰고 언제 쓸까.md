@@ -2,7 +2,7 @@
 title: "Generic / Wildcard 는 왜 쓰고 언제 쓸까?"
 description: "Generic 은 왜 쓸까? 언제 어떻게 쓰고, 한계점은 뭘까? 어떤 한계점이 있길래 Wildcard를 쓸까? Wildcard 의 사용유의점은 뭐고, 기준안은 뭘까?"
 date: 2024-02-18
-tags: [Effective Java, Generic, WILDCARD]
+tags: [effective-java, generic, wildcard]
 category: uncategorized
 lang: ko
 draft: false

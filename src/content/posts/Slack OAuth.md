@@ -1,8 +1,8 @@
 ---
 title: "Slack OAuth"
-description: ""
+description: "1."
 date: 2025-08-13
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

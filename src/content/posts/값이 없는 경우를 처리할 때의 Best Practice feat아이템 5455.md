@@ -1,8 +1,8 @@
 ---
 title: "값이 없는 경우를 처리할 때의 Best Practice? (feat.아이템 54,55)"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "Self N:M 관계는 어떻게 설계/구현할까?"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "아래와 같은 상황이 있다고 해보자."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

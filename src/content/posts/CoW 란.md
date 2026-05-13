@@ -1,8 +1,8 @@
 ---
 title: "CoW 란 ?"
-description: ""
+description: "책 Modern Linux 를 보다가 CoW 에 대한 개념을 알게 되었다."
 date: 2025-12-30
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

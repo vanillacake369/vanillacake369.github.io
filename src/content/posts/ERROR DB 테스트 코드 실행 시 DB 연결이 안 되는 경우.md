@@ -1,8 +1,8 @@
 ---
 title: "ERROR : DB 테스트 코드 실행 시 DB 연결이 안 되는 경우"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "레포지토리를 통한 데이터를 삽입 테스트를 작성하고 돌려보니 DB에 접속할 수 없고, 어느 곳에서인가 DB를 사용하고 있다는 동일한 오류가 반복되었다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "양방향 OneToOne은 Lazy로 동작하지 않을 수 있다."
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://jeong-pro.tistory.com/249"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

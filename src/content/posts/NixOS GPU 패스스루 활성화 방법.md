@@ -1,8 +1,8 @@
 ---
 title: "NixOS GPU 패스스루 활성화 방법"
-description: ""
+description: "GPU 패스스루는 호스트 OS 가 사용하던 그래픽 카드 하드웨어를 가상 머신(VM)이 직접 완전히 점유하도록 통로를 열어주는 기술이다."
 date: 2026-01-26
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

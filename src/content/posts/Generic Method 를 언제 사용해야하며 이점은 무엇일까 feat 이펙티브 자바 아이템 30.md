@@ -2,7 +2,7 @@
 title: "Generic Method 를 언제 사용해야하며, 이점은 무엇일까? (feat. 이펙티브 자바 아이템 30)"
 description: "누군가 실수로 엉뚱한 타입의 객체를 넣어두면 런타임에 형변환 오류가 난다.제네릭은 이를 우회한다.제너릭을 사용하면 컬렉션이 담을 수 있는 타입을 컴파일러에게 알려주다. 따라서 엉뚱한 타입의 객체를 넣는 시도를 컴파일 과정에서 차단하여 안전한 프로그래밍을 지향할 수 있게"
 date: 2024-02-18
-tags: [Effective Java, Generic]
+tags: [effective-java, generic]
 category: uncategorized
 lang: ko
 draft: false

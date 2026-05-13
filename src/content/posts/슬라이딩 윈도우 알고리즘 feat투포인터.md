@@ -2,7 +2,7 @@
 title: "슬라이딩 윈도우 알고리즘 (feat.투포인터)"
 description: "각각의 경우를 찾아나갈 때, 종종 double for loop 를 쓴다. 이를 개선하기 위해 탐색범위를 효과적으로 줄이는 방법인 sliding window 알고리즘을 사용해보자."
 date: 2024-05-14
-tags: [Sliding Window, boj, two pointer]
+tags: [sliding-window, boj, two pointer]
 category: uncategorized
 lang: ko
 draft: false

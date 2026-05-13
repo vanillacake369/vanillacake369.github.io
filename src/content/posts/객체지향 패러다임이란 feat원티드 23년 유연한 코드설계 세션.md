@@ -1,8 +1,8 @@
 ---
 title: "객체지향 패러다임이란 (feat.원티드 23년 유연한 코드설계 세션)"
-description: ""
+description: "패러다임이란 본디 과학분야에서 나온 용어로,"
 date: 2024-05-18
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

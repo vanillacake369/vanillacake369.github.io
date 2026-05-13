@@ -1,8 +1,8 @@
 ---
 title: "Mirror, RAID 0-6 의 정의, 차이점,유스케이스, 트레이드오프"
-description: ""
+description: "RAID는 데이터 중복성(Redundancy), 성능 향상(Performance), 또는 두 가지 목적을 위해 여러 하드 드라이브를 하나의 논리 단위로 결합하는 기술입니다."
 date: 2026-01-14
-tags: [Infra]
+tags: [infra]
 category: uncategorized
 lang: ko
 draft: false

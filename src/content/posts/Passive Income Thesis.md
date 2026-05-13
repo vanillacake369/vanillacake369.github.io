@@ -1,8 +1,8 @@
 ---
 title: "Passive Income Thesis"
-description: ""
+description: "https://www.youtube.com/watch?v=YNFd_h3ah2A&t=460s"
 date: 2026-03-23
-tags: [Investment]
+tags: [investment]
 category: uncategorized
 lang: ko
 draft: false

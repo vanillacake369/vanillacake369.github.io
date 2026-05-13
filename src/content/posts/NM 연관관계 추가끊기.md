@@ -1,8 +1,8 @@
 ---
 title: "N:M 연관관계 추가&끊기"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "FK에  여부를 지정할 수 있다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

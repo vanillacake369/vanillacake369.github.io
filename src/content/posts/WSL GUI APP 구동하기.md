@@ -1,8 +1,8 @@
 ---
 title: "WSL GUI APP 구동하기"
-description: ""
+description: "모든 환경을 nix 에서 관리하는 편이다."
 date: 2025-11-27
-tags: [Tools]
+tags: [tools]
 category: uncategorized
 lang: ko
 draft: false

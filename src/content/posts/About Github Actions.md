@@ -1,8 +1,8 @@
 ---
 title: "About Github Actions"
-description: ""
+description: "코드를 관리하다보면 다음과 같은 CI 문제에 직면한다."
 date: 2026-01-16
-tags: [Infra]
+tags: [infra]
 category: uncategorized
 lang: ko
 draft: false

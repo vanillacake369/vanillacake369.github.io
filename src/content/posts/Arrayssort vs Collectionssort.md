@@ -1,8 +1,8 @@
 ---
 title: "Arrays.sort() vs Collections.sort()"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "우선적으로, 들어가기 전에어떤 정렬 알고리즘이 있으며 배웠는지 복기하고자 아래에 나열해보았다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "SXSSFWorkbook vs XSSFWorkbook"
-description: ""
+description: "The three *Workbook* classes available in Apache POI are *HSSFWorkbook*, *XSSFWorkbook*, and *SXSSFWorkbook."
 date: 2025-04-25
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

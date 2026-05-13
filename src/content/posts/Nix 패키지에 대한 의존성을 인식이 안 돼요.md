@@ -1,8 +1,8 @@
 ---
 title: "Nix 패키지에 대한 의존성을 인식이 안 돼요"
-description: ""
+description: "flake/home-manager 환경에서 lua, luaunit 을 설치했다."
 date: 2025-06-06
-tags: [Nix]
+tags: [nix]
 category: uncategorized
 lang: ko
 draft: false

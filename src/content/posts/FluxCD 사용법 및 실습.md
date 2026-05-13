@@ -2,7 +2,7 @@
 title: "FluxCD 사용법 및 실습"
 description: ""
 date: 2026-05-08
-tags: [Homelab, Infra, Kubernetes]
+tags: [homelab, infra, kubernetes]
 category: uncategorized
 lang: ko
 draft: false

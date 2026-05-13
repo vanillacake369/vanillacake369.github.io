@@ -1,8 +1,8 @@
 ---
 title: "Spring 핵심 Ideaolgy “다형성”"
-description: ""
+description: "하나의 클래스에 대해 다양한 객체를 만들어 객체를 갈아끼움에 따라 다양한 Act를 할 수 있게 한다."
 date: 2023-01-26
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

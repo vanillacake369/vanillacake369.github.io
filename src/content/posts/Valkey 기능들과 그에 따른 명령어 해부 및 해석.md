@@ -1,8 +1,8 @@
 ---
 title: "Valkey 기능들과 그에 따른 명령어 해부 및 해석"
-description: ""
+description: "OSSCA 를 통해 강대명 Valkey 컨트리뷰터님과 Valkey 오픈소스 컨트리뷰션 세션을 진행하고 있다."
 date: 2026-04-29
-tags: [Tools, OpenSource]
+tags: [tools, opensource]
 category: uncategorized
 lang: ko
 draft: false

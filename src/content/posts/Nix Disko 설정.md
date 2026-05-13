@@ -1,8 +1,8 @@
 ---
 title: "Nix Disko 설정"
-description: ""
+description: "무슨 파일시스템을 구성할지 고민되었다."
 date: 2026-01-14
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

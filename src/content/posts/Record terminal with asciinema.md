@@ -1,8 +1,8 @@
 ---
 title: "Record terminal with asciinema"
-description: ""
+description: "k6 테스트 결과에 대한 녹화본을 생성하기 위해 Terminal 녹화를 도와주는 asciinema 활용에 대해 정리"
 date: 2025-05-12
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

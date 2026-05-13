@@ -1,8 +1,8 @@
 ---
 title: "Method Reference 메서드 참조 (feat.lambda)"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "람다식은 간단한 파라미터에 대한 반환형 함수를 쉽게 작성할 수 있다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

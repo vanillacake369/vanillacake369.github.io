@@ -1,8 +1,8 @@
 ---
 title: "NixOS Colmena 설정하기"
-description: ""
+description: "Colmena는 NixOS 기반 인프라를 SSH 원격에서 선언적으로 배포할 수 있게 해주므로,"
 date: 2026-01-22
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

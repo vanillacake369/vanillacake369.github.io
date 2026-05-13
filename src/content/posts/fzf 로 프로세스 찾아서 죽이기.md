@@ -1,8 +1,8 @@
 ---
 title: "fzf 로 프로세스 찾아서 죽이기"
-description: ""
+description: "쇼츠 내리다가 본 것인데 너무 신기해서 적어봄"
 date: 2025-06-03
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

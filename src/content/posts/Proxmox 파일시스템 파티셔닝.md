@@ -1,8 +1,8 @@
 ---
 title: "Proxmox 파일시스템 & 파티셔닝"
-description: ""
+description: "파일 시스템은 프로세스나 VM 이 실행되기 전에 가장 먼저 세팅해야하는 단계이다."
 date: 2025-12-29
-tags: [Homelab]
+tags: [homelab]
 category: uncategorized
 lang: ko
 draft: false

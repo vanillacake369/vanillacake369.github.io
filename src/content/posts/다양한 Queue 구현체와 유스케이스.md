@@ -1,8 +1,8 @@
 ---
 title: "다양한 Queue 구현체와 유스케이스"
-description: ""
+description: "Go는 \"하나의 정답\"을 강요하기보다 상황에 맞는 **최적의 도구**를 선택하도록 설계되었습니다."
 date: 2026-01-28
-tags: [Go]
+tags: [go]
 category: uncategorized
 lang: ko
 draft: false

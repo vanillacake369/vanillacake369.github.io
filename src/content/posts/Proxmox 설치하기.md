@@ -1,8 +1,8 @@
 ---
 title: "Proxmox 설치하기"
-description: ""
+description: "proxmox iso 를 설치하여 proxmox 서버 운영해보고자 한다."
 date: 2025-12-29
-tags: [Homelab]
+tags: [homelab]
 category: uncategorized
 lang: ko
 draft: false

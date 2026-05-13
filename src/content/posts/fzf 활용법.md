@@ -1,8 +1,8 @@
 ---
 title: "fzf 활용법"
-description: ""
+description: "아래와 같이 zshrc 에 구축해둠"
 date: 2025-04-25
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

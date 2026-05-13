@@ -1,8 +1,8 @@
 ---
 title: "Proxmox 사용자 및 권한 부여"
-description: ""
+description: "Proxmox VE stores user attributes in /etc/pve/user.cfg."
 date: 2026-01-06
-tags: [Homelab]
+tags: [homelab]
 category: uncategorized
 lang: ko
 draft: false

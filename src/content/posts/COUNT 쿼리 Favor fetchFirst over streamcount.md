@@ -1,8 +1,8 @@
 ---
 title: "[COUNT 쿼리] Favor fetchFirst() over .stream().count()"
-description: ""
+description: "count 쿼리에 대한 에러가 발생한다는 리포트를 보고 코드를 수정 중에"
 date: 2024-08-05
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

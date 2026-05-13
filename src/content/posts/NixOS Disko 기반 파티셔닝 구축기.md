@@ -1,8 +1,8 @@
 ---
 title: "NixOS Disko 기반 파티셔닝 구축기"
-description: ""
+description: "https://github.com/nix-community/disko"
 date: 2026-05-08
-tags: [Homelab, Infra, Kubernetes, Nix]
+tags: [homelab, infra, kubernetes, nix]
 category: uncategorized
 lang: ko
 draft: false

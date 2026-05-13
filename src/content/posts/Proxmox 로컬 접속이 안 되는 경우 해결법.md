@@ -1,8 +1,8 @@
 ---
 title: "Proxmox 로컬 접속이 안 되는 경우 해결법"
-description: ""
+description: "**목적**: Proxmox와 ngrok 서비스가 정상 작동하는지 확인"
 date: 2025-12-15
-tags: [System Design, Homelab, Network]
+tags: [system-design, homelab, network]
 category: uncategorized
 lang: ko
 draft: false

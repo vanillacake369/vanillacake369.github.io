@@ -1,8 +1,8 @@
 ---
 title: "Sentry EventProcessor 설정하여 데이터 훔치기"
-description: ""
+description: "sentry 는 scrubbing 설정을 조정하여 요청 시점의 헤더와 사용자 데이터를 볼 수 있다."
 date: 2025-11-27
-tags: [Java, Tools]
+tags: [java, tools]
 category: uncategorized
 lang: ko
 draft: false

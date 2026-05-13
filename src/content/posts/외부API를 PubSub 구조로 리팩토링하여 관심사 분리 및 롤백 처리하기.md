@@ -2,7 +2,7 @@
 title: "외부API를 Pub/Sub 구조로 리팩토링하여 관심사 분리 및 롤백 처리하기"
 description: "위에서 볼 수 있듯이, PaymentService는 주문 비즈니스 처리 & Toss API Event 처리를 하고 있다.\n이에 따라 아래와 같인 이슈가 있었다. \n\n1. 비즈니스 클래스가 분산서비스와의 결합도가 상당히 높았고, 다른 Payment Event 처리에 대해"
 date: 2024-02-06
-tags: [Observer Pattern, Pubsub, Spring boot]
+tags: [observer-pattern, pubsub, spring-boot]
 category: uncategorized
 lang: ko
 draft: false

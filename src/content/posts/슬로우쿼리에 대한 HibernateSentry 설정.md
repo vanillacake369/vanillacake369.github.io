@@ -396,18 +396,15 @@ dependencies {
 
 ### 2) application.yaml 설정
 
-<aside>
-💡
-
-slow-query 에 대한 threshold 값을 monitoring.slow-query 을 바라보게끔 하였다.
-
-이유인 즉슨 필자는 hibernate slow query 와 동일하게 관리되게끔 하고자
-
-별도의 monitoring.slow-query 파일로 빼두었기 때문이다.
-
-**만약 그게 아니라면 그냥 100 와 같이 본인이 원하는 threshold 로 설정해주자.**
-
-</aside>
+> 💡
+> 
+> slow-query 에 대한 threshold 값을 monitoring.slow-query 을 바라보게끔 하였다.
+> 
+> 이유인 즉슨 필자는 hibernate slow query 와 동일하게 관리되게끔 하고자
+> 
+> 별도의 monitoring.slow-query 파일로 빼두었기 때문이다.
+> 
+> **만약 그게 아니라면 그냥 100 와 같이 본인이 원하는 threshold 로 설정해주자.**
 
 ```yaml
 sentry:
@@ -421,18 +418,15 @@ sentry:
 
 ### **3) DataSource 설정**
 
-<aside>
-💡
-
-아래를 보다보면 엥 ? 굳이 p6spy 설정을 해줘야하는 이유가 뭐지 ? 싶을 것이다.
-
-하지만 [공식문서](https://docs.sentry.io/platforms/java/guides/spring/tracing/instrumentation/jdbc/)를 살펴보면 sentry-jdbc 에서 span 을 생성해내는 SentryJdbcEventListener 가 p6spy 인 것을 알 수 있다.
-
-Sentry JDBC integration provides the `SentryJdbcEventListener` for [P6Spy](https://github.com/p6spy/p6spy/) database activity interceptor, which creates a span for each JDBC statement executed over a proxied instance of `javax.sql.DataSource`.
-
-고로 아쉽게도 p6spy 는 sentry 를 통해 슬로우쿼리 감지를 위한 필연조건이다 
-
-</aside>
+> 💡
+> 
+> 아래를 보다보면 엥 ? 굳이 p6spy 설정을 해줘야하는 이유가 뭐지 ? 싶을 것이다.
+> 
+> 하지만 [공식문서](https://docs.sentry.io/platforms/java/guides/spring/tracing/instrumentation/jdbc/)를 살펴보면 sentry-jdbc 에서 span 을 생성해내는 SentryJdbcEventListener 가 p6spy 인 것을 알 수 있다.
+> 
+> Sentry JDBC integration provides the `SentryJdbcEventListener` for [P6Spy](https://github.com/p6spy/p6spy/) database activity interceptor, which creates a span for each JDBC statement executed over a proxied instance of `javax.sql.DataSource`.
+> 
+> 고로 아쉽게도 p6spy 는 sentry 를 통해 슬로우쿼리 감지를 위한 필연조건이다
 
 ```yaml
 spring:

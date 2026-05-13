@@ -1,8 +1,8 @@
 ---
 title: "Paging 처리 시, Sort 입력값에 대한 검증처리는 어떻게 할까?"
 description: ""
-date: 2024-01-30
-tags: [Java]
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

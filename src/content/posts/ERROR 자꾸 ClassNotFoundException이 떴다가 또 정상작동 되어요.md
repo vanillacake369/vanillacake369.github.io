@@ -1,8 +1,8 @@
 ---
 title: "ERROR : 자꾸 ClassNotFoundException이 떴다가 또 정상작동 되어요"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "초반 빌드 시, 아래와 같은 오류가 생기면, 실행 시에 잘 되었다가 오류가 생겼다가 할 수 있다!"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "NixOS VLAN 설정"
-description: ""
+description: "현대적인 홈랩 구성에서 **NixOS**는 시스템의 상태를 코드로 관리(Declarative)할 수 있는 최고의 플랫폼입니다."
 date: 2026-01-15
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

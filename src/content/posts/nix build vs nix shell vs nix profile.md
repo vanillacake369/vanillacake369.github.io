@@ -1,8 +1,8 @@
 ---
 title: "nix build vs nix shell vs nix profile"
-description: ""
+description: "vagrant 패키지 설치가 안 되는 것 같아 테스트용도로 받아보려고 했다."
 date: 2025-05-22
-tags: [Nix]
+tags: [nix]
 category: uncategorized
 lang: ko
 draft: false

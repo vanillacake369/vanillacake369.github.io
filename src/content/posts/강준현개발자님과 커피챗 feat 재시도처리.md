@@ -2,7 +2,7 @@
 title: "강준현개발자님과 커피챗 (feat. 재시도처리)"
 description: ""
 date: 2024-04-01
-tags: [Talk]
+tags: [talk]
 category: uncategorized
 lang: ko
 draft: false

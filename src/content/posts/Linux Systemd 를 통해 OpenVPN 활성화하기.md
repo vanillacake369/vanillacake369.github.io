@@ -1,8 +1,8 @@
 ---
 title: "Linux Systemd 를 통해 OpenVPN 활성화하기"
-description: ""
+description: "사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다."
 date: 2025-06-10
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

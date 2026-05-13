@@ -2,7 +2,7 @@
 title: "GithubActions CD & AWS CodeDeploy 시간 최적화하기"
 description: "GithubActions CD & AWS CodeDeploy 시간 최적화를 해보자!"
 date: 2024-03-17
-tags: [CI/CD, CodeDeploy, aws, githubactions]
+tags: [ci-cd, codedeploy, aws, githubactions]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "언제 EventListener 를 쓰고 언제 TransactionalEventListener 를 쓸까?"
-description: ""
+description: "스프링 애플리케이션에서 이벤트를 발행하고 처리할 때, 두 가지 타입의 어노테이션을 사용할 수 있다."
 date: 2025-05-21
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "NixOS 는 어떤 원리로 커널/패키지를 관리할까?"
-description: ""
+description: "NixOS 홈랩을 운영하다 보면 한 가지 질문이 점점 또렷해진다."
 date: 2026-05-08
-tags: [Nix]
+tags: [nix]
 category: uncategorized
 lang: ko
 draft: false

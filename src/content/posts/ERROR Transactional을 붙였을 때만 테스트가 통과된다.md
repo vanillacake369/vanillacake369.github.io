@@ -1,8 +1,8 @@
 ---
 title: "ERROR : Transactional을 붙였을 때만 테스트가 통과된다??"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "카페 키오스크 시스템에서의 아래와 같은 프로세스의 케이스가 있다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

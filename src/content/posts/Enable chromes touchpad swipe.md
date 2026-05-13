@@ -1,8 +1,8 @@
 ---
 title: "Enable chrome’s touchpad swipe"
-description: ""
+description: "터치패드를 통해 이전 페이지로 돌아가는 편이다."
 date: 2025-05-17
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

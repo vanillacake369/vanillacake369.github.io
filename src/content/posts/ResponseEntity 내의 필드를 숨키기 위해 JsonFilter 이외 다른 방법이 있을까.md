@@ -1,8 +1,8 @@
 ---
 title: "ResponseEntity 내의 필드를 숨키기 위해 JsonFilter 이외 다른 방법이 있을까??"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "ResponseEntity에서 필터를 통해 원하는 데이터는 노출시키고, 원치 않는 데이터는 노출시키지 않는 방법을 알고 싶었다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

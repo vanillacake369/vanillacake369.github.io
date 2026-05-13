@@ -1,8 +1,8 @@
 ---
 title: "원형 변경(Mutation). 지양해야 할까?? "
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://stackoverflow.com/questions/30665622/why-do-we-need-to-avoid-mutations-while-coding-what-is-a-mutation"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "Concurrency Control in SpringBoot, MongoDB"
-description: ""
+description: "https://www.mongodb.com/resources/products/compatibilities/spring-boot"
 date: 2024-05-28
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

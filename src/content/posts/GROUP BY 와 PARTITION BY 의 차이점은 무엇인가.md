@@ -1,8 +1,8 @@
 ---
 title: "GROUP BY 와 PARTITION BY 의 차이점은 무엇인가?"
-description: ""
+description: "1."
 date: 2024-05-25
-tags: [DB]
+tags: [database]
 category: uncategorized
 lang: ko
 draft: false

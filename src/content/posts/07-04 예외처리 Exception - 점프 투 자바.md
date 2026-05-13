@@ -1,8 +1,8 @@
 ---
 title: "07-04 예외처리 (Exception) - 점프 투 자바"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "프로그램을 만들다 보면 수없이 많은 오류가 발생한다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

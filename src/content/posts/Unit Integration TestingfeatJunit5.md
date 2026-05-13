@@ -1,8 +1,8 @@
 ---
 title: "Unit & Integration Testing(feat.Junit5)"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "기준없이 유닛 테스트와 통합 테스트를 짜던 시절을 버리고 싶다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

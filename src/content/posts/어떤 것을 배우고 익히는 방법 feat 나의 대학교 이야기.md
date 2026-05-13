@@ -1,8 +1,8 @@
 ---
 title: "어떤 것을 배우고 익히는 방법 (feat. 나의 대학교 이야기)"
-description: ""
+description: "무엇인가를 제대로 아는가?"
 date: 2022-04-02
-tags: [Talk]
+tags: [talk]
 category: uncategorized
 lang: ko
 draft: false

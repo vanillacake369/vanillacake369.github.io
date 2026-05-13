@@ -2,7 +2,7 @@
 title: "Value Object 와 DTO 는 다르다."
 description: "VO 와 DTO 를 혼용되어 사용되곤 하는데, 이는 엄연히 다르다. 무엇이 다른지 알아보자."
 date: 2024-03-12
-tags: [DTO, Java, ValueObject]
+tags: [dto, java, value-object]
 category: uncategorized
 lang: ko
 draft: false

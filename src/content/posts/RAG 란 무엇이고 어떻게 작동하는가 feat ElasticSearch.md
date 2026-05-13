@@ -1,8 +1,8 @@
 ---
 title: "RAG 란 무엇이고 어떻게 작동하는가 ? (feat. ElasticSearch)"
-description: ""
+description: "LangChain 과 ELK 기반 따라할 수 있는 예제"
 date: 2026-01-10
-tags: [AI, DB]
+tags: [ai, database]
 category: uncategorized
 lang: ko
 draft: false

@@ -2,7 +2,7 @@
 title: "BETWEEN vs IN ??"
 description: "아래와 같은 의문점을 해결해보고자 한다.\n\n- 언제 `BETWEEN` 을 쓰는 게 적합하고,\n- 언제 `IN` 을 쓰는 게 적합한지\n- 각각의 Operation Plan 이 무엇인지\n- 어떤 것이 더 성능이 좋은지"
 date: 2024-05-17
-tags: [DML, between, in, mysql, predicate]
+tags: [dml, between, in, mysql, predicate]
 category: uncategorized
 lang: ko
 draft: false

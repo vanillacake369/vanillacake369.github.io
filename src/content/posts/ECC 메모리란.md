@@ -1,8 +1,8 @@
 ---
 title: "ECC 메모리란?"
-description: ""
+description: "토발즈님이 자신의 개인 PC 를 조립하는 영상이 피드에 떴다."
 date: 2025-12-29
-tags: [Infra]
+tags: [infra]
 category: uncategorized
 lang: ko
 draft: false

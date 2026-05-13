@@ -1,8 +1,8 @@
 ---
 title: "NixOS K8S Master / Worker 노드 구축"
-description: ""
+description: "https://joshrosso.com/c/nix-k8s/ 에 잘 나와있어서 참고하면 좋을듯하다!"
 date: 2026-01-20
-tags: [Homelab, Nix]
+tags: [homelab, nix]
 category: uncategorized
 lang: ko
 draft: false

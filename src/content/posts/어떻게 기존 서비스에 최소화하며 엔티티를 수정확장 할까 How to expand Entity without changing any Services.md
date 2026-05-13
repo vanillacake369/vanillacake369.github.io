@@ -1,8 +1,8 @@
 ---
 title: "어떻게 기존 서비스에 최소화하며 엔티티를 수정/확장 할까?? How to expand Entity without changing any Services??"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "만약 아래와 같은 엔티티가 있을 때 어떻게 해야할까?"
+date: 2026-05-11
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

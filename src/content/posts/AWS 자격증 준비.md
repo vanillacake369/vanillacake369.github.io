@@ -1,8 +1,8 @@
 ---
 title: "AWS 자격증 준비"
-description: ""
+description: "CKA / LFCS 는 각 개념 별로 홈랩에 설치해가며 실습 :: k8s cluster, network, pv/pvc, rbac/security"
 date: 2026-03-22
-tags: [System Design]
+tags: [system-design]
 category: uncategorized
 lang: ko
 draft: false

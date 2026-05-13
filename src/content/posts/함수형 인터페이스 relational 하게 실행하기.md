@@ -1,8 +1,8 @@
 ---
 title: "함수형 인터페이스 :: relational 하게 실행하기"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "정책에 따라 함수형 프로그래밍(함수형 인터페이스)을 호출을 할 수 있게 할 수 있다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "2026 Seoul AI Builder Hackathon 회고"
-description: ""
+description: "Seoul AI Builder 해커톤 에 참여하며 느낌 점과 회고록에 대해 살펴본다."
 date: 2026-02-08
-tags: [Conference, Talk]
+tags: [conference, talk]
 category: uncategorized
 lang: ko
 draft: false

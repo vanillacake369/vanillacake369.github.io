@@ -1,8 +1,8 @@
 ---
 title: "Debezium 을 통한 CDC 처리"
-description: ""
+description: "데이터 변경에 따른 Pub/Sub 처리를 위해 CDC 처리를 Debezium 으로 구성되게끔"
 date: 2025-11-11
-tags: [System Design, Tools, OpenSource]
+tags: [system-design, tools, opensource]
 category: uncategorized
 lang: ko
 draft: false

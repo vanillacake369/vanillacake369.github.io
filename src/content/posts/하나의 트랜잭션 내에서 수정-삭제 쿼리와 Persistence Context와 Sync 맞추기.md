@@ -1,8 +1,8 @@
 ---
 title: "하나의 트랜잭션 내에서 수정-삭제 쿼리와 Persistence Context와 Sync 맞추기"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "수정/삭제 는 굉장히 민감한 Query이다."
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

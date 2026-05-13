@@ -1,8 +1,8 @@
 ---
 title: "KCD Seoul 2025"
-description: ""
+description: "https://ubuntu.com/blog/data-centre-networking-what-is-ovn"
 date: 2025-05-21
-tags: [Kubernetes, Conference]
+tags: [kubernetes, conference]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "About VLAN"
-description: ""
+description: "VLAN 을 설정해두면 노출된 특정 VM 이 공격당해도 다른 VM 들이 노출되지 않게한다."
 date: 2026-01-20
-tags: [Network]
+tags: [network]
 category: uncategorized
 lang: ko
 draft: false

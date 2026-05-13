@@ -1,8 +1,8 @@
 ---
 title: "Testing with k6"
-description: ""
+description: "중요한 로직에 대해 처리량 및 정상 수행 여부를 확인하려면 e2e 테스트 혹은 통합 테스트가 필요하다."
 date: 2025-05-07
-tags: [Tools]
+tags: [tools]
 category: uncategorized
 lang: ko
 draft: false

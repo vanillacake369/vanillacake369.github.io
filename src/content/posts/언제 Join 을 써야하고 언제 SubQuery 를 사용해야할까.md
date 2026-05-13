@@ -1,8 +1,8 @@
 ---
 title: "언제 Join 을 써야하고 언제 SubQuery 를 사용해야할까?"
-description: ""
+description: "A subquery is a query that is **nested inside another query**."
 date: 2024-05-20
-tags: [DB]
+tags: [database]
 category: uncategorized
 lang: ko
 draft: false

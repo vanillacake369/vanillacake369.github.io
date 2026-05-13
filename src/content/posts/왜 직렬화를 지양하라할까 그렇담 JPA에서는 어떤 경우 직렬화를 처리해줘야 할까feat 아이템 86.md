@@ -1,8 +1,8 @@
 ---
 title: "왜 직렬화를 지양하라할까? 그렇담 JPA에서는 어떤 경우 직렬화를 처리해줘야 할까?(feat. 아이템 86)"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "Object ↔ Byte Stream"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

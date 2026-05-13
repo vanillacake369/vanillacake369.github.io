@@ -1,8 +1,8 @@
 ---
 title: "구름 COMMIT "
-description: ""
+description: "최근 2년, 3년 동안 개발환경이 변경된 이야기"
 date: 2026-01-20
-tags: [Talk, Conference]
+tags: [talk, conference]
 category: uncategorized
 lang: ko
 draft: false

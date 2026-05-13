@@ -1,8 +1,8 @@
 ---
 title: "Go import with underscore(_)"
-description: ""
+description: "만약 우리가 아래와 같이 mysql 드라이버 blank import 를 뺀다면,"
 date: 2025-04-25
-tags: [Go]
+tags: [go]
 category: uncategorized
 lang: ko
 draft: false

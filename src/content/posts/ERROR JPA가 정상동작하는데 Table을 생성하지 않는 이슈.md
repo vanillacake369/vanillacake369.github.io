@@ -1,8 +1,8 @@
 ---
 title: "ERROR : JPA가 정상동작하는데 Table을 생성하지 않는 이슈"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "응….그냥 매핑을 해주는, 개발자를 위한 편의기능이라고 보면 된다!"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

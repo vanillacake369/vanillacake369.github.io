@@ -1,8 +1,8 @@
 ---
 title: "String → List<Integer>로 파싱하기"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "문자열을 Integer에 대한 List형태로 바꾸는 방법"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

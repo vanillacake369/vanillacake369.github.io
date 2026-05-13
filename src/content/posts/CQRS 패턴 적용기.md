@@ -1,8 +1,8 @@
 ---
 title: "CQRS 패턴 적용기"
-description: ""
+description: "우리 팀은 “단일장애지점 극복”이라는 대명목하에 CQRS 패턴을 적용하기로 했다."
 date: 2024-01-28
-tags: [Java]
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

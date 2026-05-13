@@ -1,8 +1,8 @@
 ---
 title: "Proxmox SSH 개선"
-description: ""
+description: "Proxmox는 설치 직후부터 기본적으로 root 계정의 SSH 접속을 허용하고 있다."
 date: 2025-12-29
-tags: [Homelab]
+tags: [homelab]
 category: uncategorized
 lang: ko
 draft: false

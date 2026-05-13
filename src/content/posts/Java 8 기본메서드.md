@@ -1,8 +1,8 @@
 ---
 title: "Java 8 기본메서드"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "Iterable의 기본 메소드"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

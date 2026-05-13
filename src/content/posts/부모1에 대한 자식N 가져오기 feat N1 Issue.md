@@ -2,7 +2,7 @@
 title: "부모(1)에 대한 자식(N) 가져오기 (feat. N+1 Issue)"
 description: "깃허브의 이슈와 그에 따른 여러 댓글 시스템을 떠올려보자.하나의 이슈(1) 에 대해서 여러 댓글(N)의 연관관계를 떠올릴 수 있을 것이다.이에 따라 댓글이 이슈를 참조하게끔 외래키를 잡게 할 수 있을 것이다.이렇게 설정한 ERD에 따라 아래와 같이 엔티티를 설정할 수 "
 date: 2024-02-12
-tags: [JPA, N+1 Issue]
+tags: [jpa, n+1-issue]
 category: uncategorized
 lang: ko
 draft: false

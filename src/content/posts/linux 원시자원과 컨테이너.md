@@ -2,7 +2,7 @@
 title: "linux 원시자원과 컨테이너"
 description: "컨테이너는 정확히 무엇으로 만들어져 있는가?"
 date: 2026-05-01
-tags: [k8s, infra]
+tags: [kubernetes, infra]
 category: dev
 lang: en
 draft: false

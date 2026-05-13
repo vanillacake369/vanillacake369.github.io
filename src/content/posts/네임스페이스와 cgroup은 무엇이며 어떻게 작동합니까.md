@@ -1,8 +1,8 @@
 ---
 title: "네임스페이스와 cgroup은 무엇이며 어떻게 작동합니까?"
-description: ""
+description: "뭐든지 일단 만들고자 하는 것을 만들려고 하고,"
 date: 2025-05-20
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

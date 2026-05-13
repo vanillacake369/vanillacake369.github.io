@@ -1,8 +1,8 @@
 ---
 title: "모든 엔티티에 대해 updatedTime, createdTime에 대한 공통 엔티티를 지정할 수 있다?"
-description: ""
-date: 2024-01-30
-tags: [Java]
+description: "https://velog.io/@vpdls1511/Spring에서-BaseEntity작성하기"
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

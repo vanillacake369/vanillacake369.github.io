@@ -1,8 +1,8 @@
 ---
 title: "Nix 및 Libvirt 기반 IaC 계약 지향적 설계기"
-description: ""
+description: "홈랩을 만드는 것은 재밌지만 복잡하다."
 date: 2026-05-08
-tags: [Homelab, Infra]
+tags: [homelab, infra]
 category: uncategorized
 lang: ko
 draft: false

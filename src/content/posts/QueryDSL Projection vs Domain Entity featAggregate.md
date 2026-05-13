@@ -1,8 +1,8 @@
 ---
 title: "QueryDSL Projection vs Domain Entity (feat.Aggregate)"
 description: ""
-date: 2024-01-30
-tags: [Java]
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

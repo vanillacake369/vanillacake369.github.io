@@ -1,8 +1,8 @@
 ---
 title: "도메인과 프로젝트 상황에 맞는 Architecture Layer 결정하기"
 description: ""
-date: 2024-01-30
-tags: [Java]
+date: 2026-02-25
+tags: [java]
 category: uncategorized
 lang: ko
 draft: false

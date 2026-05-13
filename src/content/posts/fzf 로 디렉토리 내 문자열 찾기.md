@@ -1,8 +1,8 @@
 ---
 title: "fzf 로 디렉토리 내 문자열 찾기"
-description: ""
+description: "현재 디렉토리 내에서 원하는 문자열을 포함하는 곳을 모두 찾고 싶을 때가 있다."
 date: 2025-06-04
-tags: [Linux]
+tags: [linux]
 category: uncategorized
 lang: ko
 draft: false

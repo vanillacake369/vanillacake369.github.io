@@ -1,8 +1,8 @@
 ---
 title: "로컬 Nvim 통해 SSH 접속 서버에서 코딩하기"
-description: ""
+description: "로컬 Nvim 설정을 그대로 원격 서버에서 쓰고 싶었다."
 date: 2026-01-11
-tags: [Linux, Tools, Neovim]
+tags: [linux, tools, neovim]
 category: uncategorized
 lang: ko
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: "DevSecOps ? SAST/DAST ?"
-description: ""
+description: "OWASP 서울에서 DevSecOps 에 대한 세미나가 있길래 팟캐스트처럼 보던 와중"
 date: 2025-12-28
-tags: [Conference]
+tags: [conference]
 category: uncategorized
 lang: ko
 draft: false

@@ -240,14 +240,11 @@ services:
 - 커널 메시지 버퍼 접근
 - 시스템 로그 및 이벤트 모니터링
 
-<aside>
-💡
-
-이외 플래그 값들에 대해서는 아래를 추가로 살펴보자
-
-https://github.com/google/cadvisor/blob/master/docs/runtime_options.md
-
-</aside>
+> 💡
+> 
+> 이외 플래그 값들에 대해서는 아래를 추가로 살펴보자
+> 
+> https://github.com/google/cadvisor/blob/master/docs/runtime_options.md
 
 ### 2) otel-receiver 레벨에서 필터링 처리
 
