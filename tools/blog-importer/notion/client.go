@@ -2,17 +2,14 @@ package notion
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/vanillacake369/blog-importer/converter"
 )
 
 const apiBase = "https://api.notion.com/v1"
@@ -21,11 +18,8 @@ const apiVersion = "2022-06-28"
 type Client struct {
 	token      string
 	httpClient *http.Client
-	// ImageDir is the local directory to download images into (e.g. "public/images/notion").
-	// If empty, images are kept as remote URLs.
-	ImageDir string
-	// ImageURLPrefix is the URL prefix for downloaded images (e.g. "/images/notion").
-	ImageURLPrefix string
+	// Images downloads remote images to a local directory. Nil = keep remote URLs.
+	Images *converter.ImageDownloader
 }
 
 func NewClient(token string) *Client {
@@ -33,51 +27,6 @@ func NewClient(token string) *Client {
 		token:      token,
 		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}
-}
-
-// downloadImage downloads a remote image to ImageDir and returns the local path.
-// Returns the original URL if ImageDir is not set or download fails.
-func (c *Client) downloadImage(remoteURL string) string {
-	if c.ImageDir == "" {
-		return remoteURL
-	}
-
-	// Derive a stable filename from URL hash + original extension
-	hash := sha256.Sum256([]byte(remoteURL))
-	shortHash := hex.EncodeToString(hash[:8])
-	ext := path.Ext(strings.SplitN(remoteURL, "?", 2)[0]) // strip query params
-	if ext == "" || len(ext) > 6 {
-		ext = ".png"
-	}
-	filename := shortHash + ext
-
-	outPath := filepath.Join(c.ImageDir, filename)
-
-	// Skip if already downloaded
-	if _, err := os.Stat(outPath); err == nil {
-		return c.ImageURLPrefix + "/" + filename
-	}
-
-	if err := os.MkdirAll(c.ImageDir, 0o755); err != nil {
-		return remoteURL
-	}
-
-	resp, err := c.httpClient.Get(remoteURL)
-	if err != nil || resp.StatusCode != 200 {
-		return remoteURL
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return remoteURL
-	}
-
-	if err := os.WriteFile(outPath, data, 0o644); err != nil {
-		return remoteURL
-	}
-
-	return c.ImageURLPrefix + "/" + filename
 }
 
 // Post represents a blog post fetched from Notion
@@ -444,8 +393,7 @@ func blocksToMarkdown(blocks []json.RawMessage, client *Client) string {
 					caption = renderRichText(block.Image.Caption)
 				}
 				if imgURL != "" {
-					// Download image locally if ImageDir is configured
-					localURL := client.downloadImage(imgURL)
+					localURL := client.Images.Download(imgURL)
 					sb.WriteString(fmt.Sprintf("![%s](%s)\n", caption, localURL))
 				}
 			}

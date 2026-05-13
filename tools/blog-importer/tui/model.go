@@ -438,7 +438,7 @@ func (m Model) importPosts() tea.Cmd {
 					errors = append(errors, fmt.Sprintf("[velog] %s: %v", p.title, err))
 					continue
 				}
-				pd.Body = body
+				pd.Body = newVelogImageDownloader().ReplaceMarkdownImages(body)
 				pd.Description = p.velogPost.Description
 				pd.Source = "velog"
 			}
@@ -475,9 +475,18 @@ func resolveVelogUsername(client *velog.Client) string {
 func newNotionClient() *notion.Client {
 	token := getEnv("notion_access_token", "NOTION_ACCESS_TOKEN")
 	client := notion.NewClient(token)
-	client.ImageDir = filepath.Join("..", "..", "public", "images", "notion")
-	client.ImageURLPrefix = "/images/notion"
+	client.Images = &converter.ImageDownloader{
+		OutDir:    filepath.Join("..", "..", "public", "images", "notion"),
+		URLPrefix: "/images/notion",
+	}
 	return client
+}
+
+func newVelogImageDownloader() *converter.ImageDownloader {
+	return &converter.ImageDownloader{
+		OutDir:    filepath.Join("..", "..", "public", "images", "velog"),
+		URLPrefix: "/images/velog",
+	}
 }
 
 func getEnv(keys ...string) string {
