@@ -2,13 +2,6 @@
 
 export type VimMode = 'normal' | 'search' | 'fuzzy' | 'whichkey';
 
-export interface KeyBinding {
-  key: string;
-  description: string;
-  group?: string;
-  action: () => void;
-}
-
 export interface SearchMatch {
   node: Text;
   highlight: HTMLElement;

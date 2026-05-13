@@ -38,12 +38,16 @@ async function getFiles(dir) {
 }
 
 function extractFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return null;
   const fm = {};
-  for (const line of match[1].split('\n')) {
-    const [key, ...rest] = line.split(':');
-    if (key && rest.length) fm[key.trim()] = rest.join(':').trim();
+  for (const line of match[1].split(/\r?\n/)) {
+    // Split only on the first colon to preserve values containing colons (dates, URLs)
+    const colonIdx = line.indexOf(':');
+    if (colonIdx < 0) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const value = line.slice(colonIdx + 1).trim();
+    if (key && value) fm[key] = value;
   }
   return fm;
 }

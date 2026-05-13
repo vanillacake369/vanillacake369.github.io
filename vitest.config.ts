@@ -7,15 +7,14 @@ export default defineConfig({
     include: ['src/__tests__/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/domain/**', 'src/usecases/**', 'src/infrastructure/**'],
+      include: ['src/domain/**', 'src/vim/**'],
     },
   },
   resolve: {
     alias: {
       '@': '/src',
       '@domain': '/src/domain',
-      '@usecases': '/src/usecases',
-      '@infra': '/src/infrastructure',
+      '@vim': '/src/vim',
       '@components': '/src/components',
       '@layouts': '/src/layouts',
     },

@@ -7,8 +7,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@domain/*": ["src/domain/*"],
-      "@usecases/*": ["src/usecases/*"],
-      "@infra/*": ["src/infrastructure/*"],
+      "@vim/*": ["src/vim/*"],
       "@components/*": ["src/components/*"],
       "@layouts/*": ["src/layouts/*"]
     }

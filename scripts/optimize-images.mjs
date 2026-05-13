@@ -94,14 +94,18 @@ async function main() {
 
   for (const imagePath of images) {
     try {
-      const before = await stat(imagePath).catch(() => null);
-      await processImage(imagePath);
-      const after = await stat(imagePath.replace(/\.(png|jpg|jpeg|gif)$/i, '.webp')).catch(() => null);
+      const image = sharp(imagePath);
+      const metadata = await image.metadata();
+      const { width, format } = metadata;
+      const needsResize = width && width > MAX_WIDTH;
+      const needsConvert = format !== 'webp';
 
-      if (before && after && after.size < before.size) {
-        processed++;
-      } else {
+      if (!needsResize && !needsConvert) {
         skipped++;
+        console.log(`[skip]    ${imagePath} (${width}px, already webp)`);
+      } else {
+        await processImage(imagePath);
+        processed++;
       }
     } catch (err) {
       console.error(`[error]   ${imagePath}: ${err.message}`);
