@@ -5,7 +5,7 @@ date: 2025-11-11
 tags: [system-design, tools, opensource]
 category: uncategorized
 lang: ko
-draft: false
+draft: true
 ---
 
 # Why? 왜 배움?
