@@ -13,17 +13,15 @@ export async function getStaticPaths() {
 
   return tags.map((tag) => ({
     params: { tag: tag.slug },
-    props: { tagName: tag.name, tagSlug: tag.slug },
+    props: {
+      tagName: tag.name,
+      tagSlug: tag.slug,
+      taggedPosts: sortPostsByDate(filterByTag(publishedPosts, tag.name)),
+    },
   }));
 }
 
-const { tagName, tagSlug } = Astro.props;
-
-const rawEntries = await getCollection('posts');
-
-const posts = rawEntries.map(entryToPost);
-
-const taggedPosts = sortPostsByDate(filterByTag(filterPublished(posts), tagName));
+const { tagName, tagSlug, taggedPosts } = Astro.props;
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString('en-CA'); // YYYY-MM-DD

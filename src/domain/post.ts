@@ -32,7 +32,7 @@ export function entryToPost(entry: {
 }): Post {
   return {
     slug: entry.id,
-    title: entry.data.title || titleFromId(entry.id),
+    title: entry.data.title ?? titleFromId(entry.id),
     description: entry.data.description ?? '',
     date: entry.data.date,
     updatedDate: entry.data.updatedDate,
@@ -76,10 +76,18 @@ export function extractTags(posts: Post[]): TagInfo[] {
     .sort((a, b) => b.count - a.count);
 }
 
+/** Format a Date as YYYY-MM-DD in the local timezone (avoids UTC date shift for KST) */
+export function toLocalDateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function groupByCalendarDay(posts: Post[]): CalendarDay[] {
   const dayMap = new Map<string, CalendarDay>();
   for (const post of posts) {
-    const dateStr = post.date.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(post.date);
     const existing = dayMap.get(dateStr);
     if (existing) {
       existing.count++;

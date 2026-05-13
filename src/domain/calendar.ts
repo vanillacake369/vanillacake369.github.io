@@ -1,5 +1,5 @@
 import type { Post, CalendarDay } from './types';
-import { groupByCalendarDay } from './post';
+import { groupByCalendarDay, toLocalDateString } from './post';
 
 export interface CalendarCell {
   date: string; // YYYY-MM-DD
@@ -30,8 +30,9 @@ export function countToLevel(count: number): 0 | 1 | 2 | 3 | 4 {
 export function generateCalendarGrid(
   posts: Post[],
   months: number,
+  referenceDate?: Date,
 ): CalendarWeek[] {
-  const today = new Date();
+  const today = referenceDate ? new Date(referenceDate) : new Date();
   today.setHours(0, 0, 0, 0);
 
   // Compute the start date: first day of the month `months` months ago
@@ -62,7 +63,7 @@ export function generateCalendarGrid(
       if (cellDate < startDate || cellDate > today) {
         cells.push(null);
       } else {
-        const dateStr = cellDate.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(cellDate);
         const day = dayMap.get(dateStr);
         const count = day?.count ?? 0;
         cells.push({

@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
         url: `/posts/${post.slug}/`,
         tags: post.tags,
         date: post.date.toISOString(),
-        excerpt: p.body ?? '',
+        excerpt: post.description || (p.body ?? '').replace(/^---[\s\S]*?---\s*/, '').slice(0, 200),
       };
     });
 

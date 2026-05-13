@@ -11,10 +11,14 @@ export async function GET(context: APIContext) {
         filterPublished(rawEntries.map(entryToPost)),
     );
 
+    if (!context.site) {
+        throw new Error('site must be configured in astro.config.mjs for RSS feed generation');
+    }
+
     return rss({
         title: SITE_CONFIG.title,
         description: SITE_CONFIG.description,
-        site: context.site!,
+        site: context.site,
         items: posts.map((post) => ({
             title: post.title,
             description: post.description,
