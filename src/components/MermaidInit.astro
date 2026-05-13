@@ -11,11 +11,13 @@
     run: (opts: { nodes: Element[] }) => Promise<void>;
   };
 
+  const MERMAID_RE = /^(flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|mindmap|timeline|quadrantChart|graph\s)/;
+
   function isMermaidCode(pre: Element): boolean {
     const code = pre.querySelector('code');
     if (!code) return false;
     const text = code.textContent?.trim() ?? '';
-    return /^(flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|graph\s)/.test(text);
+    return MERMAID_RE.test(text);
   }
 
   function renderMermaid(mermaid: MermaidAPI): void {

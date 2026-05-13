@@ -2,6 +2,8 @@
 // Keybindings: Ctrl+K (leader), Ctrl+P (fuzzy), / (page search), g (nav prefix)
 
 import type { VimMode, WhichKeyGroup } from './types';
+import type { Theme } from '../domain/theme';
+import { toggleTheme as domainToggleTheme } from '../domain/theme';
 import * as vimSearch from './vim-search';
 import * as fuzzyFinder from './fuzzy-finder';
 import * as whichKey from './which-key';
@@ -85,10 +87,10 @@ function startPrefixTimeout(): void {
   }, PREFIX_TIMEOUT_MS);
 }
 
-function toggleTheme(): void {
+function applyThemeToggle(): void {
   const html = document.documentElement;
-  const current = html.getAttribute('data-theme') as 'light' | 'dark';
-  const next = current === 'light' ? 'dark' : 'light';
+  const current = (html.getAttribute('data-theme') ?? 'light') as Theme;
+  const next = domainToggleTheme(current);
   html.setAttribute('data-theme', next);
   localStorage.setItem('theme', next);
 }
@@ -263,7 +265,7 @@ function handleKeydown(e: KeyboardEvent): void {
           e.preventDefault();
           break;
         case 't':
-          toggleTheme();
+          applyThemeToggle();
           e.preventDefault();
           break;
       }
@@ -320,9 +322,14 @@ function handleKeydown(e: KeyboardEvent): void {
 
 export function init(): void {
   document.addEventListener('keydown', handleKeydown);
-  // Invalidate heading cache when DOM changes (e.g. View Transitions, SPA nav)
-  new MutationObserver(invalidateHeadingCache)
-    .observe(document.body, { childList: true, subtree: true });
+  // Invalidate heading cache on structural changes to <main> only (not Giscus, search marks, etc.)
+  const main = document.querySelector('main');
+  if (main) {
+    new MutationObserver(invalidateHeadingCache)
+      .observe(main, { childList: true, subtree: false });
+  }
+  // Also invalidate on Astro View Transitions navigation
+  document.addEventListener('astro:after-swap', invalidateHeadingCache);
   // Allow vim-search to activate search mode (e.g. ?highlight= from fuzzy finder)
   document.addEventListener('vim:search-activated', () => { mode = 'search'; });
   showOnboarding();

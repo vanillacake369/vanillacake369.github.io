@@ -53,13 +53,16 @@
 </style>
 
 <script>
+  import { toggleTheme } from '../domain/theme';
+  import type { Theme } from '../domain/theme';
+
   const button = document.getElementById('theme-toggle');
 
   if (button) {
     button.addEventListener('click', () => {
       const html = document.documentElement;
-      const current = html.getAttribute('data-theme') as 'light' | 'dark';
-      const next = current === 'light' ? 'dark' : 'light';
+      const current = (html.getAttribute('data-theme') ?? 'light') as Theme;
+      const next = toggleTheme(current);
       html.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
     });

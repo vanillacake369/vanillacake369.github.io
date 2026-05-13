@@ -9,9 +9,18 @@
 </section>
 
 <script>
+  // Track the theme observer so we can disconnect on re-init
+  let themeObserver: MutationObserver | null = null;
+
   function loadGiscus(): void {
     const container = document.querySelector('.giscus');
     if (!container) return;
+
+    // Disconnect previous observer to prevent accumulation on navigation
+    if (themeObserver) {
+      themeObserver.disconnect();
+      themeObserver = null;
+    }
 
     // Clear previous instance to prevent duplicates during navigation
     container.innerHTML = '';
@@ -40,7 +49,7 @@
     container.appendChild(script);
 
     // Sync theme changes in real-time
-    const observer = new MutationObserver(() => {
+    themeObserver = new MutationObserver(() => {
       const newTheme = document.documentElement.getAttribute('data-theme') === 'dark'
         ? 'transparent_dark'
         : 'light';
@@ -59,7 +68,7 @@
         );
       }
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   }
 
   // Initial load

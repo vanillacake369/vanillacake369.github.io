@@ -55,11 +55,13 @@
 </style>
 
 <script>
+  const MERMAID_RE = /^(flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|mindmap|timeline|quadrantChart|graph\s)/;
+
   function isMermaidPre(pre: Element): boolean {
     const code = pre.querySelector('code');
     if (!code) return false;
     const text = code.textContent?.trim() ?? '';
-    return /^(flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|graph\s)/.test(text);
+    return MERMAID_RE.test(text);
   }
 
   function addCopyButton(pre: HTMLElement): void {
