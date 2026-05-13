@@ -6,4 +6,7 @@ export const SITE_CONFIG = {
     github: "https://github.com/vanillacake369",
     linkedin: "https://www.linkedin.com/in/vanillacake369/",
     site: "https://vanillacake369.github.io",
+    analytics: {
+        cloudflareBeaconUrl: "https://static.cloudflareinsights.com/beacon.min.js",
+    },
 } as const;

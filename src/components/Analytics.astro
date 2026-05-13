@@ -1,6 +1,6 @@
 ---
-// Cloudflare Web Analytics beacon
-// 이 토큰은 공개되어도 안전한 클라이언트 사이드 식별자입니다.
+import { SITE_CONFIG } from '../config';
+
 const token = import.meta.env.PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN;
 const isProd = import.meta.env.PROD;
 ---
@@ -8,7 +8,7 @@ const isProd = import.meta.env.PROD;
 {isProd && token && (
   <script
     defer
-    src="https://static.cloudflareinsights.com/beacon.min.js"
+    src={SITE_CONFIG.analytics.cloudflareBeaconUrl}
     data-cf-beacon={`{"token": "${token}"}`}
   />
 )}
