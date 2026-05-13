@@ -46,8 +46,6 @@ The source tree follows a clean, layered architecture:
 ```
 src/
 ├── domain/          # Pure domain models (Post, Theme, Calendar, types)
-├── usecases/        # Application logic (empty — ready for expansion)
-├── infrastructure/  # External adapters (analytics, comments, search)
 ├── components/      # Astro UI components
 ├── layouts/         # Page layout wrappers
 ├── pages/           # File-based routes (Astro pages)
@@ -69,7 +67,7 @@ src/
 └── content.config.ts # Zod collection schemas
 ```
 
-Data flows strictly downward: `domain` has no imports from other layers; `usecases` may import `domain`; `components` and `pages` sit at the top and compose everything.
+Data flows strictly downward: `domain` has no imports from other layers; `components` and `pages` sit at the top and compose everything.
 
 ---
 
@@ -241,6 +239,41 @@ A second workflow at `.github/workflows/deploy-gh-pages.yml` deploys to GitHub P
 npm run build
 # Upload the ./dist directory to any static host.
 ```
+
+---
+
+## Blog Importer (Notion + Velog)
+
+A Go TUI tool to migrate posts from Notion and Velog into this blog.
+
+```bash
+cd tools/blog-importer
+go run .
+```
+
+### Setup
+
+Create a `.env` file at the project root with your credentials:
+
+```env
+notion_access_token = ntn_your_token_here
+velog_cookie = access_token=your_jwt_here
+```
+
+- **Notion**: The target database must be shared with your integration (Connections → Add)
+- **Velog**: Public API works without auth; cookie enables private post access
+
+### Features
+
+- TUI with multi-select (space to toggle, `a` for all, enter to import)
+- Notion → Markdown conversion (headings, code, tables, images, toggles, **sub-pages**)
+- Images auto-downloaded to `public/images/notion/` (self-hosted, no external dependencies)
+- Velog posts imported as-is (already Markdown)
+- Astro-compatible frontmatter auto-generated
+
+### Output
+
+Imported posts are saved to `src/content/posts/` with proper frontmatter. Images land in `public/images/notion/`.
 
 ---
 

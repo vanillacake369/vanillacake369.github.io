@@ -29,3 +29,6 @@ pnpm-debug.log*
 # test artifacts
 screenshots/
 .playwright-mcp/
+
+# blog-importer binary
+tools/blog-importer/blog-importer

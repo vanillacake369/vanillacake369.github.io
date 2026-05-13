@@ -366,15 +366,7 @@ func (m Model) loadPosts() tea.Cmd {
 		if loadVelog {
 			accessToken := extractVelogAccessToken()
 			client := velog.NewClient(accessToken)
-
-			// Try authenticated currentUser, then fall back to env/default username
-			username, _ := client.CurrentUser()
-			if username == "" {
-				username = getEnv("velog_username", "VELOG_USERNAME")
-			}
-			if username == "" {
-				username = "vanillacake369" // default from project config
-			}
+			username := resolveVelogUsername(client)
 
 			velogPosts, err := client.ListPosts(username)
 			if err != nil {
@@ -440,11 +432,7 @@ func (m Model) importPosts() tea.Cmd {
 				accessToken := extractVelogAccessToken()
 				client := velog.NewClient(accessToken)
 
-				username, _ := client.CurrentUser()
-				if username == "" {
-					username = getEnv("velog_username", "VELOG_USERNAME")
-				}
-
+				username := resolveVelogUsername(client)
 				body, err := client.FetchPostBody(username, p.velogPost.URLSlug)
 				if err != nil {
 					errors = append(errors, fmt.Sprintf("[velog] %s: %v", p.title, err))
@@ -472,6 +460,17 @@ func (m Model) importPosts() tea.Cmd {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+
+func resolveVelogUsername(client *velog.Client) string {
+	username, _ := client.CurrentUser()
+	if username == "" {
+		username = getEnv("velog_username", "VELOG_USERNAME")
+	}
+	if username == "" {
+		username = "vanillacake369"
+	}
+	return username
+}
 
 func newNotionClient() *notion.Client {
 	token := getEnv("notion_access_token", "NOTION_ACCESS_TOKEN")
