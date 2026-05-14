@@ -24,18 +24,18 @@ A technical blog built with Astro, featuring Vim-style keyboard navigation, full
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | [Astro](https://astro.build) v6.3.1 |
-| Language | TypeScript (strict) |
-| Testing | Vitest v4 + happy-dom |
-| Search | Pagefind v1.5 |
-| Math | remark-math + rehype-katex |
-| Markdown | remark-gfm, remark-footnotes, @astrojs/mdx |
-| Fonts | Pretendard, JetBrains Mono |
-| Comments | utterances |
-| Deployment | Cloudflare Pages / GitHub Pages |
-| Node | >= 22.12.0 |
+| Layer      | Technology                                 |
+| ---------- | ------------------------------------------ |
+| Framework  | [Astro](https://astro.build) v6.3.1        |
+| Language   | TypeScript (strict)                        |
+| Testing    | Vitest v4 + happy-dom                      |
+| Search     | Pagefind v1.5                              |
+| Math       | remark-math + rehype-katex                 |
+| Markdown   | remark-gfm, remark-footnotes, @astrojs/mdx |
+| Fonts      | Pretendard, JetBrains Mono                 |
+| Comments   | utterances                                 |
+| Deployment | Cloudflare Pages / GitHub Pages            |
+| Node       | >= 22.12.0                                 |
 
 ---
 
@@ -105,24 +105,24 @@ description: "A short description shown in listings and SEO meta."
 date: 2026-05-13
 tags: [astro, typescript]
 category: engineering
-lang: ko          # 'ko' or 'en'
-draft: false      # true hides the post from production
+lang: ko # 'ko' or 'en'
+draft: false # true hides the post from production
 ---
 ```
 
 Full frontmatter schema (defined in `src/content.config.ts`):
 
-| Field | Type | Required | Default |
-|---|---|---|---|
-| `title` | string | yes | — |
-| `description` | string | yes | — |
-| `date` | date | yes | — |
-| `updatedDate` | date | no | — |
-| `tags` | string[] | no | `[]` |
-| `category` | string | no | `"uncategorized"` |
-| `lang` | `"ko"` \| `"en"` | no | `"ko"` |
-| `draft` | boolean | no | `false` |
-| `heroImage` | string (path) | no | — |
+| Field         | Type             | Required | Default           |
+| ------------- | ---------------- | -------- | ----------------- |
+| `title`       | string           | yes      | —                 |
+| `description` | string           | yes      | —                 |
+| `date`        | date             | yes      | —                 |
+| `updatedDate` | date             | no       | —                 |
+| `tags`        | string[]         | no       | `[]`              |
+| `category`    | string           | no       | `"uncategorized"` |
+| `lang`        | `"ko"` \| `"en"` | no       | `"ko"`            |
+| `draft`       | boolean          | no       | `false`           |
+| `heroImage`   | string (path)    | no       | —                 |
 
 ### Obsidian workflow
 
@@ -140,36 +140,36 @@ Vim-style shortcuts are active on every page. Shortcuts are disabled when an inp
 
 ### Global
 
-| Key | Action |
-|---|---|
-| `/` | In-page search (Pagefind) |
-| `Ctrl+K` | Open fuzzy finder (files / posts) |
+| Key      | Action                                   |
+| -------- | ---------------------------------------- |
+| `/`      | In-page search (Pagefind)                |
+| `Ctrl+K` | Open fuzzy finder (files / posts)        |
 | `Ctrl+/` | Show / hide keyboard shortcut cheatsheet |
-| `G` | Jump to bottom of page |
+| `G`      | Jump to bottom of page                   |
 
 ### `g` prefix (press `g`, then the second key within 2 s)
 
-| Sequence | Action |
-|---|---|
-| `g g` | Jump to top of page |
-| `g h` | Go to Home |
-| `g t` | Go to Tags |
-| `g a` | Go to About |
+| Sequence | Action              |
+| -------- | ------------------- |
+| `g g`    | Jump to top of page |
+| `g h`    | Go to Home          |
+| `g t`    | Go to Tags          |
+| `g a`    | Go to About         |
 
 ### Heading navigation
 
-| Key | Action |
-|---|---|
-| `}` | Jump to next heading |
+| Key | Action                   |
+| --- | ------------------------ |
+| `}` | Jump to next heading     |
 | `{` | Jump to previous heading |
 
 ### `Ctrl+K` leader sequences
 
-| Sequence | Action |
-|---|---|
+| Sequence          | Action                    |
+| ----------------- | ------------------------- |
 | `Ctrl+K` then `f` | Find files (fuzzy finder) |
-| `Ctrl+K` then `g` | Grep content |
-| `Ctrl+K` then `t` | Toggle dark/light theme |
+| `Ctrl+K` then `g` | Grep content              |
+| `Ctrl+K` then `t` | Toggle dark/light theme   |
 
 On the first visit, an onboarding cheatsheet is displayed automatically for 5 seconds.
 
@@ -183,13 +183,13 @@ This is the single source of truth for all site-wide metadata. Edit this file to
 
 ```ts
 export const SITE_CONFIG = {
-    title: "Tony's Blog",
-    description: "A blog about software engineering, systems, and ideas.",
-    author: "vanillacake369",
-    email: "lonelynight1026@gmail.com",
-    github: "https://github.com/vanillacake369",
-    linkedin: "https://www.linkedin.com/in/vanillacake369/",
-    site: "https://vanillacake369.github.io",
+  title: "Tony's Blog",
+  description: "A blog about software engineering, systems, and ideas.",
+  author: "vanillacake369",
+  email: "lonelynight1026@gmail.com",
+  github: "https://github.com/vanillacake369",
+  linkedin: "https://www.linkedin.com/in/vanillacake369/",
+  site: "https://vanillacake369.github.io",
 } as const;
 ```
 
@@ -209,17 +209,17 @@ utterances is pre-configured. To point it at your own repository, update the `re
 
 ## Available Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start Astro dev server at `localhost:4321` |
-| `npm run build` | Build for production and generate Pagefind index |
-| `npm run preview` | Serve the `dist/` folder locally |
-| `npm test` | Run unit tests (Vitest, single run) |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
-| `npm run lint:md` | Check Markdown files for issues |
-| `npm run lint:md:fix` | Auto-fix Markdown issues (e.g. image paths) |
-| `npm run optimize-images` | Compress and resize images in `assets/` |
+| Script                    | Description                                      |
+| ------------------------- | ------------------------------------------------ |
+| `npm run dev`             | Start Astro dev server at `localhost:4321`       |
+| `npm run build`           | Build for production and generate Pagefind index |
+| `npm run preview`         | Serve the `dist/` folder locally                 |
+| `npm test`                | Run unit tests (Vitest, single run)              |
+| `npm run test:watch`      | Run tests in watch mode                          |
+| `npm run test:coverage`   | Run tests with coverage report                   |
+| `npm run lint:md`         | Check Markdown files for issues                  |
+| `npm run lint:md:fix`     | Auto-fix Markdown issues (e.g. image paths)      |
+| `npm run optimize-images` | Compress and resize images in `assets/`          |
 
 ---
 

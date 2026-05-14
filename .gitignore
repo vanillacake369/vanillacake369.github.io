@@ -25,6 +25,7 @@ pnpm-debug.log*
 
 # editor settings
 .vscode/
+.obsidian/
 
 # test artifacts
 screenshots/
