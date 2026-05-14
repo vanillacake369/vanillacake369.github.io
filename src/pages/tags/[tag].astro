@@ -1,13 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { filterPublished, filterByTag, sortPostsByDate, extractTags, slugifyTag, entryToPost } from '../../domain/post';
+import PostListItem from '../../components/PostListItem.astro';
+import { filterPublished, filterByTag, sortPostsByDate, extractTags, entryToPost } from '../../domain/post';
 
 export async function getStaticPaths() {
   const rawEntries = await getCollection('posts');
-
   const posts = rawEntries.map(entryToPost);
-
   const publishedPosts = filterPublished(posts);
   const tags = extractTags(publishedPosts);
 
@@ -15,23 +14,18 @@ export async function getStaticPaths() {
     params: { tag: tag.slug },
     props: {
       tagName: tag.name,
-      tagSlug: tag.slug,
       taggedPosts: sortPostsByDate(filterByTag(publishedPosts, tag.name)),
     },
   }));
 }
 
-const { tagName, tagSlug, taggedPosts } = Astro.props;
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
-}
+const { tagName, taggedPosts } = Astro.props;
 ---
 
 <BaseLayout title={`#${tagName}`} description={`Posts tagged with ${tagName}.`}>
   <section class="post-list-section">
     <div class="page-header">
-      <a href="/tags" class="back-link">← Tags</a>
+      <a href="/tags" class="back-link">&larr; Tags</a>
       <h1 class="page-title">#{tagName}</h1>
       <p class="tag-post-count">{taggedPosts.length} {taggedPosts.length === 1 ? 'post' : 'posts'}</p>
     </div>
@@ -41,25 +35,7 @@ function formatDate(date: Date): string {
     ) : (
       <ul class="post-list">
         {taggedPosts.map((post) => (
-          <li class="post-item">
-            <div class="post-item-meta">
-              <time class="post-item-date" datetime={post.date.toISOString()}>
-                {formatDate(post.date)}
-              </time>
-              <span class="post-item-category">{post.category}</span>
-            </div>
-            <a href={`/posts/${post.slug}`} class="post-item-title">
-              {post.title}
-            </a>
-            <p class="post-item-description">{post.description}</p>
-            {post.tags.length > 0 && (
-              <div class="post-item-tags">
-                {post.tags.map((tag) => (
-                  <a href={`/tags/${slugifyTag(tag)}`} class="post-item-tag">#{tag}</a>
-                ))}
-              </div>
-            )}
-          </li>
+          <PostListItem post={post} />
         ))}
       </ul>
     )}
@@ -82,7 +58,6 @@ function formatDate(date: Date): string {
 
   .back-link:hover {
     color: var(--color-accent);
-    text-decoration: none;
   }
 
   .page-title {
@@ -108,76 +83,5 @@ function formatDate(date: Date): string {
     display: flex;
     flex-direction: column;
     gap: 0;
-  }
-
-  .post-item {
-    padding: var(--spacing-xl) 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .post-item:first-child {
-    padding-top: 0;
-  }
-
-  .post-item-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xs);
-  }
-
-  .post-item-date {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .post-item-category {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--color-accent);
-    font-weight: 600;
-  }
-
-  .post-item-title {
-    display: block;
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: var(--color-text);
-    text-decoration: none;
-    line-height: 1.4;
-    margin-bottom: var(--spacing-sm);
-    transition: color 0.15s ease;
-  }
-
-  .post-item-title:hover {
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-
-  .post-item-description {
-    font-size: 0.925rem;
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .post-item-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-  }
-
-  .post-item-tag {
-    font-size: 0.775rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  .post-item-tag:hover {
-    color: var(--color-accent);
-    text-decoration: none;
   }
 </style>
