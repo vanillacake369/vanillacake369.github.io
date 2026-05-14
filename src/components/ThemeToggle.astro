@@ -56,9 +56,10 @@
   import { toggleTheme } from '../domain/theme';
   import type { Theme } from '../domain/theme';
 
-  const button = document.getElementById('theme-toggle');
-
-  if (button) {
+  function bindThemeToggle(): void {
+    const button = document.getElementById('theme-toggle');
+    if (!button || button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
     button.addEventListener('click', () => {
       const html = document.documentElement;
       const current = (html.getAttribute('data-theme') ?? 'light') as Theme;
@@ -67,4 +68,7 @@
       localStorage.setItem('theme', next);
     });
   }
+
+  bindThemeToggle();
+  document.addEventListener('astro:after-swap', bindThemeToggle);
 </script>

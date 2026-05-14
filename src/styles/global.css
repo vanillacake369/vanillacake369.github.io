@@ -33,8 +33,8 @@ select {
   --color-surface-muted: #f0ede5;
   --color-text: #1f241f;
   --color-text-secondary: #596155;
-  --color-accent: #4d7c57;
-  --color-accent-soft: rgba(77, 124, 87, 0.12);
+  --color-accent: #00a86b;
+  --color-accent-soft: rgba(0, 168, 107, 0.12);
   --color-border: #d8d3c7;
   --color-border-strong: #b9b3a6;
   --color-code-bg: #efebe2;
@@ -47,7 +47,7 @@ select {
   --font-serif: 'Pretendard Variable', 'Pretendard', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --max-width: 70ch;
+  --max-width: 48rem;
 
   /* Vim UI */
   --vim-overlay-bg: rgba(0, 0, 0, 0.5);
@@ -62,18 +62,30 @@ select {
   --spacing-2xl: 3rem;
 }
 
-/* Base typography — fluid scaling */
+/* Base typography — fluid scaling
+ *
+ * Root font: 16px (375vw) → 18px (1440vw) via clamp().
+ * Uses rem so browser font-size preferences are respected (WCAG).
+ * Headings scale more aggressively than body (Discord-style).
+ * Spacing uses rem (tied to root) so it stays proportionally wider
+ * on small screens where text is smaller — improves scan-ability.
+ *
+ * References:
+ *   Material Design 3 — 16sp base, 18sp for OLED
+ *   LearnUI — 16-18px body for responsive, 18-24px for long-form
+ *   WCAG 2.2 — 4.5:1 contrast, 200% zoom, 45-75 char line length
+ */
 html {
-  font-size: 16px;
+  font-size: clamp(1rem, 0.188vw + 0.956rem, 1.125rem);
   scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--color-bg);
-  background-image: var(--body-gradient, linear-gradient(to bottom, rgba(77, 124, 87, 0.025), transparent 220px));
+  background-image: var(--body-gradient, linear-gradient(to bottom, rgba(0, 168, 107, 0.025), transparent 220px));
   color: var(--color-text);
   font-family: var(--font-sans);
-  line-height: 1.65;
+  line-height: 1.7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -239,25 +251,6 @@ sup:target,
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-}
-
-/* Responsive typography — mobile first, scale up */
-@media (min-width: 768px) {
-  html {
-    font-size: 17px;
-  }
-}
-
-@media (min-width: 1024px) {
-  html {
-    font-size: 17.5px;
-  }
-}
-
-@media (min-width: 1440px) {
-  html {
-    font-size: 18px;
   }
 }
 

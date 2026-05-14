@@ -1,29 +1,40 @@
 ---
 ---
 
+<!-- Critical theme CSS — loaded synchronously to prevent FOUC in dev mode -->
+<style is:inline>
+  :root {
+    --color-bg: #f6f4ee;
+    --color-text: #1f241f;
+    --color-accent: #00a86b;
+    --color-border: #d8d3c7;
+    --color-surface: #fbfaf6;
+    --color-text-secondary: #596155;
+    color-scheme: light;
+  }
+  [data-theme='dark'] {
+    --color-bg: #000000;
+    --color-text: #e0e0e0;
+    --color-accent: #00ff88;
+    --color-border: #222222;
+    --color-surface: #0a0a0a;
+    --color-text-secondary: #8c8c8c;
+    color-scheme: dark;
+  }
+  html { background-color: var(--color-bg); color: var(--color-text); }
+</style>
+
 <script is:inline>
   (function () {
-    var el = document.documentElement;
-
-    function applyTheme() {
-      var stored = localStorage.getItem('theme');
-      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
-      el.setAttribute('data-theme', theme);
-      el.style.colorScheme = theme;
-      // Inline critical styles to prevent FOUC in dev mode
-      // (dev server loads CSS async via module scripts)
-      el.style.backgroundColor = theme === 'dark' ? '#000' : '#f6f4ee';
-      el.style.color = theme === 'dark' ? '#e0e0e0' : '#1f241f';
-    }
-
-    applyTheme();
-    document.addEventListener('astro:after-swap', applyTheme);
-
-    // Remove inline overrides once stylesheets are loaded
-    window.addEventListener('load', function () {
-      el.style.removeProperty('background-color');
-      el.style.removeProperty('color');
-    });
+    var stored = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
   })();
+  document.addEventListener('astro:after-swap', function () {
+    var stored = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  });
 </script>
