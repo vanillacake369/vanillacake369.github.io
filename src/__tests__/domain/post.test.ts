@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
+  titleFromId,
+  slugify,
+  entryToPost,
+  excerptFromBody,
   sortPostsByDate,
   filterPublished,
   filterByLang,
@@ -22,6 +26,151 @@ function makePost(overrides: Partial<Post> = {}): Post {
     ...overrides,
   };
 }
+
+// ── titleFromId ──────────────────────────────────────────────────────────────
+
+describe('titleFromId', () => {
+  it('returns filename as-is (preserving spaces and case)', () => {
+    expect(titleFromId('NixOS 는 어떤 원리로 커널패키지를 관리할까'))
+      .toBe('NixOS 는 어떤 원리로 커널패키지를 관리할까');
+  });
+
+  it('strips .md extension', () => {
+    expect(titleFromId('Hello World.md')).toBe('Hello World');
+  });
+
+  it('strips .mdx extension', () => {
+    expect(titleFromId('Hello World.mdx')).toBe('Hello World');
+  });
+
+  it('trims whitespace', () => {
+    expect(titleFromId('  spaced  ')).toBe('spaced');
+  });
+});
+
+// ── slugify ──────────────────────────────────────────────────────────────────
+
+describe('slugify', () => {
+  it('lowercases and replaces spaces with hyphens', () => {
+    expect(slugify('Hello World')).toBe('hello-world');
+  });
+
+  it('handles Korean with spaces', () => {
+    expect(slugify('NixOS 는 어떤 원리로 커널패키지를 관리할까'))
+      .toBe('nixos-는-어떤-원리로-커널패키지를-관리할까');
+  });
+
+  it('preserves parentheses and dots', () => {
+    expect(slugify('NixOS k8s 클러스터 구축기 (feat.kubelet 설정 장애 해결)'))
+      .toBe('nixos-k8s-클러스터-구축기-(feat.kubelet-설정-장애-해결)');
+  });
+
+  it('strips .md extension', () => {
+    expect(slugify('test-post.md')).toBe('test-post');
+  });
+
+  it('collapses multiple hyphens', () => {
+    expect(slugify('a   b---c')).toBe('a-b-c');
+  });
+
+  it('removes leading/trailing hyphens', () => {
+    expect(slugify(' -hello- ')).toBe('hello');
+  });
+
+  it('removes special characters except allowed ones', () => {
+    expect(slugify('C++ & Rust!')).toBe('c-rust');
+  });
+});
+
+// ── entryToPost ──────────────────────────────────────────────────────────────
+
+describe('entryToPost', () => {
+  const baseEntry = {
+    id: 'NixOS 는 어떤 원리로 커널패키지를 관리할까',
+    data: {
+      date: new Date('2026-05-08'),
+      tags: ['nix'] as string[],
+    },
+  };
+
+  it('derives slug via slugify', () => {
+    const post = entryToPost(baseEntry);
+    expect(post.slug).toBe('nixos-는-어떤-원리로-커널패키지를-관리할까');
+  });
+
+  it('derives title from filename when no frontmatter title', () => {
+    const post = entryToPost(baseEntry);
+    expect(post.title).toBe('NixOS 는 어떤 원리로 커널패키지를 관리할까');
+  });
+
+  it('uses frontmatter title when provided', () => {
+    const post = entryToPost({
+      ...baseEntry,
+      data: { ...baseEntry.data, title: 'Custom Title' },
+    });
+    expect(post.title).toBe('Custom Title');
+  });
+
+  it('defaults description to empty string', () => {
+    const post = entryToPost(baseEntry);
+    expect(post.description).toBe('');
+  });
+
+  it('defaults lang to ko', () => {
+    const post = entryToPost(baseEntry);
+    expect(post.lang).toBe('ko');
+  });
+
+  it('defaults draft to false', () => {
+    const post = entryToPost(baseEntry);
+    expect(post.draft).toBe(false);
+  });
+});
+
+// ── excerptFromBody ──────────────────────────────────────────────────────────
+
+describe('excerptFromBody', () => {
+  it('strips frontmatter', () => {
+    const body = '---\ntitle: Test\n---\nHello world';
+    expect(excerptFromBody(body)).toBe('Hello world');
+  });
+
+  it('strips code blocks', () => {
+    const body = 'Before\n```js\nconsole.log("hi")\n```\nAfter';
+    expect(excerptFromBody(body)).toBe('Before After');
+  });
+
+  it('strips images', () => {
+    const body = 'Text ![alt](image.png) more';
+    expect(excerptFromBody(body)).toBe('Text  more');
+  });
+
+  it('converts links to text', () => {
+    const body = 'Check [this link](https://example.com) out';
+    expect(excerptFromBody(body)).toBe('Check this link out');
+  });
+
+  it('strips markdown syntax characters', () => {
+    const body = '## Heading\n**bold** and _italic_';
+    expect(excerptFromBody(body)).toBe('Heading bold and italic');
+  });
+
+  it('collapses newlines to spaces', () => {
+    const body = 'Line 1\n\nLine 2\nLine 3';
+    expect(excerptFromBody(body)).toBe('Line 1 Line 2 Line 3');
+  });
+
+  it('respects maxLength', () => {
+    const body = 'a'.repeat(500);
+    expect(excerptFromBody(body, 100)).toHaveLength(100);
+  });
+
+  it('returns empty for empty input', () => {
+    expect(excerptFromBody('')).toBe('');
+  });
+});
+
+// ── sortPostsByDate ──────────────────────────────────────────────────────────
 
 describe('sortPostsByDate', () => {
   it('sorts posts newest first', () => {

@@ -110,6 +110,22 @@ export function groupByCalendarDay(posts: Post[]): CalendarDay[] {
   return Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
+/**
+ * Extract a plain-text excerpt from raw markdown body.
+ * Strips frontmatter, code blocks, images, links, and syntax characters.
+ */
+export function excerptFromBody(body: string, maxLength = 300): string {
+  return body
+    .replace(/^---[\s\S]*?---\n*/m, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/!\[.*?\]\(.*?\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#*>`~_\-|]/g, '')
+    .replace(/\n+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
 export function slugifyTag(tag: string): string {
   return tag
     .toLowerCase()
