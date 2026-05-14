@@ -152,6 +152,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     const fuzzyStatus = fuzzyOverlay?.querySelector<HTMLElement>('.vim-fuzzy-status');
     if (fuzzyOverlay && fuzzyInput && fuzzyResults && fuzzyPreview && fuzzyStatus) {
       fuzzyFinder.init({ overlay: fuzzyOverlay, input: fuzzyInput, resultList: fuzzyResults, preview: fuzzyPreview, status: fuzzyStatus });
+      // Inject build-time page list (set by FuzzyFinder.astro's define:vars script)
+      const injected = (window as unknown as { __fuzzyPages?: { url: string; title: string }[] }).__fuzzyPages;
+      if (injected) fuzzyFinder.setPages(injected);
     }
 
     const whichKeyEl = document.getElementById('vim-whichkey');
