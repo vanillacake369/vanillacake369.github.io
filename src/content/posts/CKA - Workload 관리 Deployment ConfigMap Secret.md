@@ -1,5 +1,5 @@
 ---
-description: "Kubernetes 워크로드: Deployment, ConfigMap, Secret, 멀티컨테이너 패턴"
+description: "Deployment 롤아웃 전략, ConfigMap·Secret 주입 방법, 멀티컨테이너 패턴(Sidecar·Init·Ambassador)을 실전 예제와 함께 정리한다."
 date: 2025-12-25
 tags: [kubernetes, journal]
 lang: ko
@@ -7,171 +7,294 @@ draft: false
 series: { id: "Kubernetes CKA", order: 6 }
 ---
 
-## 2주차 : 섹션 4,5,6 Logging, Application Lifecycle, Cluster Maintenance
+# Why?
 
-# Why ?
+컨테이너를 하나 띄우는 것은 어렵지 않다.
+문제는 그 컨테이너를 **안정적으로 운영**하는 것이다.
 
-# What ?
+처음 Kubernetes를 배울 때는 `kubectl run` 으로 파드를 하나 띄우고 "됐다"고 생각했다.
+그런데 실제 서비스에서는 "파드가 죽으면 누가 다시 살리는가", "새 버전을 배포할 때 기존 트래픽은 어떻게 처리하는가", "비밀번호 같은 설정값은 이미지에 박아 넣어야 하는가"라는 질문이 곧바로 따라온다.
 
-## logging & monitoring
+Kubernetes는 이 세 가지 물음에 각각 **Deployment**, **ConfigMap**, **Secret**이라는 이름으로 답한다.[^1]
+이름 자체가 설계 의도를 담고 있다.
+Deployment는 "어떻게 배포할 것인가"를 선언하고, ConfigMap은 "설정을 코드에서 분리"하며, Secret은 "민감 정보를 별도 저장소에서 관리"한다.
+
+그런데 실제로 사용하다 보면 몇 가지 함정이 있다.
+Secret이 Base64로 인코딩되어 있다고 해서 암호화된 것이 아니라는 점, etcd에 평문으로 저장된다는 점, 볼륨 마운트와 환경변수 주입의 동작 차이 등이다.
+
+이 글은 CKA 2주차 실습을 기반으로, Deployment 롤아웃 전략부터 ConfigMap·Secret 주입 방법, 그리고 멀티컨테이너 패턴(Sidecar, Init, Ambassador)까지 순서대로 정리한다.
+
+## 📊 Logging & Monitoring
+
+Kubernetes에서 클러스터 상태를 파악하려면 먼저 메트릭 수집 체계를 이해해야 한다.
+각 노드에서 실행되는 **cAdvisor**가 컨테이너 자원 사용량을 수집하며, Metrics Server가 이를 API로 노출한다.[^2]
 
 ### node metric 확인
 
-cAdvisor 기반 각 환경 별로 모듈을 제공 중
-
-![](/images/notion/cda43220f172dd94.png)
+minikube 환경이라면 아래 명령으로 Metrics Server를 활성화한다.
 
 ```bash
 minikube addons enable metrics-server
 ```
 
+직접 배포하는 경우 공식 저장소의 매니페스트를 사용한다.
+
 ```bash
 git clone https://github.com/kubernetes-incubator/metrics-server.git
-kubectl create –f deploy/1.8+/
+kubectl create -f deploy/1.8+/
 ```
 
-이후 아래와 같이 pod, node 에 대한 CPU/MEM 에 대해서 확인 가능
+설치 후 아래와 같이 노드와 파드의 CPU·메모리를 확인할 수 있다.
 
 ```bash
+# 노드별 자원 사용량 확인
 controlplane ~ ➜  kubectl top node
-NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%
-kubemaster 166m 8% 1337Mi 70%
-kubenode1 36m 1% 1046Mi 55%
-kubenode2 39m 1% 1048Mi 55%
+NAME         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+kubemaster   166m         8%     1337Mi          70%
+kubenode1    36m          1%     1046Mi          55%
+kubenode2    39m          1%     1048Mi          55%
 ```
 
 ```bash
+# 파드별 자원 사용량 확인
 controlplane ~ ➜  kubectl top pod
-NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%
-nginx 166m 8% 1337Mi 70%
-redis 36m 1% 1046Mi 55%
+NAME    CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+nginx   166m         8%     1337Mi          70%
+redis   36m          1%     1046Mi          55%
 ```
 
 ### pod/container log 확인
 
-log 는 아래와 같이 호출하여 볼 수 있음
+로그는 파드 내 컨테이너 수에 따라 호출 방식이 달라진다.
 
-- 파드 내 단일 컨테이너 : kubectl 파드명
-- 파드 내 다수 컨테이너 : kubectl 파드명 원하는컨테이너명
+- 파드 내 단일 컨테이너: `kubectl logs <파드명>`
+- 파드 내 다수 컨테이너: `kubectl logs <파드명> <컨테이너명>`
 
 ```bash
+# 현재 실행 중인 파드 목록 조회
 $kubectl get pods
-NAME READY STATUS RESTARTS AGE
-webapp-1 1/1 Running 0 51s
-webapp-2 2/2 Running 0 51s
+NAME       READY   STATUS    RESTARTS   AGE
+webapp-1   1/1     Running   0          51s
+webapp-2   2/2     Running   0          51s
 
-# 파드 내 단일 컨테이너 로깅
+# 단일 컨테이너 파드 로그
 $kubectl logs webapp-1
-,,,,
+...
 
-# 파드 내 다수 컨테이너 로깅
-# kubectl describe 를 통해 컨테이너명 조회
+# 다수 컨테이너 파드: 먼저 컨테이너명 확인
 controlplane ~ ➜  kubectl describe pod webapp-2
 Containers:
   simple-webapp:
-	  ,,,
+    ...
   db:
-	  ,,,
+    ...
 
+# 특정 컨테이너 로그 조회
 controlplane ~ ➜  kubectl logs webapp-2 simple-webapp
 [2025-12-27 12:53:50,894] INFO in event-simulator: USER3 is viewing page2
-[2025-12-27 12:53:51,895] INFO in event-simulator: USER2 is viewing page3
-[2025-12-27 12:53:52,896] INFO in event-simulator: USER1 is viewing page3
-[2025-12-27 12:53:53,897] INFO in event-simulator: USER1 is viewing page1
-[2025-12-27 12:53:54,899] INFO in event-simulator: USER4 logged in
 [2025-12-27 12:53:55,900] WARNING in event-simulator: USER5 Failed to Login as the account is locked due to MANY FAILED ATTEMPTS.
 ```
 
-## Rollout and Versioning
+로그와 메트릭으로 현재 상태를 파악할 수 있게 되었다면, 다음 단계는 파드를 안정적으로 배포하고 교체하는 전략을 이해하는 것이다.
 
-### deployment
+## 🔄 Rollout and Versioning
 
-Deployment는 Pod와 ReplicaSet에 대한 선언적 업데이트를 제공하는 상위 수준의 Kubernetes 오브젝트입니다.
-**주요 기능:**
+Kubernetes에서 파드를 직접 교체하면 서비스 중단이 발생한다.
+이를 막기 위해 **Deployment**가 롤링 업데이트와 롤백 전략을 담당한다.
+
+### Deployment란?
+
+Deployment는 Pod와 ReplicaSet에 대한 선언적 업데이트를 제공하는 상위 수준의 Kubernetes 오브젝트다.[^3]
+
+주요 기능은 다음과 같다.
 
 - Pod의 생성 및 삭제 관리
 - 롤링 업데이트 및 롤백 지원
 - 스케일링 (확장/축소)
 - 일시 중지 및 재개
 
-**Deployment → ReplicaSet → Pod 관계:**
+Deployment, ReplicaSet, Pod의 포함 관계는 아래와 같다.
 
-```bash
-┌─────────────────────────────────────────────────────────┐
-│                      Deployment                         │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │                   ReplicaSet                      │  │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐           │  │
-│  │  │   Pod   │  │   Pod   │  │   Pod   │           │  │
-│  │  └─────────┘  └─────────┘  └─────────┘           │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    D["Deployment"] --> RS["ReplicaSet"]
+    RS --> P1["Pod"]
+    RS --> P2["Pod"]
+    RS --> P3["Pod"]
 ```
 
-### replicaset
+### ReplicaSet
 
-ReplicaSet은 지정된 수의 Pod 복제본이 항상 실행되도록 보장합니다.
-**주요 역할:**
+ReplicaSet은 지정된 수의 Pod 복제본이 항상 실행되도록 보장한다.
+
+주요 역할은 다음과 같다.
 
 - 원하는 수의 Pod 유지
 - Pod 장애 시 자동 복구
 - 수평적 스케일링 지원
 
-> ⚠️ 참고: 일반적으로 ReplicaSet을 직접 생성하지 않고, Deployment를 통해 관리합니다.
+> 일반적으로 ReplicaSet을 직접 생성하지 않고 Deployment를 통해 관리한다.
+> 우리는 ReplicaSet을 직접 건드리지 않는다.
+> 모든 제어는 Deployment를 통해 이루어지며, ReplicaSet은 **롤백(Rollback)을 위한 기록 저장소** 역할을 수행한다.
 
-### strategies
+### 배포 전략
 
-- Recreate
-- RollingUpdate
+Kubernetes Deployment가 지원하는 업데이트 전략은 두 가지다.
 
-### Rollout 명령어
+- **Recreate**: 기존 파드를 모두 종료한 후 새 파드를 생성한다. 서비스 중단이 발생하지만 구현이 단순하다.
+- **RollingUpdate**: 기존 파드를 하나씩 교체한다. 기본값이며 무중단 배포를 가능하게 한다.
 
-> 📖 TL;DR;
+### 히스토리 기록은 어디에 저장되는가?
 
-- Deployment 생성 및 관리
-- Rollout 상태 확인
-- Rollout 히스토리 조회
-- 이미지 업데이트
-- 전략 변경
-- Rollback (롤백)
-- Rollout 일시 중지 및 재개
+클러스터 내부의 **ReplicaSet**에 저장된다.
+사용되지 않는 과거의 ReplicaSet들이 사라지지 않고 남아서 각 버전의 `template` 정보를 가지고 있기 때문에 롤백이 가능한 것이다.
 
-## Commands / Args
+`kubectl apply -f deploy.yaml --record` 처럼 실행하면 실행한 명령어가 `CHANGE-CAUSE`에 기록된다.
+다만 Kubernetes v1.19 이후부터는 이 플래그가 _deprecated_(권장되지 않음) 되었다.
+이에 따라 `kubectl annotate` 로 직접 기록하거나, YAML 파일에 미리 적어두는 방식으로 변경되었다.
 
-## Env variables
+무한정 ReplicaSet이 남는 것을 방지하기 위해 `revisionHistoryLimit`으로 히스토리 개수를 제어할 수 있다.
 
-> 📖 방법이 기억이 안 난다면 강의에서 나온 것처럼 —help 를 통해 찾아보자
-> 📖 Q:
+```yaml
+spec:
+  revisionHistoryLimit: 5  # 최근 5개의 기록(ReplicaSet)만 남기고 나머지는 삭제
+  replicas: 3
+```
 
-### configmap 이란 ?
+### 롤아웃 명령어
 
-ConfigMap은 Kubernetes에서 **설정 데이터를 키-값 쌍으로 저장**하는 리소스입니다.
+실제 운영에서는 배포 후 상태를 확인하고 문제 발생 시 복구하는 워크플로우를 따른다.
 
-애플리케이션 코드와 설정을 분리하여 컨테이너 이미지를 재빌드하지 않고도 설정을 변경할 수 있습니다.
+```bash
+# 배포
+kubectl apply -f deploy.yaml
 
-### configmap 명령어
+# 실시간 배포 상황 감시
+kubectl rollout status deployment/my-app
 
-- configmap 조회
-- configmap 생성
-- pod 에서 생성된 configmap 사용
+# 롤아웃 히스토리 조회
+kubectl rollout history deployment/my-app
 
-## Secrets
+# 특정 리비전 상세 확인
+kubectl rollout history deployment/my-app --revision=2
 
-### Secrets 이란 ?
+# Pod 업데이트를 위한 재시작
+kubectl rollout restart deployment/my-app
 
-Secret은 Kubernetes에서 **민감한 데이터를 저장**하기 위한 리소스입니다.
+# 이전 버전으로 복구
+kubectl rollout undo deployment/my-app --to-revision=1
+```
 
-비밀번호, API 키, 인증서 등 보안이 필요한 정보를 저장합니다.
+### 복제본 수에 대한 설정값
 
-### **Secret vs ConfigMap**
+롤링 업데이트 중 파드 수를 제어하는 두 파라미터가 있다.[^4]
+
+- **maxSurge** ([surge: a sudden and great increase](https://dictionary.cambridge.org/dictionary/english/surge)): 원하는 파드 수 대비 초과 생성 가능한 파드 수
+- **maxUnavailable**: 업데이트 중 동시에 사용 불가능해질 수 있는 최대 파드 수
+
+기본값은 두 값 모두 **25%** 다.
+
+### 문제 1: 새로운 버전 배포 및 리비전 되돌리기
+
+**시나리오:** 현재 `web-ns` 네임스페이스에 `replicas: 5`인 `web-deploy`가 실행 중이다.
+
+요구 조건은 다음과 같다.
+
+1. **가용성 보장:** 업데이트 중에도 최소 5개의 파드는 항상 트래픽을 처리할 수 있는 상태(Ready)여야 한다.
+2. **리소스 제약:** 업데이트 중 동시에 실행되는 총 파드 수는 7개를 초과해서는 안 된다.
+3. **검증:** 배포 후 문제가 생겨 **리비전 1번**으로 되돌려야 한다.
+
+`maxSurge: 2`, `maxUnavailable: 0` 으로 설정하면 최대 7개를 초과하지 않으면서 가용 파드 5개를 항상 유지할 수 있다.
+
+```yaml
+# web-deploy.yaml 에서 strategy 섹션을 아래와 같이 수정한다
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 2
+    maxUnavailable: 0
+```
+
+```bash
+# 수정된 매니페스트 추출 및 편집
+k get deploy web-deploy -n web-ns -o yaml > web-deploy.yaml
+vim web-deploy.yaml
+
+# 적용
+k apply -f web-deploy.yaml
+
+# 배포 확인
+k describe deploy web-deploy -n web-ns
+k describe pod <pod-이름> | grep Image
+
+# 히스토리 확인 후 롤백
+k rollout history deployment/web-deploy
+k rollout undo deployment/web-deploy --to-revision=1
+```
+
+### 문제 2: 롤링 업데이트
+
+Create a deployment as follows:
+
+- Next, deploy the application with new version `1.11.13-alpine` by performing a rolling update.
+- Finally, rollback that update to the previous version `1.11.10-alpine`.
+
+```bash
+# Deployment 생성 (dry-run으로 매니페스트 먼저 확인)
+kubectl create deployment nginx-app \
+  --image=nginx:1.11.10-alpine --replicas=3 \
+  --dry-run=client -o yaml > deployment.yaml
+
+kubectl apply -f deployment.yaml
+
+# 롤링 업데이트 적용
+kubectl set image deployment nginx-app nginx=nginx:1.11.13-alpine --record
+kubectl rollout history deployment nginx-app
+
+# 이전 버전으로 롤백
+kubectl rollout undo deployment nginx-app
+kubectl rollout history deployment nginx-app
+```
+
+Deployment의 롤아웃 전략을 이해하면 "어떻게 배포할 것인가"에 답할 수 있다.
+다음으로는 "설정값을 코드에서 어떻게 분리할 것인가"에 답하는 ConfigMap과 Secret을 살펴본다.
+
+## ⚙️ ConfigMap & Secrets
+
+애플리케이션 설정을 이미지에 박아 넣으면, 환경이 바뀔 때마다 이미지를 다시 빌드해야 한다.
+Kubernetes는 이 문제를 ConfigMap과 Secret이라는 두 리소스로 해결한다.
+
+### ConfigMap이란?
+
+ConfigMap은 Kubernetes에서 **설정 데이터를 키-값 쌍으로 저장**하는 리소스다.
+애플리케이션 코드와 설정을 분리하여 컨테이너 이미지를 재빌드하지 않고도 설정을 변경할 수 있다.[^5]
+
+- **용도**: 데이터베이스 주소, 환경 설정(로그 레벨), 설정 파일(`nginx.conf`) 등
+- **특징**: 민감하지 않은 일반 텍스트 데이터를 저장한다
+
+### Pod에 ConfigMap 할당 방법
+
+1. 우선 ConfigMap을 생성한다.
+2. 이후 Pod에 매핑하여 주입한다.
+3. 볼륨으로 마운트된 경우라면, ConfigMap 내용 수정 시 Pod에 자동으로 업데이트된다.
+
+### Secrets이란?
+
+Secret은 Kubernetes에서 **민감한 데이터를 저장**하기 위한 리소스다.
+비밀번호, API 키, 인증서 등 보안이 필요한 정보를 저장한다.[^6]
+
+- **특징**: 데이터가 **Base64**로 인코딩되어 저장된다. (암호화가 아니므로 누구나 디코딩 가능함에 주의!)
+- **유형**: `Opaque`(일반), `kubernetes.io/dockerconfigjson`(도커 로그인 정보) 등
+
+### Secret vs ConfigMap
 
 | 구분            | ConfigMap                  | Secret                            |
 | --------------- | -------------------------- | --------------------------------- |
 | **용도**        | 일반 설정 데이터           | 민감한 데이터                     |
 | **예시**        | DB 호스트, 포트, 설정 파일 | 비밀번호, API 키, 인증서          |
 | **데이터 저장** | 평문 (Plain text)          | Base64 인코딩                     |
-| **암호화**      | ❌ 없음                    | ⚠️ 기본은 없음 (etcd 암호화 가능) |
-| **메모리 저장** | ❌ 디스크                  | ✅ tmpfs (메모리)                 |
+| **암호화**      | 없음                       | 기본은 없음 (etcd 암호화 가능)    |
+| **메모리 저장** | 디스크                     | tmpfs (메모리)                    |
 | **크기 제한**   | 1MB                        | 1MB                               |
 
 ### Secrets 타입
@@ -185,16 +308,14 @@ Secret은 Kubernetes에서 **민감한 데이터를 저장**하기 위한 리소
 
 ### Secrets & etcd 간의 관계
 
-**etcd란?**
-etcd는 Kubernetes의 **핵심 데이터 저장소**입니다.
-
-클러스터의 모든 상태 정보(Pod, Service, ConfigMap, Secret 등)가 여기에 저장됩니다.
+etcd는 Kubernetes의 **핵심 데이터 저장소**다.
+클러스터의 모든 상태 정보(Pod, Service, ConfigMap, Secret 등)가 여기에 저장된다.
 
 ```mermaid
 flowchart TB
     subgraph ControlPlane["Kubernetes Control Plane"]
         API["API Server"]
-        ETCD[("etcd<br/>(데이터 저장소)")]
+        ETCD[("etcd\n(데이터 저장소)")]
         CM["Controller Manager"]
 
         API <--> ETCD
@@ -211,15 +332,15 @@ flowchart TB
     ETCD --> Storage
 ```
 
-**Secret이 etcd에 저장되는 과정**
+Secret이 etcd에 저장되는 과정은 아래와 같다.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant User as 👤 User
+    participant User as 사용자
     participant API as API Server
     participant ETCD as etcd
-    participant Pod as 🐳 Pod
+    participant Pod as Pod
 
     User->>API: Secret 생성 (kubectl create secret)
     Note over API: 인증/인가 (RBAC 확인)
@@ -231,16 +352,16 @@ sequenceDiagram
     API-->>Pod: Secret 전달 (디코딩되어 주입)
 ```
 
-**⚠️ 문제점: 평문 저장**
-**etcd 내부 데이터 확인 (실제 예시)**
+**문제점: 평문 저장**
+
+etcd에 직접 접근하면 Secret이 그대로 노출된다.
 
 ```bash
-# etcd에서 Secret 직접 조회
+# etcd에서 Secret 직접 조회 (클러스터 관리자 권한 필요)
 ETCDCTL_API=3 etcdctl get /registry/secrets/default/db-secret \
   --cacert=/etc/kubernetes/pki/etcd/ca.crt \
   --cert=/etc/kubernetes/pki/etcd/server.crt \
   --key=/etc/kubernetes/pki/etcd/server.key
-
 ```
 
 ```
@@ -254,35 +375,124 @@ db-secretdefault"*$e]8db6-4f5a-9c3b2
 DB_PASSWORDp@ssw0rd        # ← 비밀번호가 그대로 보임!
 DB_USERadmin               # ← 사용자명도 노출!
 Opaque"
-
 ```
 
-### etcd 에 저장되는 secrets 탈취에 대한 솔루션
+### etcd에 저장되는 Secrets 탈취에 대한 솔루션
 
-1. etcd 암호화 (Encryption at Rest)
-2.
+1. **etcd 암호화 (Encryption at Rest)**: `EncryptionConfiguration`을 설정해 etcd 저장 데이터 자체를 암호화한다.
+2. **RBAC으로 접근 제한**: Secret에 접근할 수 있는 서비스 계정과 역할을 최소 권한으로 제한한다.
+3. **외부 Secret 관리 도구**: HashiCorp Vault, AWS Secrets Manager, External Secrets Operator 등을 사용한다.
 
-RBAC으로 접근 제한 3.
+### Pod에 Secrets 할당 방법
 
-외부 Secret 관리 도구
+1. Secret을 생성한다.
+2. 이후 Pod에 매핑하여 주입한다.
+3. 볼륨으로 마운트된 경우라면, 내용 수정 시 Pod에 자동으로 업데이트된다.
 
-### Secrets 명령어
+### 문제 1: ConfigMap 연결
 
-- 조회
-- 생성
-- Pod 에서 Secret 사용
+Create a ConfigMap named `app-config` in the namespace `cm-namespace` with the following key-value pairs:
 
-## Multi Container Pods
+```
+ENV=production
+LOG_LEVEL=info
+```
+
+Then, modify the existing Deployment named `cm-webapp` in the same namespace to use the `app-config` ConfigMap.
+
+```bash
+# 명령어로 ConfigMap 생성 (--from-literal 사용)
+kubectl create configmap app-config -n cm-namespace \
+  --from-literal=ENV=production \
+  --from-literal=LOG_LEVEL=info
+```
+
+```yaml
+# 또는 매니페스트로 선언 (app-config.yaml)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: cm-namespace
+data:
+  ENV: production
+  LOG_LEVEL: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cm-webapp
+  namespace: cm-namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: app-config  # ConfigMap의 모든 키를 환경변수로 주입
+```
+
+```bash
+kubectl apply -f app-config.yaml
+
+# 실행 중인 Deployment 즉시 수정
+kubectl edit deployment cm-webapp -n cm-namespace
+
+# 확인: Pod 내부 환경변수 검증
+POD_NAME=$(kubectl get pods -n cm-namespace -l app=nginx -o name | head -1)
+kubectl exec -n cm-namespace $POD_NAME -- sh -c 'echo $ENV'
+kubectl exec -n cm-namespace $POD_NAME -- sh -c 'echo $LOG_LEVEL'
+```
+
+### 문제 2: ConfigMap을 통해 TLS 활성화
+
+There is an existing deployment called `nginx-static` in the `nginx-static` namespace.
+The deployment contains a ConfigMap named `nginx-config` that supports TLSv1.3.
+Update the nginx-config ConfigMap to allow TLSv1.2 connections.
+
+```bash
+# ConfigMap 매니페스트 추출
+kubectl get configmap nginx-config -n nginx-static -o yaml > nginx-config.yaml
+
+# ssl_protocols TLSv1.3; → ssl_protocols TLSv1.2 TLSv1.3; 으로 변경
+vi nginx-config.yaml
+
+# 변경 사항 적용
+kubectl apply -f nginx-config.yaml
+
+# ConfigMap 변경 후 파드를 재시작해야 nginx가 새 설정을 읽는다
+kubectl rollout restart deployment nginx-static -n nginx-static
+
+# 롤아웃 완료 확인 후 TLS 연결 테스트
+kubectl rollout status deployment nginx-static -n nginx-static
+curl -k --tls-max 1.2 https://web.k8s.local:30007
+```
+
+ConfigMap과 Secret으로 설정을 파드 외부로 분리했다면, 이제 파드 내부 구조를 확장하는 멀티컨테이너 패턴을 살펴볼 차례다.
+
+## 🧩 Multi Container Pods
+
+단일 컨테이너로는 "메인 앱 실행 + 로그 수집 + 프록시" 같은 관심사를 분리하기 어렵다.
+Pod는 여러 컨테이너가 동일한 네트워크 네임스페이스와 볼륨을 공유하도록 설계되어, 이 문제를 우아하게 해결한다.
 
 ```mermaid
 flowchart TB
     subgraph Pod["Pod"]
         direction LR
-
         A["Container A"]
         B["Container B"]
         C["Container C"]
-
         A --- B
         B --- C
     end
@@ -291,11 +501,9 @@ flowchart TB
     Pod --- Vol["Shared Volume"]
 ```
 
-각각의 개념과 구성도 mermaid, 예제 yaml 파일을 정리해줘
-
 ### co-located containers
 
-메인 애플리케이션과 함께 **동시에 실행**되며 보조 기능을 수행하는 컨테이너입니다.
+메인 애플리케이션과 함께 **동시에 실행**되며 보조 기능을 수행하는 컨테이너다.
 
 | 패턴           | 설명                    | 예시                            |
 | -------------- | ----------------------- | ------------------------------- |
@@ -312,9 +520,7 @@ metadata:
     app: web-app
 spec:
   containers:
-    # ========================================
     # 1. Main Container - 웹 애플리케이션
-    # ========================================
     - name: web-app
       image: nginx:1.25
       ports:
@@ -332,15 +538,13 @@ spec:
           memory: "256Mi"
           cpu: "200m"
 
-    # ========================================
     # 2. Sidecar Container - 로그 수집기
-    # ========================================
     - name: log-collector
       image: fluent/fluent-bit:latest
       volumeMounts:
         - name: shared-logs
           mountPath: /var/log/nginx
-          readOnly: true
+          readOnly: true        # 메인 앱이 쓴 로그를 읽기 전용으로 수집
         - name: fluent-config
           mountPath: /fluent-bit/etc
       resources:
@@ -351,14 +555,12 @@ spec:
           memory: "128Mi"
           cpu: "100m"
 
-    # ========================================
     # 3. Ambassador Container - 프록시
-    # ========================================
     - name: proxy
       image: envoyproxy/envoy:v1.28-latest
       ports:
-        - containerPort: 9901 # Envoy admin
-        - containerPort: 10000 # Proxy port
+        - containerPort: 9901   # Envoy admin
+        - containerPort: 10000  # Proxy port
       resources:
         requests:
           memory: "64Mi"
@@ -367,9 +569,6 @@ spec:
           memory: "128Mi"
           cpu: "100m"
 
-  # ========================================
-  # Shared Volumes
-  # ========================================
   volumes:
     - name: shared-logs
       emptyDir: {}
@@ -382,9 +581,8 @@ spec:
 
 ### regular init containers
 
-메인 컨테이너 **실행 전에 순차적으로 실행**되는 컨테이너입니다.
-
-초기화 작업을 수행하고 완료되면 종료됩니다.
+메인 컨테이너 **실행 전에 순차적으로 실행**되는 컨테이너다.
+초기화 작업을 수행하고 완료되면 종료된다.[^7]
 
 | 특징          | 설명                                     |
 | ------------- | ---------------------------------------- |
@@ -401,9 +599,6 @@ metadata:
   labels:
     app: webapp
 spec:
-  # ========================================
-  # Init Containers (순차 실행)
-  # ========================================
   initContainers:
     # 1단계: DB 서비스가 준비될 때까지 대기
     - name: wait-for-db
@@ -437,17 +632,12 @@ spec:
       command: ["sh", "-c"]
       args:
         - |
-          echo "Setting permissions..."
           chmod -R 755 /data
           chown -R 1000:1000 /data
-          echo "Permissions set!"
       volumeMounts:
         - name: data-volume
           mountPath: /data
 
-  # ========================================
-  # Main Container (Init 완료 후 실행)
-  # ========================================
   containers:
     - name: webapp
       image: myapp:1.0
@@ -471,7 +661,6 @@ spec:
         limits:
           memory: "512Mi"
           cpu: "500m"
-      # 앱이 준비되었는지 확인
       readinessProbe:
         httpGet:
           path: /health
@@ -479,9 +668,6 @@ spec:
         initialDelaySeconds: 5
         periodSeconds: 10
 
-  # ========================================
-  # Volumes
-  # ========================================
   volumes:
     - name: config-volume
       emptyDir: {}
@@ -489,13 +675,12 @@ spec:
       emptyDir: {}
 ```
 
-### sidecar containers
+### sidecar containers (Native Sidecar, 1.28+)
 
-Kubernetes 1.28부터 도입된 **네이티브 사이드카**입니다.
+Kubernetes 1.28부터 도입된 **네이티브 사이드카**다.
+Init Container에 `restartPolicy: Always`를 설정하면 사이드카로 인식되어, 메인 컨테이너보다 먼저 시작되고 메인 앱이 종료되면 함께 종료된다.[^8]
 
-Init Container에 `restartPolicy: Always`를 설정하여 메인 컨테이너와 함께 **지속적으로 실행**됩니다.
-
-### 기존 방식 vs 네이티브 사이드카
+기존 방식과의 차이를 비교하면 다음과 같다.
 
 | 구분          | 기존 Co-located   | Native Sidecar (1.28+)  |
 | ------------- | ----------------- | ----------------------- |
@@ -503,7 +688,7 @@ Init Container에 `restartPolicy: Always`를 설정하여 메인 컨테이너와
 | **시작 순서** | 메인과 동시       | 메인보다 먼저           |
 | **종료 순서** | 메인과 동시       | 메인보다 나중           |
 | **재시작**    | Pod 정책 따름     | `restartPolicy: Always` |
-| **Job 호환**  | ❌ Job 완료 방해  | ✅ Job과 호환           |
+| **Job 호환**  | Job 완료 방해     | Job과 호환              |
 
 ```yaml
 # Istio 스타일 Service Mesh Sidecar 예제
@@ -515,10 +700,10 @@ metadata:
     app: myapp
 spec:
   initContainers:
-    # Sidecar: Istio Proxy (Envoy)
+    # restartPolicy: Always 가 이 컨테이너를 Sidecar로 만든다
     - name: istio-proxy
       image: docker.io/istio/proxyv2:1.20.0
-      restartPolicy: Always
+      restartPolicy: Always   # ← 이 한 줄이 핵심
       ports:
         - containerPort: 15090
           name: http-envoy-prom
@@ -539,7 +724,6 @@ spec:
           cpu: "200m"
           memory: "256Mi"
 
-  # Main Container
   containers:
     - name: myapp
       image: myapp:1.0
@@ -547,62 +731,144 @@ spec:
         - containerPort: 8080
 ```
 
-## Init Container
+멀티컨테이너 구조를 이해하면 사이드카를 활용한 로깅 패턴으로 자연스럽게 이어진다.
 
-???
+## 📡 Sidecar & Logging
 
-## Kubectx and Kubens - Command Line Utilities
+사이드카의 가장 대표적인 활용 사례는 로그 수집이다.
+메인 앱이 파일에 로그를 쓰면, 사이드카가 그 파일을 읽어 중앙 수집 시스템으로 전송한다.
 
-## 오브젝트 생성 oneline command
+### Sidecar란?
 
-[https://hushtang.tistory.com/94](https://hushtang.tistory.com/94)
+기본 컨테이너(Main App)의 기능을 확장하거나 보조하기 위해 **같은 Pod 안에 함께 실행되는 보조 컨테이너**다.
+주로 로그 수집, 프록시, 설정 동기화 등의 목적으로 배포된다.
 
-> 💡 k run vs k create
+### 생명주기 (feat. initContainer)
 
-```shell
-kubectl run mc-pod --image=nginx:1-alpine --dry-run=client -o yaml > mc-pod.yaml
-```
+일반 컨테이너로 사이드카를 띄우면, 메인 앱이 종료되어도 사이드카가 안 죽어서 Pod가 `Running`에 머무는 문제가 있다.
+Kubernetes 1.29 버전부터 `initContainers` 설정 안에 `restartPolicy: Always`를 추가하면 사이드카로 인식하여, 메인 앱이 종료되면 같이 종료된다.
 
-```shell
-kubectl create deploy my-ds --image=nginx --dry-run=client -o yaml > my-ds.yaml
-```
+### Pod와 공유하는 자원
 
-```shell
-# service 는 서비스 타입과 tcp port 를 꼭 지정해줘야 한다
-# 다만 서비스타입은 소문자로 해줘야한다
-# ClusterIp(X) clusterip(O)
-kubectl create service clusterip messaging-service --tcp=80:80 --dry-run=client -o yaml > messaging-service.yaml
-```
+Pod 내의 모든 컨테이너는 격리되어 있지만, 일부 자원은 공유하고 스케줄링 시 합산된다.
 
-## env 주입 방법
+- **Network**: 같은 `Network Namespace`를 공유한다. 따라서 서로 `localhost`로 통신하며 포트가 중복되면 안 된다.
+- **Storage**: `Volume`을 공유하여 메인 앱이 쓴 로그 파일을 사이드카가 읽는 식의 작업이 가능하다.
+- **Cgroup & Resource**: 스케줄러는 Pod 내부 모든 컨테이너의 `Request/Limit` 합계를 계산하여 노드를 결정한다.
 
-> 💡 TL;DR;
-> 💡 ConfigMap vs Secret
-> 💡 환경변수 주입 대신 볼륨 마운트 방식을 권장하는 이유
+### 적용 & 확인
 
-직접 정의 [https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/)
-
-```go
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: envar-demo
-  labels:
-    purpose: demonstrate-envars
+  name: sidecar-example
+spec:
+  initContainers:
+    - name: log-sidecar
+      image: busybox
+      restartPolicy: Always  # 이 설정이 Sidecar를 만든다
+      command: ["sh", "-c", "tail -f /var/log/app.log"]
+      volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log
+  containers:
+    - name: main-app
+      image: nginx
+      volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log
+  volumes:
+    - name: shared-logs
+      emptyDir: {}
+```
+
+```bash
+# 파드 상태 확인
+kubectl get pod ${pod-이름}
+
+# 사이드카 컨테이너의 로그 확인
+kubectl logs ${pod-이름} -c ${사이드카-이름}
+```
+
+### 문제 1: 사이드카 생성
+
+A legacy app needs to be integrated into the Kubernetes built-in logging architecture (i.e. `kubectl logs`).
+
+Update the existing Deployment `synergy-deployment`, adding a co-located container named `sidecar` using the image `busybox:stable`.
+The new container must run: `/bin/sh -c "tail -n+1 -f /var/log/synergy-deployment.log"`
+Use a Volume mounted at `/var/log` to share the log file.
+
+```bash
+# 기존 Deployment 매니페스트 추출
+kubectl get deploy synergy-deployment -o yaml > synergy-deployment.yaml
+
+vi synergy-deployment.yaml
+```
+
+```yaml
+# synergy-deployment.yaml 수정 내용
+spec:
+  template:
+    spec:
+      containers:
+      - name: <기존 컨테이너 - 수정하지 말 것>
+        ...
+        volumeMounts:
+        - name: log-volume
+          mountPath: /var/log          # 기존 앱이 로그를 쓰는 경로
+      initContainers:
+      - name: sidecar
+        image: busybox:stable
+        restartPolicy: Always          # Native Sidecar 선언
+        command:
+        - /bin/sh
+        - -c
+        - "tail -n+1 -f /var/log/synergy-deployment.log"
+        volumeMounts:
+        - name: log-volume
+          mountPath: /var/log
+      volumes:
+      - name: log-volume
+        emptyDir: {}
+```
+
+```bash
+# 적용 및 상태 확인
+kubectl apply -f synergy-deployment.yaml
+kubectl rollout status deployment synergy-deployment
+
+# 사이드카 로그 확인
+kubectl logs <sidecar-pod명> -c sidecar
+```
+
+## 🌐 env 주입 방법
+
+설정을 ConfigMap과 Secret으로 분리했다면, 실제로 파드에 어떤 방식으로 주입할지를 결정해야 한다.
+
+> 방법이 기억나지 않는다면 `--help` 를 통해 찾아보자.
+
+### 직접 정의[^9]
+
+가장 단순한 방법으로, YAML에 값을 직접 명시한다.
+
+```yaml
 spec:
   containers:
   - name: envar-demo-container
     image: gcr.io/google-samples/hello-app:2.0
-**    env:
+    env:
     - name: DEMO_GREETING
-      value: "Hello from the environment"
+      value: "Hello from the environment"   # 값을 YAML에 직접 기재
     - name: DEMO_FAREWELL
-      value: "Such a sweet sorrow"**
+      value: "Such a sweet sorrow"
 ```
 
-ConfigMap 사용 [https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)
+### ConfigMap 사용[^10]
 
-```go
+`envFrom`을 사용하면 ConfigMap의 모든 키를 한 번에 환경변수로 주입할 수 있다.
+
+```yaml
 # ConfigMap 생성
 apiVersion: v1
 kind: ConfigMap
@@ -611,34 +877,32 @@ metadata:
 data:
   DB_HOST: "mysql.example.com"
   API_KEY: "static-key"
+```
 
-# Pod에서 참조
+```yaml
+# Pod에서 ConfigMap 전체 주입
 spec:
   containers:
   - name: app
     image: myapp
-**    envFrom:
+    envFrom:
     - configMapRef:
-        name: app-config  # 모든 키 주입**
-
+        name: app-config  # ConfigMap의 모든 키를 환경변수로 주입
 ```
 
-Secret 사용 [https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-a-container-environment-variable-with-data-from-a-single-secret](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-a-container-environment-variable-with-data-from-a-single-secret)
+### Secret 사용[^11]
 
-1.
+환경변수 주입, 볼륨 마운트, 명령행 인자 세 가지 방식을 지원한다.
 
-환경변수 주입 2.
+1. **환경변수 주입**: `secretKeyRef`로 특정 키만 선택해 주입한다.
+2. **볼륨 마운트**: Secret을 파일로 마운트하며, 변경 시 자동 반영된다.
+3. **명령행 인자**: `$(VAR_NAME)` 형태로 명령행에 삽입한다.
 
-볼륨 마운트 3.
+### Downward API 사용 — fieldRef[^12]
 
-명령행 인자
+파드 자신의 메타데이터(이름, IP, 네임스페이스 등)를 환경변수로 노출한다.
 
-Downward API 사용 :: fieldRef 사용
-[https://kubernetes.io/docs/concepts/workloads/pods/downward-api/#downwardapi-fieldRef](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/#downwardapi-fieldRef)
-[https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
-[https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/](https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/)
-
-```go
+```yaml
 spec:
   containers:
   - name: app
@@ -646,24 +910,22 @@ spec:
     - name: MY_POD_NAME
       valueFrom:
         fieldRef:
-          fieldPath: metadata.name
+          fieldPath: metadata.name       # 파드 이름
     - name: MY_POD_IP
       valueFrom:
         fieldRef:
-          fieldPath: status.podIP
+          fieldPath: status.podIP        # 파드 IP
     - name: MY_NAMESPACE
       valueFrom:
         fieldRef:
-          fieldPath: metadata.namespace
-
+          fieldPath: metadata.namespace  # 네임스페이스
 ```
 
-Downward API 사용 :: resourceFieldRef 사용
-[https://kubernetes.io/docs/concepts/workloads/pods/downward-api/#downwardapi-resourceFieldRef](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/#downwardapi-resourceFieldRef)
-[https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
-[https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/](https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/)
+### Downward API 사용 — resourceFieldRef[^13]
 
-```go
+파드에 설정된 CPU·메모리 Request/Limit 값을 환경변수로 노출한다.
+
+```yaml
 spec:
   containers:
   - name: app
@@ -675,43 +937,43 @@ spec:
     - name: MY_CPU_REQUEST
       valueFrom:
         resourceFieldRef:
-          resource: requests.cpu
+          resource: requests.cpu     # CPU 요청량
     - name: MY_MEM_LIMIT
       valueFrom:
         resourceFieldRef:
           resource: limits.memory
-          divisor: 1Mi
-
+          divisor: 1Mi               # Mi 단위로 변환
 ```
 
-> 💡 Downward API 란 무엇이고 fieldRef 와 resourceFieldRef 는 무슨 차이인가 ?
+> **Downward API란?**
+> 파드가 자기 자신의 메타데이터나 스펙 정보를 환경변수 또는 볼륨 파일로 읽을 수 있게 해주는 메커니즘이다.
+> `fieldRef`는 파드의 메타데이터·상태 필드를, `resourceFieldRef`는 컨테이너의 자원 설정값을 참조한다.
 
-Init Container 사용
+### Init Container를 통한 주입
 
-```go
+Init Container가 먼저 실행되어 공유 볼륨에 환경변수 파일을 생성하고, 메인 앱 컨테이너가 이를 읽어 환경변수를 설정하는 패턴이다.
+
+```yaml
 spec:
-	# initContainers 를 우선 실행하여
-	# /env 경로에 환경변수를 저장한다.
   initContainers:
   - name: env-init
     image: busybox
     command: ['sh', '-c']
     args:
     - |
-			echo "DB_URL=jdbc:mysql://localhost:3306" > /env/my-env-file
+      # initContainers가 먼저 실행되어 /env 경로에 환경변수 파일을 생성한다
+      echo "DB_URL=jdbc:mysql://localhost:3306" > /env/my-env-file
       echo "API_KEY=12345" >> /env/my-env-file
     volumeMounts:
     - name: env-volume
       mountPath: /env
-  # 이후 깨어나는 실제 앱 컨테이너는
-	# 환경변수가 쓰여진 /env/my-env-file 을 불러와
-	# 환경변수 주입 이후 앱을 실행한다.
   containers:
   - name: app
-	  image: my-app-image
-	  command: ["sh", "-c"]
+    image: my-app-image
+    command: ["sh", "-c"]
     args:
     - |
+      # 환경변수 파일을 source한 후 앱을 실행한다
       . /env/my-env-file && ./run-my-app
     volumeMounts:
     - name: env-volume
@@ -719,24 +981,61 @@ spec:
   volumes:
   - name: env-volume
     emptyDir: {}
-
 ```
 
-## Deployment/Pod 에 볼륨 할당방법 ?
+## 🤖 Deployment에 볼륨 할당 방법
 
-# 9번 문제 ✅📓
+Deployment에 볼륨을 할당하는 방법은 Pod 스펙의 `volumes` 필드에 볼륨을 선언하고, 각 컨테이너의 `volumeMounts`에서 참조하는 방식이다.
+ConfigMap·Secret·emptyDir·PVC 등 다양한 볼륨 타입을 동일한 패턴으로 연결할 수 있다.
 
-Create a Horizontal Pod Autoscaler (HPA) with name `webapp-hpa` for the deployment named `kkapp-deploy` in the **default namespace** with the `webapp-hpa.yaml` file located under the root folder.
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config    # 컨테이너 내부 마운트 경로
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app-config          # 참조할 ConfigMap 이름
+```
 
-Ensure that the HPA scales the deployment based on **CPU utilization**, maintaining an average CPU usage of **50%** across all pods.
+## 📋 오브젝트 생성 one-line command
 
-Configure the HPA to **cautiously scale down** pods by setting a **stabilization window of 300 seconds** to prevent rapid fluctuations in pod count.
-**`Note:`** The kkapp-deploy deployment is created for backend; you can check in the terminal.
+> `k run` vs `k create`: `run`은 Pod 단위, `create`는 Deployment·Service 등 상위 리소스 생성에 사용한다.
+
+```shell
+# Pod 생성 (dry-run으로 매니페스트 미리 확인)
+kubectl run mc-pod --image=nginx:1-alpine --dry-run=client -o yaml > mc-pod.yaml
+```
+
+```shell
+# Deployment 생성
+kubectl create deploy my-ds --image=nginx --dry-run=client -o yaml > my-ds.yaml
+```
+
+```shell
+# Service 생성: 타입과 tcp 포트를 반드시 지정해야 한다
+# 서비스 타입은 소문자 (ClusterIp → clusterip)
+kubectl create service clusterip messaging-service --tcp=80:80 --dry-run=client -o yaml > messaging-service.yaml
+```
+
+## 📈 HPA (Horizontal Pod Autoscaler)
+
+### 문제: HPA 생성
+
+Create a Horizontal Pod Autoscaler (HPA) with name `webapp-hpa` for the deployment named `kkapp-deploy` in the **default namespace**.
+
+- Scale based on **CPU utilization**, maintaining an average CPU usage of **50%**
+- Set a **stabilization window of 300 seconds** for scale-down
 
 <details>
 <summary>정답</summary>
 
-```go
+```yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -756,12 +1055,12 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50
-	behavior:
-	  scaleDown:
-	    stabilizationWindowSeconds: 300
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 스케일 다운 안정화 윈도우
 ```
 
-```go
+```bash
 # HPA 상태 조회
 kubectl get hpa webapp-hpa
 
@@ -771,388 +1070,35 @@ kubectl describe hpa webapp-hpa
 
 </details>
 
-## Deployment
-
-### Deployment 란 ??
-
-- 파드(Pod)와 레플리카셋(ReplicaSet)의 **선언적 업데이트**를 관리하는 상위 객체
-- "파드 3개를 유지해줘"라는 명령뿐만 아니라, "v1에서 v2로 업데이트할 때 하나씩 교체해줘" 라는 **배포 전략을 처리**
-
-### ReplicaSet 과 Deployment 의 관계 ??
-
-- 우리는 ReplicaSet을 직접 건드리지 않는다.
-- 모든 제어는 Deployment를 통해 이루어지며, ReplicaSet은 **롤백(Rollback)을 위한 기록 저장소** 역할을 수행한다
-
-### 히스토리 기록은 어디에 저장되는가 ??
-
-클러스터 내부의 **ReplicaSet**에 저장된다
-사용되지 않는 과거의 ReplicaSet들이 사라지지 않고 남아서 각 버전의 `template` 정보를 가지고 있기 때문에 롤백이 가능한 것이다.
-`kubectl apply -f deploy.yaml --record` 처럼 실행하면, 실행한 명령어가 `CHANGE-CAUSE`에 기록된다.
-
-다만 Kubernetes v1.19 이후부터는 이 플래그가 _deprecated_(권장되지 않음) 되었다.
-
-이에 따라 1) kubectl patch 혹은 kubectl annotate 로 바로 기록하거나 2) yaml 파일에 미리 적어두는 방식으로 변경되었다
-
-1.
-
-명령어 바로 기록 2.
-
-YAML 파일에 미리 적어두기
-
-### 롤아웃
-
-보통 실제로는 배포하고나서 배포 상태 확인 이후 복구하는 워크플로우를 따른다
-실제로 다음과 같은 명령어를 활용한다
-
-- **배포**: `kubectl apply -f deploy.yaml`
-- **모니터링**: `kubectl rollout status deployment/my-app` (실시간 배포 상황 감시)
-- **문제 발생 시 확인**: `kubectl rollout history deployment/my-app`
-- **Pod 업데이트를 위한 재시작**: `kubectl rollout restart deployment/my-app`
-- **상세 검증**: `kubectl rollout history deployment/my-app --revision=prev_version`
-- **복구**: `kubectl rollout undo deployment/my-app --to-revision=prev_version`
-
-또한 무한정 ReplicaSet 이 남는 것을 방지하기위해 ReplicaSet 최대 개수를 제어하여 히스토리 개수를 관리할 수 있다.
-
-```yaml
-spec:
-  revisionHistoryLimit: 5  # 최근 5개의 기록(ReplicaSet)만 남기고 나머지는 삭제
-  replicas: 3
-  ...
-
-```
-
-### 복제본 수에 대한 설정값
-
-- **maxSurge **[\***\*surge:a sudden and great increase**](https://dictionary.cambridge.org/dictionary/english/surge)
-- **maxUnavailable**
-
-기본값은 두 값 둘 다 25%
-
-### 문제 1 : 새로운 버전 배포 및 리비전 되돌리기
-
-**시나리오:** 현재 `web-ns` 네임스페이스에 `replicas: 5`인 `web-deploy`가 실행 중입니다.
-
-이 애플리케이션의 새로운 버전(v2)을 배포하려고 하는데, 다음의 엄격한 가용성 조건을 충족해야 합니다.
-
-1. **가용성 보장:** 업데이트 중에도 최소 5개의 파드는 항상 트래픽을 처리할 수 있는 상태(Ready)여야 합니다.
-
-즉, 가용성이 단 1%도 떨어져서는 안 됩니다. 2. **리소스 제약:** 인프라 자원의 한계로 인해, 업데이트 중에 **동시에 실행되는 총 파드 수는 7개를 초과해서는 안 됩니다.** 3. **검증:** 배포 후 문제가 생겨 **리비전 1번**으로 되돌려야 합니다.
-**질문:**
-
-- 이 요구사항을 충족하기 위한 `maxSurge`와 `maxUnavailable`의 값은 각각 무엇입니까? (정수 혹은 퍼센트로 답하세요)
-- 리비전 1번으로 되돌리기 위한 정확한 명령어는 무엇입니까?
-
-```yaml
-alias k="kubectl"
-type k
-
-k get deploy web-deploy -n web-ns -o yaml > web-deploy.yaml
-vim web-deploy.yaml
-이후 아래와 같이 값을 수정
-maxSurge: 2
-**maxUnavailable: 0
-**k apply -f web-deploy.yaml # 적용**
-
-# 확인
-k describe deploy web-deploy -n web-ns
-k get replicaset <replicaset-이름>
-k get pod <pod-이름>
-k describe pod <pod-이름> | grep Image
-k exec <pod-이름> -n web-ns -- curl ifconfig.me
-
-# 문제 발생 시 히스토리 확인 후 rollback
-k rollout history deployment/web-deploy
-# 문제 발생했다면 undo 이후 revision 1 으로 롤백
-k rollout undo deployment/web-deploy --to-revision=1**
-```
-
-### 문제 2 : 롤링 업데이트
-
-Create a deployment as follows:
-
-- TASK:
-- Next, deploy the application with new version 1.11.13-alpine, by performing a rolling update
-- Finally, rollback that update to the previous version 1.11.10-alpine
-
-```bash
-kubectl create deployment nginx-app \
-	 --image=nginx:1.11.10-alpine --replicas=3 \
-	 --dry-run=client -o yaml > deplyment.yaml
-
-kubectl apply -f deplyment.yaml
-
-# rolling update
-kubectl set image deployment nginx-app nginx=nginx:1.11.13-alpine --record
-kubectl rollout history deployment nginx-app
-
-# roll-back
-kubectl rollout undo deployment nginx-app
-kubectl rollout history deployment nginx-app
-```
-
-## ConfigMap & Secrets
-
-### ConfigMap 이란 ?
-
-어플리케이션에 필요한 설정 값(환경 변수, 설정 파일 등)을 파드와 분리하여 저장하는 객체
-
-- **용도**: 데이터베이스 주소, 환경 설정(로그 레벨), 설정 파일(`nginx.conf`) 등.
-- **특징**: 민감하지 않은 일반 텍스트 데이터를 저장합니다.
-
-### Pod 에 ConfigMap 할당 방법
-
-1.
-
-우선 ConfigMap 을 생성한다 2.
-
-이후 Pod 에 매핑하여 주입한다 3. **( 볼륨으로 마운트된 경우라면 내용수정 시 Pod 에 자동으로 업데이트된다**
-
-### Secrets 이란 ?
-
-비밀번호, 토큰, SSH 키와 같은 **민감한 정보**를 저장하는 객체입니다.
-
-- **특징**: 데이터가 **Base64**로 인코딩되어 저장됩니다. (암호화가 아니므로 누구나 디코딩 가능함에 주의!)
-- **유형**: `Opaque`(일반), `kubernetes.io/dockerconfigjson`(도커 로그인 정보) 등.
-
-### Pod 에 Secrets 할당 방법
-
-1.
-
-Secret 을 생성한다 2.
-
-이후 Pod 에 매핑하여 주입한다 3. **( 볼륨으로 마운트된 경우라면 내용수정 시 Pod 에 자동으로 업데이트된다**
-
-### 문제 1 : ConfigMap 연결
-
-Create a ConfigMap named `app-config` in the namespace `cm-namespace` with the following key-value pairs:
-
-```
-ENV=production
-LOG_LEVEL=info
-```
-
-Then, modify the existing Deployment named `cm-webapp` in the same namespace to use the `app-config` ConfigMap by setting the environment variables `ENV` and `LOG_LEVEL` in the container from the ConfigMap.
-
-- ConfigMap app-config is created
-- Deployment uses the app-config ConfigMap for variable ENV and LOG LEVEL
-- Are the environment variables reflected in the deployment?
-- ConfigMap has proper ENV value
-- ConfigMap has proper LOG_LEVEL value
-
-```bash
-# configmap 생성 / deployment 수정
-# vim app-config.yaml
-
-# 아래와 같이 명령어로도 생성 가능
-# kubectl create configmap app-config -n cm-namespace \
-#  --from-literal=ENV=production \
-#  --from-literal=LOG_LEVEL=info
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
-	namespace: cm-namespace
-data:
-  ENV: production
-	LOG_LEVEL: info
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cm-webapp
-  namespace: cm-namespace
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80
-        envFrom:
-        - configMapRef:
-            name: app-config
-
-kubectl apply -f app-config.yaml
-# 실행 중인 deployment 의 manifest 파일 수정방법
-# 1) 바로 설정 열어서 수정, 저장하면 바로 rolling policy 에 의해 반영
-kubectl edit deployment cm-webapp -n cm-namespace
-# 2) manifest yaml 추출 후 수정 및 적용
-kubectl get deployment cm-webapp -n cm-namespace -o yaml > cm-webapp.yaml
-vim cm-webapp.yaml
-kubectl apply -f cm-webapp.yaml
-
-# 이후 확인
-kubectl describe cm app-config -n cm-namespace
-kubectl describe deploy cm-webapp -n cm-namespace
-kubectl get pods -n cm-namespace -l app=cm-webapp -o name # deploy 의 pod 이름
-# 위에서 가져온 POD 에 접근하여 환경변수 확인
-kubectl exec -n cm-namespace $POD_NAME -- sh -c 'echo $ENV'
-kubectl exec -n cm-namespace $POD_NAME -- sh -c 'echo $LOG_LEVEL'
-```
-
-### 문제 2 : ConfigMap 을 통해 TLS 활성화
-
-There is an existing deployment called nginx-static in the nginx-static namespace.
-
-The deployment contains a ConfigMap named nginx-config that supports TLSv1.3
-Update the nginx-config ConfigMap to allow TLSv1.2 connections.
-
-Re-create, restart, or scale resources as necessary.
-
-By Using command to test the changes:
-[candidate@cka0001]$ curl -k --tls-max 1.2 [https://web.k8s.local:30007](https://web.k8s.local:30007/)
-
-```bash
-# configmap 수정
-kubectl get configmap nginx-config -n nginx-static -o yaml > nginx-config.yaml
-
-vi nginx-config.yaml
-
-ssl_protocols TLSv1.3; → ssl_protocols TLSv1.2 TLSv1.3; 로 변경
-
-# 적용 이후 리소스 재시작
-kubectl apply -f nginx-config.yaml
-
-kubectl rollout restart deployment nginx-static -n nginx-static
-
-# 롤아웃 확인 후 최종 curl 확인
-kubectl rollout status deployment nginx-static -n nginx-static
-
-curl -k --tls-max 1.2 [https://web.k8s.local:30007](https://web.k8s.local:30007/)
-
-```
-
-## Sidecar & Logging
-
-### Sidecar 란 ??
-
-기본 컨테이너(Main App)의 기능을 확장하거나 보조하기 위해 **같은 Pod 안에 함께 실행되는 보조 컨테이너이다**
-주로 로그 수집, 프록시, 설정 동기화 등등을 위한 목적으로 배포된다.
-
-### 생명주기(feat. initContainer)
-
-일반 컨테이너로 사이드카를 띄우면, 메인 앱이 종료되어도 사이드카가 안 죽어서 Pod가 `Running`에 머무는 문제가 있다
-쿠버네티스 1.29 버전부터 `initContainers` 설정 안에 `restartPolicy: Always`를 추가하면
-사이드카로 인식하고, 시작 시 메인 앱 컨테이너가 뜨기 **전**에 실행되어 완료를 기다리지 않으며, 메인 앱이 종료되면 같이 종료된다.
-
-### Pod 와 공유하는 자원
-
-Pod 내의 모든 컨테이너는 격리되어 있지만, 일부 자원은 공유하고 스케줄링 시 합산된다.
-
-- **Network:** 같은 `Network Namespace`를 공유한다.
-
-따라서 서로 `localhost`로 통신하며 포트가 중복되면 안 된다.
-
-- **Storage:** `Volume`을 공유하여 메인 앱이 쓴 로그 파일을 사이드카가 읽는 식의 작업이 가능하다.
-- **Cgroup & Resource:** 스케줄러는 Pod 내부 모든 컨테이너의 `Request/Limit` 합계를 계산하여 노드를 결정한다.
-
-### 적용 & 확인
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: sidecar-example
-spec:
-  initContainers:
-    - name: log-sidecar
-      image: busybox
-      restartPolicy: Always # 이 설정이 Sidecar를 만듭니다!
-      command: ["sh", "-c", "tail -f /var/log/app.log"]
-      volumeMounts:
-        - name: shared-logs
-          mountPath: /var/log
-  containers:
-    - name: main-app
-      image: nginx
-      volumeMounts:
-        - name: shared-logs
-          mountPath: /var/log
-  volumes:
-    - name: shared-logs
-      emptyDir: {}
-```
-
-```bash
-kubectl get pod ${pod-이름}
-
-kubectl get logs ${pod-이름} -c ${사이드카-이름}
-```
-
-### 문제 1 : 사이드카 생성
-
-A legacy app needs to be integrated into the Kubernetes built-in logging
-architecture (i.e. kubectl logs).
-
-Adding a streaming co-located container is a
-good and common way to accomplish this requirement.
-
-Update the existing Deployment synergy-deployment, adding a co-located
-container named sidecar using the image busybox:stable to the existing
-Pod.
-
-The new co-located container has to run the following command:
-/bin/sh -c "tail -n+1 -f /var/log/synergy-deployment.log"
-Use a Volume mounted at /var/log to make the log file synergydeployment.log available to the co-located container.
-
-Do not modify the specification of the existing container other than adding
-the required.
-
-Hint: Use a shared volume to expose the log file between the main
-application container and the sidecar
-
-```bash
-kubectl get deploy synergy-deployment -o yaml > synergy-deployment.yaml
-
-vi synergy-deployment.yaml
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: synergy-deployment
-  labels:
-    app: synergy-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: synergy-deployment
-  template:
-    metadata:
-      labels:
-        app: synergy-deployment
-    spec:
-      containers:
-      - name: &lt;기존 컨테이너 - 수정하지 말 것&gt;
-        ...
-        volumeMounts:
-        - name: log-volume
-          mountPath: /var/log          # 기존 앱이 로그 쓰는 경로
-      initContainers:
-      - name: sidecar                  # ← 일반 containers에 추가
-        image: busybox:stable
-        restartPolicy: Always
-        command:
-        - /bin/sh
-        - -c
-        - "tail -n+1 -f /var/log/synergy-deployment.log"
-        volumeMounts:
-        - name: log-volume
-          mountPath: /var/log
-      volumes:
-      - name: log-volume
-        emptyDir: {}
-
-kubectl apply -f synergy-deployment.yaml
-kubectl rollout status deployment synergy-deployment
-
-kubectl logs <sidecar-pod명> -c sidecar
-```
+## 🔧 Kubectx and Kubens
+
+`kubectx`와 `kubens`는 컨텍스트와 네임스페이스 전환을 단축해주는 커맨드라인 유틸리티다.
+CKA 시험에서 네임스페이스를 자주 전환할 때 `kubens <namespace>` 하나로 빠르게 이동할 수 있다.
+
+---
+
+## 마치며
+
+이 글에서 다룬 내용을 한 줄로 요약하면 다음과 같다.
+
+- **Deployment**: 선언적 업데이트와 롤백 전략으로 무중단 배포를 관리한다.
+- **ConfigMap**: 설정값을 이미지에서 분리해 재빌드 없이 변경할 수 있게 한다.
+- **Secret**: 민감 정보를 별도 저장하되, etcd 암호화와 RBAC 없이는 완전히 안전하지 않다.
+- **멀티컨테이너 패턴**: Sidecar·Init·Ambassador 패턴으로 관심사를 분리한다.
+
+실제 시험과 운영 환경 모두에서 가장 자주 마주치는 조합은 **Deployment + ConfigMap + Secret + Sidecar**다.
+각 리소스의 역할을 명확히 이해하고 `kubectl rollout`, `kubectl exec`, `kubectl logs` 명령을 손에 익혀두는 것이 핵심이다.
+
+[^1]: [Kubernetes Deployments 공식 문서](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+[^2]: [Kubernetes Resource Metrics Pipeline](https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/)
+[^3]: [Kubernetes ReplicaSet 공식 문서](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
+[^4]: [Deployment 롤링 업데이트 전략](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-update-deployment)
+[^5]: [ConfigMap 공식 문서](https://kubernetes.io/docs/concepts/configuration/configmap/)
+[^6]: [Secret 공식 문서](https://kubernetes.io/docs/concepts/configuration/secret/)
+[^7]: [Init Containers 공식 문서](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)
+[^8]: [Sidecar Containers (Native, 1.28+)](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
+[^9]: [컨테이너 환경변수 직접 정의](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/)
+[^10]: [ConfigMap으로 환경변수 정의](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)
+[^11]: [Secret으로 환경변수 정의](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-a-container-environment-variable-with-data-from-a-single-secret)
+[^12]: [Downward API — fieldRef](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
+[^13]: [Downward API — resourceFieldRef](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
