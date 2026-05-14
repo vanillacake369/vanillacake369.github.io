@@ -4,6 +4,9 @@ import MermaidInit from '../components/MermaidInit.astro';
 import CodeCopyButton from '../components/CodeCopyButton.astro';
 import Comments from '../components/Comments.astro';
 import RelatedPosts from '../components/RelatedPosts.astro';
+import { getCollection } from 'astro:content';
+import { extractSeries } from '../domain/series';
+import { translations } from '../i18n/translations';
 
 interface Props {
   title: string;
@@ -11,10 +14,10 @@ interface Props {
   date: Date;
   updatedDate?: Date;
   tags?: string[];
-  category?: string;
   lang?: 'ko' | 'en';
   heroImage?: string;
   currentSlug?: string;
+  series?: { id: string; order: number };
 }
 
 const {
@@ -23,11 +26,36 @@ const {
   date,
   updatedDate,
   tags = [],
-  category = 'uncategorized',
   lang = 'ko',
   heroImage,
   currentSlug = '',
+  series,
 } = Astro.props;
+
+// 시리즈 정보 가져오기
+let seriesPosts: ReturnType<typeof extractSeries>[number]['posts'] = [];
+let seriesSlug = '';
+if (series) {
+  const allPosts = await getCollection('posts');
+  const allSeries = extractSeries(
+    allPosts.map((entry) => ({
+      slug: entry.id,
+      title: entry.data.title ?? entry.id,
+      description: entry.data.description ?? '',
+      date: entry.data.date,
+      updatedDate: entry.data.updatedDate,
+      tags: entry.data.tags ?? [],
+      category: 'uncategorized',
+      lang: entry.data.lang ?? 'ko',
+      draft: entry.data.draft ?? false,
+      heroImage: entry.data.heroImage,
+      series: entry.data.series,
+    })),
+  );
+  const currentSeries = allSeries.find((item) => item.id === series.id);
+  seriesPosts = currentSeries?.posts ?? [];
+  seriesSlug = currentSeries?.slug ?? '';
+}
 
 function formatDate(d: Date, locale: string): string {
   return d.toLocaleDateString(locale, {
@@ -65,10 +93,6 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
       )}
 
       <header class="post-header">
-        <div class="post-meta-top">
-          <span class="post-category">{category}</span>
-        </div>
-
         <h1 class="post-title">{title}</h1>
 
         <div class="post-meta">
@@ -88,6 +112,67 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
               <a href={`/tags/${tag}`} class="post-tag">#{tag}</a>
             ))}
           </div>
+        )}
+
+        {series && seriesPosts.length > 1 && (
+          <details class="series-box">
+            <summary class="series-summary">
+              <div class="series-summary-copy">
+                <span class="series-kicker"
+                  data-i18n="series.kicker"
+                  data-i18n-ko={translations.ko['series.kicker']}
+                  data-i18n-en={translations.en['series.kicker']}
+                >{translations.ko['series.kicker']}</span>
+                <p class="series-title">{series.id}</p>
+                <p class="series-progress">{series.order}/{seriesPosts.length} <span
+                  data-i18n="series.part"
+                  data-i18n-ko={translations.ko['series.part']}
+                  data-i18n-en={translations.en['series.part']}
+                >{translations.ko['series.part']}</span></p>
+              </div>
+              <div class="series-summary-meta">
+                <div class="series-mini-rail" aria-hidden="true">
+                  {seriesPosts.map((post) => (
+                    <span class={`series-mini-cell${post.slug === currentSlug ? ' current' : ''}`}></span>
+                  ))}
+                </div>
+                <span class="series-toggle-copy"
+                  data-i18n="series.fold"
+                  data-i18n-ko={translations.ko['series.fold']}
+                  data-i18n-en={translations.en['series.fold']}
+                >{translations.ko['series.fold']}</span>
+              </div>
+            </summary>
+
+            <div class="series-panel">
+              <div class="series-panel-header">
+                <p class="series-panel-text"
+                  data-i18n="series.panelText"
+                  data-i18n-ko={translations.ko['series.panelText']}
+                  data-i18n-en={translations.en['series.panelText']}
+                >{translations.ko['series.panelText']}</p>
+                {seriesSlug && <a href={`/series#${seriesSlug}`} class="series-archive-link"
+                  data-i18n="series.archiveLink"
+                  data-i18n-ko={translations.ko['series.archiveLink']}
+                  data-i18n-en={translations.en['series.archiveLink']}
+                >{translations.ko['series.archiveLink']}</a>}
+              </div>
+
+              <ol class="series-list">
+                {seriesPosts.map((post) => (
+                  <li class={post.slug === currentSlug ? "current" : ""}>
+                    <span class="series-item-order">{String(post.order).padStart(2, '0')}</span>
+                    <div class="series-item-body">
+                      <a href={`/posts/${post.slug}`}>
+                        {post.title}
+                      </a>
+                      <p>{post.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </details>
         )}
       </header>
 
@@ -165,18 +250,6 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     border-bottom: 1px solid var(--color-border);
   }
 
-  .post-meta-top {
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .post-category {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-accent);
-    font-weight: 600;
-  }
-
   .post-title {
     font-family: var(--font-serif);
     font-size: 2rem;
@@ -209,6 +282,175 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .series-box {
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-surface);
+    margin-bottom: var(--spacing-xl);
+    overflow: hidden;
+  }
+
+  .series-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .series-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .series-summary-copy {
+    min-width: 0;
+  }
+
+  .series-kicker,
+  .series-progress,
+  .series-toggle-copy,
+  .series-item-order,
+  .series-list li p {
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+  }
+
+  .series-kicker {
+    display: inline-block;
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .series-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .series-progress {
+    margin-top: 0.18rem;
+  }
+
+  .series-summary-meta {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+  }
+
+  .series-mini-rail {
+    display: flex;
+    gap: 0.35rem;
+    padding-top: 0.1rem;
+  }
+
+  .series-mini-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background-color: var(--color-accent-soft);
+    border: 1px solid var(--color-border);
+  }
+
+  .series-mini-cell.current {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .series-toggle-copy {
+    min-width: 5.5rem;
+    text-align: right;
+  }
+
+  .series-box[open] .series-toggle-copy {
+    color: var(--color-accent);
+  }
+
+  .series-panel {
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-lg);
+  }
+
+  .series-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .series-panel-text {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .series-archive-link {
+    font-size: 0.82rem;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+  }
+
+  .series-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .series-list li {
+    display: flex;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .series-list li:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .series-item-order {
+    width: 2rem;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    padding-top: 0.15rem;
+  }
+
+  .series-item-body {
+    min-width: 0;
+  }
+
+  .series-list li a {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .series-list li a:hover {
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .series-list li.current .series-item-body a {
+    color: var(--color-accent);
+    font-weight: 700;
+    pointer-events: none;
+  }
+
+  .series-list li.current .series-item-order {
+    color: var(--color-accent);
+  }
+
+  .series-list li p {
+    margin-top: 0.2rem;
   }
 
   .post-tag {
@@ -229,16 +471,38 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     text-decoration: none;
   }
 
+  @media (max-width: 640px) {
+    .series-summary,
+    .series-panel-header,
+    .series-list li {
+      flex-direction: column;
+    }
+
+    .series-summary-meta {
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .series-toggle-copy {
+      min-width: 0;
+      text-align: left;
+    }
+
+    .series-item-order {
+      width: auto;
+      padding-top: 0;
+    }
+  }
+
   /* Prose — academic paper body styling */
   .prose {
     font-family: var(--font-serif);
-    font-size: 1rem;
-    line-height: 1.8;
+    font-size: 1.05rem; /* 살짝 키움 */
+    line-height: 1.6;   /* 연구 기반 최적화 */
     color: var(--color-text);
-  }
-
-  .prose :global(p) {
-    margin-bottom: 1.5em;
+    max-width: 1036px;  /* 목표 폭 설정 */
+    margin: 0 auto;
   }
 
   .prose :global(h1),
@@ -297,12 +561,12 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   }
 
   /* Code — Shiki dual theme support */
-  /* font-family, font-size, background, padding, border, border-radius inherit from global.css `code` rule */
+  /* Inline code keeps the global code rule; block code is reset in global.css for Shiki/Astro output. */
   .prose :global(code) {
     font-style: normal;
   }
 
-  .prose :global(pre) {
+  .prose :global(pre:not(.shiki):not(.astro-code)) {
     border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: var(--spacing-lg);

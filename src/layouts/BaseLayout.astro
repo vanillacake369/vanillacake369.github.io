@@ -40,6 +40,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
+    <ThemeInitScript />
+    <LangInitScript />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
@@ -62,8 +64,6 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       publishedDate={publishedDate}
       tags={tags}
     />
-    <ThemeInitScript />
-    <LangInitScript />
     <slot name="head" />
   </head>
   <body>
@@ -76,6 +76,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
             data-i18n-ko={translations.ko['nav.about']}
             data-i18n-en={translations.en['nav.about']}
           >{translations.ko['nav.about']}</a>
+          <a href="/series"
+            data-i18n="nav.series"
+            data-i18n-ko={translations.ko['nav.series']}
+            data-i18n-en={translations.en['nav.series']}
+          >{translations.ko['nav.series']}</a>
           <a href="/tags"
             data-i18n="nav.tags"
             data-i18n-ko={translations.ko['nav.tags']}
@@ -179,8 +184,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
   /* Header */
   .site-header {
     border-bottom: 1px solid var(--color-border);
-    padding: var(--spacing-md) 0;
-    background-color: var(--color-bg);
+    padding: 0.85rem 0;
+    background-color: color-mix(in srgb, var(--color-bg) 88%, var(--color-surface) 12%);
+    backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -191,15 +197,17 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-md);
+    min-height: 2.5rem;
   }
 
   .site-title {
-    font-family: var(--font-sans);
+    font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 0.98rem;
     color: var(--color-text);
     text-decoration: none;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
     white-space: nowrap;
   }
 
@@ -210,12 +218,15 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
   .site-nav {
     display: flex;
-    gap: var(--spacing-lg);
+    gap: 0.85rem;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .site-nav a {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
     color: var(--color-text-secondary);
     text-decoration: none;
     transition: color 0.15s ease;
@@ -229,14 +240,15 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
   /* Main */
   .site-main {
     flex: 1;
-    padding: var(--spacing-2xl) 0;
+    padding: 2.4rem 0 3rem;
   }
 
   /* Footer */
   .site-footer {
     border-top: 1px solid var(--color-border);
-    padding: var(--spacing-lg) 0;
+    padding: 1rem 0;
     margin-top: auto;
+    background-color: color-mix(in srgb, var(--color-bg) 78%, var(--color-surface) 22%);
   }
 
   .footer-inner {
@@ -257,7 +269,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
   .footer-links a {
     color: var(--color-text-secondary);
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
     transition: color 0.15s ease;
   }
 
@@ -269,7 +282,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
   .rss-link {
     border: 1px solid var(--color-border);
     padding: 0.15em 0.5em;
-    border-radius: 3px;
+    border-radius: 2px;
+    background-color: var(--color-surface);
   }
 
   .rss-link:hover {
@@ -278,17 +292,20 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
   .nav-icon-btn {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
     padding: 0.25rem;
     color: var(--color-text-secondary);
     display: flex;
     align-items: center;
     transition: color 0.15s ease;
+    border-radius: 2px;
   }
 
   .nav-icon-btn:hover {
     color: var(--color-text);
+    border-color: var(--color-border);
+    background-color: var(--color-surface);
   }
 
   /* Mobile search button — hidden on desktop, shown via vim-ui.css media query */
@@ -298,12 +315,21 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
   /* Responsive */
   @media (max-width: 480px) {
+    .header-inner {
+      align-items: flex-start;
+    }
+
+    .site-title {
+      padding-top: 0.35rem;
+    }
+
     .site-nav {
-      gap: var(--spacing-md);
+      justify-content: flex-end;
+      gap: 0.6rem;
     }
 
     .site-nav a {
-      font-size: 0.85rem;
+      font-size: 0.74rem;
     }
   }
 </style>
