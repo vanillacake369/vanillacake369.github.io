@@ -232,9 +232,8 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   }
 
   .post-header {
-    margin-bottom: var(--spacing-2xl);
-    padding-bottom: var(--spacing-xl);
-    border-bottom: 1px solid var(--color-border);
+    /* margin-bottom: var(--spacing-lg); */
+    margin-bottom: var(--spacing--2xl);
   }
 
   .post-title {
@@ -482,16 +481,89 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     }
   }
 
-  /* Prose — optimized for readability (60-70ch line length) */
+  /* ═══════════════════════════════════════════════════════
+     Prose — Discord-inspired responsive typography
+     ─────────────────────────────────────────────────────
+     Measured from discord.com/blog:
+       Mobile (375)  → p:16  h2:36  h3:18
+       Tablet (768)  → p:18  h2:40  h3:20
+       Desktop(1440) → p:20  h2:56  h3:24
+     ─────────────────────────────────────────────────────
+     How to tune:
+       --prose-body   : body font-size (rem)
+       --prose-h1     : h1 font-size (rem)
+       --prose-h2     : h2 font-size (rem)
+       --prose-h3     : h3 font-size (rem)
+       --prose-h4     : h4 font-size (rem)
+       These custom properties change per breakpoint below.
+       Edit the @media blocks to adjust sizes at each width.
+     ═══════════════════════════════════════════════════════ */
+
+  /* ── Mobile-first base (< 768px) ── */
   .prose {
+    --prose-body: 0.935rem;   /* ~15px */
+    --prose-h1: 1.75rem;      /* ~28px */
+    --prose-h2: 1.5rem;       /* ~24px */
+    --prose-h3: 1.08rem;      /* ~17px */
+    --prose-h4: 0.95rem;      /* ~15px */
+
     font-family: var(--font-serif);
-    font-size: 1rem;
-    line-height: 1.7;
+    font-size: var(--prose-body);
+    line-height: 1.65;
     color: var(--color-text);
     max-width: var(--max-width);
     margin: 0 auto;
   }
 
+  /* ── Tablet (768px+) ── */
+  @media (min-width: 768px) {
+    .prose {
+      --prose-body: 1rem;       /* ~16px */
+      --prose-h1: 2rem;         /* ~32px */
+      --prose-h2: 1.75rem;      /* ~28px */
+      --prose-h3: 1.18rem;      /* ~19px */
+      --prose-h4: 1rem;         /* ~16px */
+      line-height: 1.7;
+    }
+  }
+
+  /* ── Desktop (1280px+) ── */
+  @media (min-width: 1280px) {
+    .prose {
+      --prose-body: 1.1rem;     /* ~18px */
+      --prose-h1: 2.5rem;       /* ~40px */
+      --prose-h2: 2.1rem;       /* ~34px */
+      --prose-h3: 1.35rem;      /* ~22px */
+      --prose-h4: 1.1rem;       /* ~18px */
+      line-height: 1.75;
+    }
+  }
+
+  /* ── Wide (1600px+) ── */
+  @media (min-width: 1600px) {
+    .prose {
+      --prose-body: 1rem;    /* ~19px */
+      --prose-h1: 2.85rem;      /* ~46px */
+      --prose-h2: 2.4rem;       /* ~38px */
+      --prose-h3: 1.45rem;      /* ~23px */
+      --prose-h4: 1.15rem;      /* ~18px */
+    }
+  }
+
+  /* Paragraph = blank-line separated block */
+  .prose :global(p) {
+    margin-top: 0;
+    margin-bottom: 1.5em;
+  }
+
+  /* br = single newline → line break within same paragraph */
+  .prose :global(br) {
+    display: block;
+    content: '';
+    margin-top: 0.1em;
+  }
+
+  /* ── Headings ── */
   .prose :global(h1),
   .prose :global(h2),
   .prose :global(h3),
@@ -499,45 +571,68 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   .prose :global(h5),
   .prose :global(h6) {
     font-family: var(--font-sans);
-    font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.15;
     color: var(--color-text);
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     scroll-margin-top: 5rem;
   }
 
+  .prose :global(h1) {
+    font-size: var(--prose-h1);
+    font-weight: 700;
+    margin-top: 3.5rem;
+    margin-bottom: 0.6rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--color-border);
+  }
+
+  .prose :global(h1:first-child),
+  .prose :global(h1:nth-child(-n+2)) {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
   .prose :global(h2) {
-    font-size: clamp(1.3rem, 0.5vw + 1.15rem, 1.5rem);
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.3em;
+    font-size: var(--prose-h2);
+    font-weight: 700;
+    margin-top: 3rem;
+    margin-bottom: 0.5rem;
   }
 
   .prose :global(h3) {
-    font-size: clamp(1.1rem, 0.25vw + 1rem, 1.2rem);
+    font-size: var(--prose-h3);
+    font-weight: 600;
+    margin-top: 2.25rem;
+    margin-bottom: 0.4rem;
   }
 
   .prose :global(h4) {
-    font-size: 1rem;
+    font-size: var(--prose-h4);
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.3rem;
   }
 
+  /* ── Links ── */
   .prose :global(a) {
     color: var(--color-accent);
     text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
     text-underline-offset: 2px;
+    transition: text-decoration-color 0.15s ease;
   }
 
   .prose :global(a:hover) {
-    opacity: 0.8;
+    text-decoration-color: var(--color-accent);
   }
 
-  /* Blockquote */
+  /* ── Blockquote ── */
   .prose :global(blockquote) {
     border-left: 3px solid var(--color-accent);
     background-color: var(--color-blockquote-bg);
-    margin: 1.75rem 0;
-    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 1.5em 0;
+    padding: 0.75em 1em;
     border-radius: 0 4px 4px 0;
     color: var(--color-text-secondary);
     font-style: italic;
@@ -547,8 +642,11 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     margin-bottom: 0;
   }
 
-  /* Code — Shiki dual theme support */
-  /* Inline code keeps the global code rule; block code is reset in global.css for Shiki/Astro output. */
+  .prose :global(blockquote p + p) {
+    margin-top: 0.5em;
+  }
+
+  /* ── Code ── */
   .prose :global(code) {
     font-style: normal;
   }
@@ -562,36 +660,36 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     margin: 1.5em 0;
   }
 
-  /* Lists */
+  /* ── Lists ── */
   .prose :global(ul),
   .prose :global(ol) {
     padding-left: 1.75em;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25em;
   }
 
   .prose :global(li) {
-    margin-bottom: 0.4em;
+    margin-bottom: 0.3em;
   }
 
   .prose :global(li > ul),
   .prose :global(li > ol) {
-    margin-top: 0.4em;
+    margin-top: 0.3em;
     margin-bottom: 0;
   }
 
-  /* Tables */
+  /* ── Tables ── */
   .prose :global(table) {
     width: 100%;
     border-collapse: collapse;
     margin: 1.5em 0;
-    font-size: 0.925rem;
+    font-size: 0.9rem;
     font-family: var(--font-sans);
   }
 
   .prose :global(th),
   .prose :global(td) {
     border: 1px solid var(--color-border);
-    padding: 0.6em 0.9em;
+    padding: 0.5em 0.75em;
     text-align: left;
   }
 
@@ -605,7 +703,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     background-color: var(--color-blockquote-bg);
   }
 
-  /* Images — lazy loading applied via loading="lazy" on elements */
+  /* ── Images ── */
   .prose :global(img) {
     max-width: 100%;
     height: auto;
@@ -615,7 +713,6 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     border: 1px solid var(--color-border);
   }
 
-  /* Ensure optimized <picture> wrappers (from astro:assets) also behave correctly */
   .prose :global(picture) {
     display: block;
     margin: 1.5em auto;

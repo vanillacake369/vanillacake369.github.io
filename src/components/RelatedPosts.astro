@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { entryToPost } from '../domain/post';
+import { entryToPost, slugify, toLocalDateString } from '../domain/post';
 
 interface Props {
   currentSlug: string;
@@ -11,28 +11,29 @@ const { currentSlug, tags } = Astro.props;
 
 const allPosts = await getCollection('posts');
 const related = allPosts
-  .filter(p => !p.data.draft && p.id !== currentSlug)
+  .filter(p => !p.data.draft && slugify(p.id) !== currentSlug)
   .map(p => ({
     post: entryToPost(p),
     sharedTags: p.data.tags.filter(t => tags.includes(t)),
   }))
   .filter(p => p.sharedTags.length > 0)
   .sort((a, b) => b.sharedTags.length - a.sharedTags.length || b.post.date.getTime() - a.post.date.getTime())
-  .slice(0, 5);
+  .slice(0, 4);
 ---
 
 {related.length > 0 && (
   <section class="related-posts">
-    <h2 class="related-title">Related Posts</h2>
+    <p class="related-label">Related</p>
     <ul class="related-list">
       {related.map(({ post, sharedTags }) => (
         <li class="related-item">
-          <a href={`/posts/${post.slug}/`} class="related-link">{post.title}</a>
-          <div class="related-tags">
-            {sharedTags.map(tag => (
-              <span class="related-tag">#{tag}</span>
-            ))}
-          </div>
+          <a href={`/posts/${post.slug}/`} class="related-link">
+            <span class="related-title">{post.title}</span>
+            <span class="related-meta">
+              <time datetime={post.date.toISOString()}>{toLocalDateString(post.date)}</time>
+              <span class="related-shared">{sharedTags.map(t => `#${t}`).join(' ')}</span>
+            </span>
+          </a>
         </li>
       ))}
     </ul>
@@ -43,16 +44,16 @@ const related = allPosts
   .related-posts {
     margin-top: var(--spacing-2xl);
     padding-top: var(--spacing-xl);
-    border-top: 1px solid var(--color-border);
   }
 
-  .related-title {
-    font-family: var(--font-sans);
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-    margin-bottom: var(--spacing-lg);
+  .related-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-md);
   }
 
   .related-list {
@@ -61,41 +62,59 @@ const related = allPosts
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
   }
 
-  .related-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
+  .related-item + .related-item {
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
   }
 
   .related-link {
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    color: var(--color-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--spacing-md);
+    padding: 0.6rem 0;
     text-decoration: none;
     transition: color 0.15s ease;
   }
 
   .related-link:hover {
+    text-decoration: none;
+  }
+
+  .related-link:hover .related-title {
     color: var(--color-accent);
-    text-decoration: underline;
-    text-underline-offset: 2px;
   }
 
-  .related-tags {
+  .related-title {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--color-text);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+
+  .related-meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
+    align-items: baseline;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+    opacity: 0.6;
   }
 
-  .related-tag {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    background-color: var(--color-code-bg);
-    border: 1px solid var(--color-border);
-    padding: 0.1em 0.5em;
-    border-radius: 9999px;
+  .related-shared {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .related-shared {
+      display: inline;
+    }
   }
 </style>
