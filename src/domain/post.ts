@@ -1,14 +1,25 @@
 import type { Post, TagInfo, CalendarDay } from './types';
 
 /**
- * Derive a human-readable title from a file ID (slug).
- * "linux-원시자원과-컨테이너" → "linux 원시자원과 컨테이너"
- * "hello-world" → "hello world"
+ * Derive a human-readable title from a file ID.
+ * The file name IS the title — just strip the extension.
  */
 export function titleFromId(id: string): string {
+  return id.replace(/\.mdx?$/, '').trim();
+}
+
+/**
+ * Convert a file ID to a URL-safe slug.
+ * "NixOS 는 어떤 원리로 커널패키지를 관리할까" → "nixos-는-어떤-원리로-커널패키지를-관리할까"
+ */
+export function slugify(id: string): string {
   return id
-    .replace(/\.mdx?$/, '')    // strip extension if present
-    .replace(/[-_]/g, ' ')     // hyphens/underscores → spaces
+    .replace(/\.mdx?$/, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ\-_.()]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
     .trim();
 }
 
@@ -31,7 +42,7 @@ export function entryToPost(entry: {
   };
 }): Post {
   return {
-    slug: entry.id,
+    slug: slugify(entry.id),
     title: entry.data.title ?? titleFromId(entry.id),
     description: entry.data.description ?? '',
     date: entry.data.date,

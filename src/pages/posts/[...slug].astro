@@ -2,12 +2,12 @@
 import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import TOC from '../../components/TOC.astro';
-import { titleFromId } from '../../domain/post';
+import { titleFromId, slugify } from '../../domain/post';
 
 export async function getStaticPaths() {
   const entries = await getCollection('posts');
   return entries.map((entry) => ({
-    params: { slug: entry.id },
+    params: { slug: slugify(entry.id) },
     props: { entry },
   }));
 }
@@ -28,7 +28,7 @@ const title = entry.data.title || titleFromId(entry.id);
   series={series}
   lang={lang}
   heroImage={heroImage}
-  currentSlug={entry.id}
+  currentSlug={slugify(entry.id)}
 >
   <TOC headings={headings} slot="toc" />
   <Content />

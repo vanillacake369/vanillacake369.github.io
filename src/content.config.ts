@@ -1,14 +1,15 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { TAGS } from './domain/tags';
 
-const tagsEnum = z.enum([
-  'kubernetes', 'infra', 'nix', 'homelab', 'linux', 'dev', 'ai', 'tools', 
-  'database', 'network', 'system-design', 'algorithm', 'java', 'spring-boot',
-  'effective-java', 'neovim', 'conference', 'investment', 'journal', 'reflection'
-]);
+const tagsEnum = z.enum(TAGS);
 
 const posts = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/posts' }),
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/posts',
+    generateId: ({ entry }) => entry.replace(/\.mdx?$/, ''),
+  }),
   schema: z.object({
     title: z.string().optional(),
     description: z.string().default(''),
