@@ -159,8 +159,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
     const whichKeyEl = document.getElementById('vim-whichkey');
     const whichKeyInner = whichKeyEl?.querySelector<HTMLElement>('.vim-whichkey-inner');
+    const whichKeyOverlay = document.getElementById('vim-whichkey-overlay');
     if (whichKeyEl && whichKeyInner) {
-      whichKey.init({ el: whichKeyEl, inner: whichKeyInner });
+      whichKey.init({ el: whichKeyEl, inner: whichKeyInner, overlay: whichKeyOverlay ?? undefined });
     }
 
     // Start the single global keyboard listener (AFTER components are initialized)

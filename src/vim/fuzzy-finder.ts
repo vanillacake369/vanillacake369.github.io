@@ -3,7 +3,7 @@
 import type { FuzzyResult } from './types';
 
 // Page index injected at init time (from inline script in FuzzyFinder.astro)
-let pages: { url: string; title: string }[] = [];
+let pages: { url: string; title: string; excerpt?: string; body?: string; tags?: string[] }[] = [];
 
 // DOM refs
 let overlayEl: HTMLElement | null = null;
@@ -46,7 +46,7 @@ export function init(els: {
 }
 
 /** Inject page list — called once from the inline script in FuzzyFinder.astro */
-export function setPages(list: { url: string; title: string }[]): void {
+export function setPages(list: { url: string; title: string; excerpt?: string; body?: string; tags?: string[] }[]): void {
   pages = list;
 }
 
@@ -100,6 +100,48 @@ export function confirm(): void {
 
 // ── Internal ──────────────────────────────────────────────────────────────────
 
+const previewCache = new Map<string, string>();
+let fetchAbort: AbortController | null = null;
+
+async function fetchPreview(url: string): Promise<void> {
+  // Cancel any in-flight request
+  if (fetchAbort) fetchAbort.abort();
+  fetchAbort = new AbortController();
+
+  // Return cached HTML if available
+  const cached = previewCache.get(url);
+  if (cached) {
+    renderPreviewBody(cached);
+    return;
+  }
+
+  try {
+    const res = await fetch(url, { signal: fetchAbort.signal });
+    if (!res.ok) return;
+    const html = await res.text();
+    // Extract .post-body content from the fetched page
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const body = doc.querySelector('.post-body');
+    const content = body?.innerHTML ?? '';
+    previewCache.set(url, content);
+    // Only render if the selection hasn't changed
+    if (selectedIndex >= 0 && results[selectedIndex]?.url === url) {
+      renderPreviewBody(content);
+    }
+  } catch {
+    // Aborted or network error — ignore
+  }
+}
+
+function renderPreviewBody(html: string): void {
+  if (!previewEl) return;
+  const bodyEl = previewEl.querySelector('.vim-fuzzy-preview-body');
+  if (bodyEl) {
+    bodyEl.classList.remove('vim-fuzzy-preview-loading');
+    bodyEl.innerHTML = html;
+  }
+}
+
 function runSearch(query: string): void {
   currentQuery = query;
   if (!query) {
@@ -114,7 +156,7 @@ function runSearch(query: string): void {
   results = pages
     .filter((p) => p.title.toLowerCase().includes(q))
     .slice(0, 20)
-    .map((p) => ({ url: p.url, title: p.title, excerpt: '' }));
+    .map((p) => ({ url: p.url, title: p.title, excerpt: p.excerpt ?? '', body: p.body, tags: p.tags }));
 
   selectedIndex = results.length > 0 ? 0 : -1;
   renderResults();
@@ -190,7 +232,14 @@ function updateSelection(): void {
 
   if (selectedIndex >= 0 && selectedIndex < results.length) {
     const result = results[selectedIndex];
-    previewEl.innerHTML = `<div class="vim-fuzzy-preview-title">${highlightText(escapeHtml(result.title), currentQuery)}</div>`;
+    const tagsHtml = result.tags?.length
+      ? `<div class="vim-fuzzy-preview-tags">${result.tags.map(t => `<span class="vim-fuzzy-preview-tag">#${escapeHtml(t)}</span>`).join(' ')}</div>`
+      : '';
+    previewEl.innerHTML =
+      `<div class="vim-fuzzy-preview-title">${highlightText(escapeHtml(result.title), currentQuery)}</div>` +
+      tagsHtml +
+      '<div class="vim-fuzzy-preview-body vim-fuzzy-preview-loading">Loading...</div>';
+    fetchPreview(result.url);
   } else {
     previewEl.innerHTML = '<div class="vim-fuzzy-preview-placeholder">Select a result to preview</div>';
   }

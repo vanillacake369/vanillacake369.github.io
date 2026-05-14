@@ -11,6 +11,7 @@ export interface FuzzyResult {
   url: string;
   title: string;
   excerpt: string;
+  body?: string;
   tags?: string[];
 }
 

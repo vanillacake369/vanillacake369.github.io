@@ -4,14 +4,16 @@ import type { WhichKeyGroup } from './types';
 
 let el: HTMLElement | null = null;
 let innerEl: HTMLElement | null = null;
+let overlayEl: HTMLElement | null = null;
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Cache rendered fragments keyed by group identity (avoids re-creating static DOM)
 const renderedCache = new WeakMap<readonly WhichKeyGroup[], DocumentFragment>();
 
-export function init(els: { el: HTMLElement; inner: HTMLElement }): void {
+export function init(els: { el: HTMLElement; inner: HTMLElement; overlay?: HTMLElement }): void {
   el = els.el;
   innerEl = els.inner;
+  overlayEl = els.overlay ?? null;
 }
 
 function buildGroupFragment(groups: readonly WhichKeyGroup[]): DocumentFragment {
@@ -70,6 +72,7 @@ export function show(groups: WhichKeyGroup[]): void {
   }
   innerEl.appendChild(cached.cloneNode(true));
 
+  if (overlayEl) overlayEl.hidden = false;
   el.hidden = false;
   el.removeAttribute('aria-hidden');
   // Force reflow then show
@@ -87,6 +90,7 @@ export function hide(): void {
       el.hidden = true;
       el.setAttribute('aria-hidden', 'true');
     }
+    if (overlayEl) overlayEl.hidden = true;
     hideTimer = null;
   }, 150);
 }
