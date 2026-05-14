@@ -49,9 +49,10 @@ select {
 
   --max-width: 48rem;
 
-  /* Vim UI */
-  --vim-overlay-bg: rgba(0, 0, 0, 0.5);
-  --vim-modal-bg: var(--color-bg);
+  /* Vim UI — glassmorphism */
+  --vim-overlay-bg: rgba(0, 0, 0, 0.35);
+  --vim-panel-bg: rgba(255, 252, 245, 0.82);
+  --vim-panel-border: rgba(0, 0, 0, 0.1);
   --vim-highlight-bg: rgba(255, 214, 0, 0.35);
   --vim-highlight-active-bg: rgba(255, 140, 0, 0.55);
   --spacing-xs: 0.25rem;

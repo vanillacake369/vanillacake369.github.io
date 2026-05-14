@@ -18,6 +18,9 @@
   --body-gradient: none;
 
   /* Vim UI — dark overrides */
+  --vim-overlay-bg: rgba(0, 0, 0, 0.5);
+  --vim-panel-bg: rgba(10, 10, 10, 0.85);
+  --vim-panel-border: rgba(255, 255, 255, 0.08);
   --vim-highlight-bg: rgba(255, 214, 0, 0.2);
   --vim-highlight-active-bg: rgba(255, 165, 0, 0.45);
 }
