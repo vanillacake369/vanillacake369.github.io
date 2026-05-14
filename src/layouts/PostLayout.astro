@@ -495,13 +495,13 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     }
   }
 
-  /* Prose — academic paper body styling */
+  /* Prose — optimized for readability (60-70ch line length) */
   .prose {
     font-family: var(--font-serif);
-    font-size: 1.05rem; /* 살짝 키움 */
-    line-height: 1.6;   /* 연구 기반 최적화 */
+    font-size: 1rem;
+    line-height: 1.65;
     color: var(--color-text);
-    max-width: 1036px;  /* 목표 폭 설정 */
+    max-width: 70ch;
     margin: 0 auto;
   }
 
@@ -669,11 +669,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
 
   @media (max-width: 640px) {
     .post-title {
-      font-size: 1.6rem;
-    }
-
-    .prose {
-      font-size: 1rem;
+      font-size: 1.4rem;
     }
   }
 </style>

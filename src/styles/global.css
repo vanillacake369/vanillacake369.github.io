@@ -47,7 +47,7 @@ select {
   --font-serif: 'Pretendard Variable', 'Pretendard', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --max-width: 820px;
+  --max-width: 70ch;
 
   /* Vim UI */
   --vim-overlay-bg: rgba(0, 0, 0, 0.5);
@@ -62,9 +62,9 @@ select {
   --spacing-2xl: 3rem;
 }
 
-/* Base typography */
+/* Base typography — fluid scaling */
 html {
-  font-size: 17px;
+  font-size: 16px;
   scroll-behavior: smooth;
 }
 
@@ -73,7 +73,7 @@ body {
   background-image: var(--body-gradient, linear-gradient(to bottom, rgba(77, 124, 87, 0.025), transparent 220px));
   color: var(--color-text);
   font-family: var(--font-sans);
-  line-height: 1.75;
+  line-height: 1.65;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -127,9 +127,11 @@ pre:not(.shiki):not(.astro-code) code {
 
 pre.shiki,
 pre.astro-code {
-  border-radius: 10px;
+  border-radius: 8px;
   overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.5;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5em 0;
   background-color: var(--code-block-bg, var(--color-code-bg));
   color: var(--code-block-fg, inherit);
 }
@@ -141,7 +143,7 @@ pre.astro-code code {
   padding: 0;
   border-radius: 0;
   color: inherit;
-  font-size: inherit;
+  font-size: 0.82em;
 }
 
 /* Code block theme — light mode */
@@ -240,12 +242,26 @@ sup:target,
   }
 }
 
-/* Responsive */
-@media (max-width: 640px) {
+/* Responsive typography — mobile first, scale up */
+@media (min-width: 768px) {
   html {
-    font-size: 16px;
+    font-size: 17px;
   }
+}
 
+@media (min-width: 1024px) {
+  html {
+    font-size: 17.5px;
+  }
+}
+
+@media (min-width: 1440px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
   .site-wrapper {
     padding: 0 var(--spacing-md);
   }
