@@ -3,21 +3,29 @@ title: "lua 테스트 방법"
 description: "nvim 에서 플러그인 설치나 설정 시에는 lua 언어를 사용한다."
 date: 2025-11-11
 tags: [neovim]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 nvim 에서 플러그인 설치나 설정 시에는 lua 언어를 사용한다.
+
 따라서 필자는 lua 테스트 코드 작성법을 알아야한다고 생각했다.
+
 어느 언어나 설정이든 테스트는 무조건 필요하기 때문이다.
+
 따라서 Lua 언어는 어떻게 테스트하는지 알아보았다.
 
-# What ? 무엇을 배움?
+# What ?
+
+무엇을 배움?
 
 ---
 
@@ -66,9 +74,3 @@ OK
 ## Busted
 
 > 💡 어떻게 하면 nvim 플러그인들을 제대로 설정했는지 테스트할 수 있을까?
-
-
-
-# Reference
-
----

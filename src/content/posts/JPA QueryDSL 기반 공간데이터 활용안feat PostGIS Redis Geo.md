@@ -2,25 +2,34 @@
 title: "JPA & QueryDSL 기반 공간데이터 활용안(feat. PostGIS, Redis Geo)"
 description: "공간데이터란 무엇이고, 주의점은 무엇인지, 또한 이를 Spring 단에서 처리하며 맞닥드렸던 문제점과 해결방법에 대해 나열해보고자 한다."
 date: 2025-07-28
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 공간데이터란 무엇이고, 주의점은 무엇인지, 또한 이를 Spring 단에서 처리하며 맞닥드렸던 문제점과 해결방법에 대해 나열해보고자 한다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ## 공간 데이터(Spatial Data)란?
 
-공간 데이터(Spatial Data)는 지리적 위치 정보를 포함한 데이터를 말하며, 실제 세계의 객체나 사건, 현상이 가지는 위치(좌표, 주소 등)를 기반으로 표현됩니다. 주로 점(Point), 선(Line), 면(Polygon)의 형태로 나타납니다.
+공간 데이터(Spatial Data)는 지리적 위치 정보를 포함한 데이터를 말하며, 실제 세계의 객체나 사건, 현상이 가지는 위치(좌표, 주소 등)를 기반으로 표현됩니다.
+
+주로 점(Point), 선(Line), 면(Polygon)의 형태로 나타납니다.
 
 - **점(Point)**: 특정 위치를 나타내는 단일 좌표 (예: 상점, 버스 정류장).
 - **선(LineString)**: 두 개 이상의 점을 연결하여 형성되는 객체 (예: 도로, 강).
@@ -52,7 +61,9 @@ SRID는 정확한 위치 표현과 좌표계 변환을 가능하게 합니다.
 
 ## R-Tree와 공간지리인덱스(Spatial Index)
 
-공간 데이터는 2차원 이상의 다차원 구조로 인해 일반적인 데이터베이스 인덱스(B-Tree 등)로는 효율적이지 않습니다. 이를 위해 공간지리인덱스가 사용됩니다.
+공간 데이터는 2차원 이상의 다차원 구조로 인해 일반적인 데이터베이스 인덱스(B-Tree 등)로는 효율적이지 않습니다.
+
+이를 위해 공간지리인덱스가 사용됩니다.
 
 ### R-Tree
 
@@ -147,7 +158,9 @@ Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 
 
 복잡한 공간 연산 및 대규모 GIS는 PostGIS와 같은 전문 데이터베이스가 더 적합합니다.
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -175,7 +188,6 @@ Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 
 |  | ST_MakePoint / ST_SetSRID | 점(포인트) 좌표 생성 및 SRID 설정 함수 |
 
 ![](/images/velog/dcbc1d40732bc8bb.png)
-
 
 ## 컴포넌트 설명
 
@@ -225,7 +237,7 @@ public class PostGisJPQLTemplate extends JPQLTemplates {
 
     /**
      * KNN 알고리즘 사용하는 PostGis <-> 함수 선언
-     * @see <a href="https://postgis.net/documentation/faq/spatial-indexes/">How do I use spatial indexes?</a>
+     * @see <a href="https://postgis.net/documentation/faq/spatial-indexes/[^2]">How do I use spatial indexes?</a>
      */
     public static NumberExpression<Double> distanceKnn(Path<Point> point, Expression<Point> other) {
         return Expressions.numberTemplate(
@@ -263,17 +275,23 @@ public void setEntityManager(EntityManager entityManager) {
 
 따라서 `<->` 를 인식하게끔 해주기 위해 다음 두 단계 작업을 처리해주었다.
 
-1. Dialect 를 직접 선언
+1.
+
+Dialect 를 직접 선언
 2. resoureces/META-INF 에 직접 선언한 Dialect 를 등록
     1. `src/main/resources/META-INF/services/org.hibernate.boot.model.FunctionContributor`파일을 생성한다.
-    2. 해당 파일에 직접 구현한 CustomFunctionContributor를 등록한다.
-        1. 패키지명.컨트리뷰터이름 형태로 등록
+    2.
+
+해당 파일에 직접 구현한 CustomFunctionContributor를 등록한다.
+        1.
+
+패키지명.컨트리뷰터이름 형태로 등록
 
 ```java
 /**
  * PostGis Function 을 사용하기 위한 Custom Dialect Function
  *
- * @see <a href="https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0">[hibernate 6] custom 함수 등록 방법</a>
+ * @see <a href="https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0[^4]">[hibernate 6] custom 함수 등록 방법</a>
  */
 public class CustomPostGisDialect extends SpatialFunctionContributor {
 
@@ -296,7 +314,6 @@ public class CustomPostGisDialect extends SpatialFunctionContributor {
 ![](/images/velog/63f4f0ca7948f653.png)
 
 ![](/images/velog/260bdc4b874bb724.png)
-
 
 ### 동적 조건부절
 
@@ -431,7 +448,6 @@ redisTemplate.opsForZSet().remove("locations", "loc1");
 
 # 총평
 
----
 
 예제가 없어서 그냥 SQL 로 짜면 될 것을 굳이굳이 Querydsl 로 하겠다고 몇 번의 삽질을 했는지 모른다.
 
@@ -443,14 +459,7 @@ redisTemplate.opsForZSet().remove("locations", "loc1");
 - Spatial Index 사용, 미사용의 성능 최대치 차이점
 - SQL 에 대한 커스텀 Dialect 선언 시 Multi DB 사용 가능한지
 
-# Reference
-
----
-
-https://postgis.net/workshops/postgis-intro/geography.html
-
-https://postgis.net/documentation/faq/spatial-indexes/
-
-https://redis.io/docs/latest/develop/data-types/geospatial/
-
-https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0
+[^1]: https://postgis.net/workshops/postgis-intro/geography.html <https://postgis.net/workshops/postgis-intro/geography.html>
+[^2]: https://postgis.net/documentation/faq/spatial-indexes/ <https://postgis.net/documentation/faq/spatial-indexes/>
+[^3]: https://redis.io/docs/latest/develop/data-types/geospatial/ <https://redis.io/docs/latest/develop/data-types/geospatial/>
+[^4]: https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0 <https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0>

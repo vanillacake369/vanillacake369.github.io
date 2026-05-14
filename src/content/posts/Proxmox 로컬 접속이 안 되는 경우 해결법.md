@@ -3,14 +3,13 @@ title: "Proxmox 로컬 접속이 안 되는 경우 해결법"
 description: "**목적**: Proxmox와 ngrok 서비스가 정상 작동하는지 확인"
 date: 2025-12-15
 tags: [system-design, homelab, network]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "Proxmox Homelab", order: 2 }
 ---
 
 # Issue : 로컬 연결이 안 됨
 
----
 
 - **증상**: Proxmox VE 로컬 접속(localhost:8006)은 정상 작동하지만, 외부 접속 시 아무것도 표시되지 않음
 - **환경**: Proxmox VE 9.1, ngrok을 통한 HTTPS 터널링
@@ -18,7 +17,6 @@ draft: false
 
 # Debug : 가설 & 확인
 
----
 
 > 💁‍♂️ 총 8 단계에 나눠서 추론을 해보았다.
 
@@ -48,8 +46,6 @@ systemctl status pveproxy
 - ✅ pveproxy가 *:8006에서 IPv6로 리스닝 중
 - ✅ pveproxy 서비스 정상 작동
 
-
-
 ### 2단계: 방화벽 및 네트워크 정책 확인 ✅
 
 **목적**: 방화벽이나 네트워크 정책으로 인한 차단 여부 확인
@@ -72,8 +68,6 @@ pvesh get /nodes/pve/firewall/options
 - ✅ Proxmox 자체 방화벽도 비활성화 상태
 - 🔍 **결론**: 방화벽 문제가 아님
 
-
-
 ### 3단계: 로컬 연결 테스트 ✅
 
 **목적**: Proxmox 서비스 자체에 문제가 없는지 확인
@@ -92,8 +86,6 @@ telnet localhost 8006
 
 - ✅ 모든 로컬 접속이 정상적으로 HTML 페이지 반환
 - ✅ Proxmox 웹 서비스 자체는 문제없음
-
-
 
 ### 4단계: ngrok 터널 테스트 🔴
 
@@ -122,8 +114,6 @@ Moved Permanently
 - 🔍 **원인 파악**: ngrok 설정에서 `"addr": "<http://localhost:8006>"`으로 HTTP를 사용
 - 💡 **문제점**: Proxmox VE는 HTTPS 전용 서비스인데 HTTP로 터널링 시도
 
-
-
 ### 5단계: ngrok 설정 수정 ✅
 
 **목적**: HTTP → HTTPS 터널링으로 변경
@@ -142,8 +132,6 @@ ngrok http <https://localhost:8006>
 
 - ✅ ngrok을 통한 외부 접속 성공
 - ✅ Proxmox 로그인 페이지까지 표시됨
-
-
 
 ### 6단계: 웹 리소스 로딩 문제 발견 🔴
 
@@ -168,8 +156,6 @@ find /usr -name "StdWorkspace.js" 2>/dev/null
 
 ```
 
-
-
 ### 7단계: Proxmox 패키지 상태 확인 🔴
 
 **목적**: 웹 리소스 파일이 누락된 원인 파악
@@ -180,7 +166,7 @@ find /usr -name "StdWorkspace.js" 2>/dev/null
 dpkg -l | grep -E "(pve-manager|proxmox)"
 
 # 패키지 파일 목록 확인
-dpkg -L pve-manager | grep -E "\\.(js|css|html)$"
+dpkg -L pve-manager | grep -E "\.(js|css|html)$"
 
 # 패키지 무결성 확인
 dpkg -V pve-manager
@@ -201,8 +187,6 @@ Not Upgrading: 113 packages
 - 🔴 **113개 패키지가 업그레이드되지 않은 상태**
 - 🔴 **Enterprise repository 설정 문제**
 - 💡 **추정 원인**: 의존성 충돌이나 부분적 업데이트로 인한 불완전한 설치
-
-
 
 ### 8단계: 패키지 재설치 및 복구 ✅
 
@@ -251,11 +235,8 @@ systemctl restart pveproxy
 3. **curl을 통한 세밀한 테스트**: HTTP 응답 코드와 헤더 분석
 4. **패키지 무결성 검증**: `dpkg -V`를 통한 파일 손상 확인
 
-
-
 # Solution
 
----
 
 두 개의 독립적인 문제가 연쇄적으로 발생한 경우였습니다:
 
@@ -277,7 +258,6 @@ chmod +x ~/ngrok-pve.sh
 
 # Proxmox Setup Tutorial
 
----
 
 [https://www.youtube.com/watch?v=qmSizZUbCOA&t=205s](https://www.youtube.com/watch?v=qmSizZUbCOA&t=205s)
 [https://github.com/TechHutTV/homelab/blob/main/storage/README.md](https://github.com/TechHutTV/homelab/blob/main/storage/README.md)
@@ -292,7 +272,6 @@ chmod +x ~/ngrok-pve.sh
 
 # Milestone
 
----
 
 - [ ] Proxmox iso → Ventoy
 - [ ] Proxmox 설치
@@ -371,9 +350,9 @@ graph TB
 ```
 
 # Blueprint of home-lab
+
 # Reference 📚
 
----
 
 1. [https://www.youtube.com/watch?v=yUyxJr2xboI&t=1s](https://www.youtube.com/watch?v=yUyxJr2xboI&t=1s)
 2. [https://www.youtube.com/watch?v=f-x5cB6qCzA&t=553s](https://www.youtube.com/watch?v=f-x5cB6qCzA&t=553s)

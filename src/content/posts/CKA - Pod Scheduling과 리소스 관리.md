@@ -2,31 +2,24 @@
 title: "CKA - Pod Scheduling과 리소스 관리"
 description: "Kubernetes 스케줄링, Taint/Toleration, Affinity, PriorityClass, Static Pod"
 date: 2025-12-25
-tags: [kubernetes, scheduling]
-category: uncategorized
+tags: [kubernetes, journal]
 lang: ko
 draft: false
+series: { id: "Kubernetes CKA", order: 3 }
 ---
 
 ## Resource: Download Kubernetes Certificate Health Check Spreadsheet
 
-
-
 ## (2025 Updates) Custom Resource Definition (CRD)
-
-
 
 ## 여기서 resources 에 해당하는 리소스명을 찾으려면 ##
 
-
-
 ## kubectl api-resources 를 명령하고 확인한다 ##
-
-
 
 ## Taints & Tolerations
 
 ### Taints 란 ??
+
 ### Tolerations 란 ??
 ### 문제 1 :
 
@@ -34,23 +27,36 @@ draft: false
 
 ### **PriorityClass 란 ??**
 
-`PriorityClass`는 Pod에 **상대적인 중요도**를 부여하는 리소스이다. 
+`PriorityClass`는 Pod에 **상대적인 중요도**를 부여하는 리소스이다.
+
 클러스터의 자원이 부족할 때 어떤 Pod를 먼저 실행하고, 어떤 Pod를 희생(Eviction)시킬지 결정하는 기준이 된다
 **우선순위 선언문인 PriorityClass 는 Cluster Scoped Resource 이며 Pod 수준에서 이를 매핑하여 우선순위를 지정하도록 처리한다**
 
 ### 원리
 
-1. 등록
-2. 매핑(Admission Control)
-3. 큐잉 단계(Scheduling Queueing)
-4. 선점(Preemption)
+1.
+
+등록
+2.
+
+매핑(Admission Control)
+3.
+
+큐잉 단계(Scheduling Queueing)
+4.
+
+선점(Preemption)
 
 ### 스케줄링 우선순위
 
 자원이 꽉 찬 클러스터에 높은 우선순위의 Pod가 들어오면 **선점(Preemption)** 로직이 작동합니다.
 
-1. 스케줄러는 낮은 우선순위의 Pod를 찾아 **강제 종료(Eviction)** 시킵니다.
-2. 확보된 자원에 높은 우선순위의 Pod를 배치합니다.
+1.
+
+스케줄러는 낮은 우선순위의 Pod를 찾아 **강제 종료(Eviction)** 시킵니다.
+2.
+
+확보된 자원에 높은 우선순위의 Pod를 배치합니다.
 
 ### 적용 & 확인
 
@@ -96,13 +102,19 @@ kubectl describe pods ${pod-이름} -n ${namespace-이름}
 Create a new PriorityClass named high-priority for user-workloads with a
 value that is one less than the highest existing user-defined priority class
 value.
+
 Patch the existing Deployment busybox-logger running in the priority
 namespace to use the high-priority priority class.
+
 Ensure that the busybox-logger Deployment rolls out successfully with the
 new priority class set.
+
 It is expected that Pods from other Deployments running in the priority
 namespace are evicted.
-Do not modify other Deployments running in the priority namespace. Failure
+
+Do not modify other Deployments running in the priority namespace.
+
+Failure
 to do so may result in a reduced score.
 
 ```bash
@@ -152,9 +164,15 @@ API 서버를 거치지 않고, **특정 노드의 kubelet이 직접 관리**하
 
 ### 원리
 
-1. Monitoring
-2. Static Pod 실행
-3. Mirroring
+1.
+
+Monitoring
+2.
+
+Static Pod 실행
+3.
+
+Mirroring
 
 ```mermaid
 graph TD
@@ -211,7 +229,9 @@ graph TD
 ### StaticPod 삭제방법
 
 Static Pod 는 `/etc/kubernetes/manifests` 안에 있는 yaml 로 돌아가기 때문에 생명주기가 철저히 해당 파일에 의존적이다.
+
 또한 kubectl get pods 로 보이는 static pod 는 사실 API 서버에서 생성된 Mirror Pod 이기 때문에 kubectl delete 로 지운다고해서 원본이 제거되는 것이 아니다.
+
 따라서 Static Pod 를 제거하고자 한다면 `/etc/kubernetes/manifests` 안에 있는 yaml 를 제거하거나 이동시켜주면 된다.
 
 ### 적용 & 확인

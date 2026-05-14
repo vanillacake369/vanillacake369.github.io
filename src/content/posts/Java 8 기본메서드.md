@@ -3,14 +3,12 @@ title: "Java 8 기본메서드"
 description: "Iterable의 기본 메소드"
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 ## 무엇을 공부하였는가 🤔
 
----
 
 Iterable의 기본 메소드
 
@@ -33,7 +31,6 @@ Comparator의 기본 메소드 및 스태틱 메소드
 
 ## 어떻게 쓰는가 ☝️
 
----
 
 ### forEach
 
@@ -110,9 +107,13 @@ int sum = widgets.stream()
 > 스트림 파이프라인은 
 > 소스(배열, 컬렉션, 생성기 함수, I/O 채널 등일 수 있음), 
 > 0개 이상의 중간 작업(필터(Predicate)과 같이 스트림을 다른 스트림으로 변환하는)
-> 종료 작업(count() 또는 forEach(Consumer)와 같은 결과 또는 부작용 생성). 으로 구성된다.
+> 종료 작업(count() 또는 forEach(Consumer)와 같은 결과 또는 부작용 생성).
+
+으로 구성된다.
 > 
-> 스트림은 게으르다. 소스 데이터에 대한 계산은 터미널 작업이 시작될 때만 수행되며 소스 요소는 필요한 경우에만 소비됩니다.
+> 스트림은 게으르다.
+
+소스 데이터에 대한 계산은 터미널 작업이 시작될 때만 수행되며 소스 요소는 필요한 경우에만 소비됩니다.
 
 ***intermediate operation은 stream을 반환하고 terminal operation은 stream을 반환하지 않는다.***
 
@@ -125,17 +126,28 @@ int sum = widgets.stream()
 
 - `collect` <리턴 결과를 만들어주는 작업>
 
-
 **Stream은 다음과 같은 특징을 지닌다**
 
-1. 실행처리에 대한 저장소가 아니다.
+1.
+
+실행처리에 대한 저장소가 아니다.
 *// 단순히 source를 아웃소싱하여 termainl operation에 의한 실행처리가 되어질 뿐, 이전 데이터를 저장하는 저장소가 아니다.*
-2. 반드시 마지막에 terminal operation이 와야 작업 처리가 된 스트림이 반환된다.
+2.
+
+반드시 마지막에 terminal operation이 와야 작업 처리가 된 스트림이 반환된다.
 
 ### parallel
 
-> `Stream.parallel()`은 Stream에서 수행되는 작업을 병렬로 처리하도록 합니다. 멀티 쓰레드에서 병렬로 처리되기 때문에 속도는 빠르지만, `forEach()`에서 출력되는 순서는 리스트에 저장된 순서와 다릅니다. 또한, 실행할 때마다 처리되는 쓰레드의 타이밍이 다르기 때문에 결과가 달라질 수 있습니다. 그렇기 때문에 처리 순서가 달라져도 결과에 영향을 주지 않을 때만 병렬로 처리해야 합니다.
-> 병렬 stream 처리가 항상 좋은 것만은 아님!! 따라서 실제로 stream이나 다른 로직 케이스들을 성능비교해보는 게 가장 좋음!
+> `Stream.parallel()`은 Stream에서 수행되는 작업을 병렬로 처리하도록 합니다.
+
+멀티 쓰레드에서 병렬로 처리되기 때문에 속도는 빠르지만, `forEach()`에서 출력되는 순서는 리스트에 저장된 순서와 다릅니다.
+
+또한, 실행할 때마다 처리되는 쓰레드의 타이밍이 다르기 때문에 결과가 달라질 수 있습니다.
+
+그렇기 때문에 처리 순서가 달라져도 결과에 영향을 주지 않을 때만 병렬로 처리해야 합니다.
+> 병렬 stream 처리가 항상 좋은 것만은 아님!!
+
+따라서 실제로 stream이나 다른 로직 케이스들을 성능비교해보는 게 가장 좋음!
 
 ```java
 List<String> list =
@@ -147,7 +159,6 @@ stream.parallel().forEach(System.out::println);
 
 ## 왜 쓰는가 ❓
 
----
 
 ### Stream을 사용하는 이유
 
@@ -157,7 +168,6 @@ stream.parallel().forEach(System.out::println);
 
 ## 레퍼런스 🔍
 
----
 
 - forEach [https://www.baeldung.com/foreach-java](https://www.baeldung.com/foreach-java)
 - Comparator [https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html](https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html)

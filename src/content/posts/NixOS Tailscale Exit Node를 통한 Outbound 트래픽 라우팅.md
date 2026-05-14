@@ -3,14 +3,13 @@ title: "NixOS Tailscale Exit Node를 통한 Outbound 트래픽 라우팅"
 description: "공공 WiFi(카페, 공항, 호텔 등)는 다음과 같은 보안 위협에 노출됩니다:"
 date: 2026-01-27
 tags: [homelab, nix]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "NixOS Ecosystem", order: 11 }
 ---
 
 # WHY
 
----
 
 ### 공공 WiFi의 위험성
 
@@ -25,7 +24,7 @@ draft: false
 
 홈랩 서버를 VPN Exit Node로 사용하면:
 
-- 모든 트래픽이 **암호화된 WireGuard 터널**을 통과
+- 모든 트래픽이 **암호화된 WireGuard[^13] 터널**을 통과
 - 인터넷에는 **홈랩의 공인 IP**로만 노출
 - DNS 쿼리도 터널을 경유하여 **DNS Leak 방지**
 - 별도 VPN 서비스 비용 없이 **자체 인프라** 활용
@@ -39,16 +38,13 @@ draft: false
 | 로그 | 업체의 no-log 정책 신뢰 필요 | 직접 로그 정책 결정 |
 | 속도 | 서버 위치에 따라 변동 | 홈 인터넷 대역폭 직접 사용 |
 
-
-
-
 # WHAT
 
----
 
 ### Tailscale Exit Node란?
 
 Tailscale 네트워크의 특정 노드를 **모든 인터넷 트래픽의 출구(Exit)**로 지정하는 기능입니다.
+
 클라이언트의 트래픽이 해당 노드를 경유하여 인터넷으로 나갑니다.
 
 ### 이 홈랩에서의 구성 요소
@@ -82,6 +78,7 @@ NixOS Host
 ```
 
 Tailscale의 기본 `divert` 모드는 **netfilter/iptables를 우회**합니다.
+
 이 서버에서 그렇게 되면:
 
 - VLAN 격리가 무력화
@@ -92,11 +89,8 @@ Tailscale의 기본 `divert` 모드는 **netfilter/iptables를 우회**합니다
 따라서 `nodivert`로 Tailscale이 netfilter 안에서 동작하게 강제하고,
 Exit Node에 필요한 MASQUERADE 규칙만 수동으로 추가합니다.
 
-
-
 # HOW
 
----
 
 ### 트래픽 흐름
 
@@ -189,7 +183,7 @@ flowchart LR
 
 ### 서버 설정 (NixOS)
 
-`modules/nixos/tailscale.nix`에 선언된 핵심 설정:
+`modules/nixos/tailscale.nix`[^4]에 선언된 핵심 설정:
 
 ```nix
 # 1. Exit Node 광고
@@ -205,9 +199,9 @@ boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = 1;
 
 # 3. 수동 MASQUERADE (nodivert 보완)
 networking.firewall.extraCommands = ''
-  iptables -t nat -A POSTROUTING \\
-    -s 100.64.0.0/10 \\
-    -o vmbr0 \\
+  iptables -t nat -A POSTROUTING \
+    -s 100.64.0.0/10 \
+    -o vmbr0 \
     -j MASQUERADE
 '';
 
@@ -231,7 +225,9 @@ tailscale set --exit-node=
 
 1. `just deploy` — NixOS 재빌드 적용
 2. [Tailscale Admin Console](https://login.tailscale.com/admin/machines) → 홈랩 노드 → **Edit route settings** → **Use as exit node** 활성화
-3. 클라이언트에서 `tailscale set --exit-node=100.70.221.61`
+3.
+
+클라이언트에서 `tailscale set --exit-node=100.70.221.61`
 
 ### 검증 방법
 
@@ -248,32 +244,13 @@ sudo iptables -t nat -L POSTROUTING -v -n | grep MASQ
 
 ```
 
-
-
-
-
-# REFERENCE
-
----
-
-### 프로젝트 내 관련 파일
-
-| 파일 | 역할 |
-| --- | --- |
-| [`modules/nixos/tailscale.nix`](https://www.notion.so/modules/nixos/tailscale.nix) | Tailscale 서비스, Exit Node, MASQUERADE 규칙 |
-| [`lib/domains/network.nix`](https://www.notion.so/lib/domains/network.nix) | 네트워크 도메인 SSOT (WAN, VLAN, Tailscale) |
-| [`modules/nixos/network.nix`](https://www.notion.so/modules/nixos/network.nix) | 브릿지, VLAN, NAT, 방화벽 설정 |
-| [`justfile`](https://www.notion.so/justfile) | 배포 타겟 해석 (LAN → Tailscale fallback) |
-
-
-### Tailscale 공식 문서
-
-- [Exit Nodes](https://tailscale.com/kb/1103/exit-nodes) — Exit Node 개념 및 설정
-- [Netfilter Mode](https://tailscale.com/kb/1snip/netfilter) — nodivert/on/off 차이점
-- [Linux Router](https://tailscale.com/kb/1snip/linux-router) — Linux에서 라우터로 사용
-
-### 관련 기술
-
-- [WireGuard](https://www.wireguard.com/) — Tailscale의 기반 VPN 프로토콜
-- [CGNAT (RFC 6598)](https://datatracker.ietf.org/doc/html/rfc6598) — 100.64.0.0/10 대역 정의
-- [iptables MASQUERADE](https://www.netfilter.org/documentation/) — Linux NAT 구현
+[^4]: `modules/nixos/tailscale.nix` <https://www.notion.so/modules/nixos/tailscale.nix>
+[^5]: `lib/domains/network.nix` <https://www.notion.so/lib/domains/network.nix>
+[^6]: `modules/nixos/network.nix` <https://www.notion.so/modules/nixos/network.nix>
+[^7]: `justfile` <https://www.notion.so/justfile>
+[^9]: Exit Nodes <https://tailscale.com/kb/1103/exit-nodes>
+[^10]: Netfilter Mode <https://tailscale.com/kb/1snip/netfilter>
+[^11]: Linux Router <https://tailscale.com/kb/1snip/linux-router>
+[^13]: WireGuard <https://www.wireguard.com/>
+[^14]: CGNAT (RFC 6598) <https://datatracker.ietf.org/doc/html/rfc6598>
+[^15]: iptables MASQUERADE <https://www.netfilter.org/documentation/>

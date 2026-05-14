@@ -2,18 +2,15 @@
 title: "TestContainer, DBRider 기반 독립된 테스트 처리기"
 description: "TestContainer, DBRider 를 통해 리소스 미러링을 하여 어디서든 동작하는 테스트 환경을 만들어주자"
 date: 2025-03-02
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/346e85a54834b08e.png)
 
-
 # Episode 📜
 
----
 
 간혹 세심한 통합 테스트를 통해 API 가 (혹은 API 들 간의 ) 구현 검증을 해야할 때가 있다.
 
@@ -65,7 +62,6 @@ draft: false
 
 # About 💁‍♂️
 
----
 
 ## TestContainer
 
@@ -85,8 +81,16 @@ TestContainer 를 통해 아래와 같이 구성해줄 수 있다.
     - 이는 어떤 자원을 가져오냐에 따라 다르다.
 - 테스트케이스에 TestContainer 컨테이너 환경을 적용해준다.
 
-> Q. 잠시만요,,,! H2 사용하면 되지 왜 TestContainer 를 쓰죠??
-> A. H2 와 MySQL 이 같은가? 아니다.
+> Q.
+
+잠시만요,,,!
+
+H2 사용하면 되지 왜 TestContainer 를 쓰죠??
+> A.
+
+H2 와 MySQL 이 같은가?
+
+아니다.
 > 테스트환경을 제공한다는 것은 개발환경을 미러링하는 것과 같다.
 > 즉, 동일한 버전의 동일한 자원을 사용해야 한다는 것이다.
 > 예컨대 H2 는 Pessismistic Lock 을 걸 수 없다.
@@ -109,7 +113,6 @@ yaml, json 파일을 통해 데이터를 주입하여 테스트를 실행하고,
 
 # Apply 🧑‍💻
 
----
 
 ## TestContainer
 
@@ -124,7 +127,9 @@ testImplementation 'org.testcontainers:mysql:1.20.4' // MySQL TestContainer
 
 또한 도커를 꼭 켜주어야 한다. 
 
-### 1. TestContainer Image
+### 1.
+
+TestContainer Image
 
 테스트 컨테이너는 도커 이미지를 사용하여 테스트 케이스를 실행한 뒤, 컨테이너를 죽인다.
 
@@ -222,7 +227,9 @@ public class MySQLFixture extends MySQLContainer<MySQLFixture> {
 }
 ```
 
-### 2. TestContainer Setup
+### 2.
+
+TestContainer Setup
 
 사전 데이터를 준비하게끔 한다.
 
@@ -255,7 +262,9 @@ JdbcDatabaseDelegate jdbcDatabaseDelegate = new JdbcDatabaseDelegate(mySQLContai
 ScriptUtils.runInitScript(jdbcDatabaseDelegate, "sql/data.sql");
 ```
 
-### 3. Apply TestContainer to Test Case
+### 3.
+
+Apply TestContainer to Test Case
 
 스프링은 AOP 와 어노테이션을 통해 쉽게 코드를 작성하게끔 할 수 있다.
 
@@ -570,18 +579,28 @@ class MemberJpaRepositoryV2Test {
 
 ## To Be Discussed 👀
 
----
 
-1. DBMS 사용 중이라면 Flyway, Liquibase 를 사용하여 개발과 테스트를 용이하게 할 수 있다.
-    1. 테스트 시, 개발환경을 똑같이 미러링할 수 있다. 
-    2. 아쉽게도 Flyway 는 자동 DB 변경점 감지를 지원 중이지 않는다. ( [~~자동감지에 대해 관심이 없다고 못을 박아버리고 이슈를 close 했다 ㅋ,,, flyway 를 좋게 보지 못 하는 이유 중 하나다,,~~](https://github.com/flyway/flyway/issues/648) )
-2. DB Rider 는 sql 형식의 포맷을 지원하지 않는 모양이다.
-    1. 필자가 아는 한해서는 DB Rider 는 Hibernate 를 통해 각 파일형식에 따라 값을 읽어서 저장해주고 테스트 이후에 테스트 데이터를 날려줄 수 있게끔 한다.
-    2. 커스터마이제이션을 통해 sql 파일도 지원할 수 있게 하면 어떨까 싶다.
+1.
+
+DBMS 사용 중이라면 Flyway, Liquibase 를 사용하여 개발과 테스트를 용이하게 할 수 있다.
+    1.
+
+테스트 시, 개발환경을 똑같이 미러링할 수 있다. 
+    2.
+
+아쉽게도 Flyway 는 자동 DB 변경점 감지를 지원 중이지 않는다. ( [~~자동감지에 대해 관심이 없다고 못을 박아버리고 이슈를 close 했다 ㅋ,,, flyway 를 좋게 보지 못 하는 이유 중 하나다,,~~](https://github.com/flyway/flyway/issues/648) )
+2.
+
+DB Rider 는 sql 형식의 포맷을 지원하지 않는 모양이다.
+    1.
+
+필자가 아는 한해서는 DB Rider 는 Hibernate 를 통해 각 파일형식에 따라 값을 읽어서 저장해주고 테스트 이후에 테스트 데이터를 날려줄 수 있게끔 한다.
+    2.
+
+커스터마이제이션을 통해 sql 파일도 지원할 수 있게 하면 어떨까 싶다.
 
 # Reference 📚
 
----
 
 https://dev.gmarket.com/76
 

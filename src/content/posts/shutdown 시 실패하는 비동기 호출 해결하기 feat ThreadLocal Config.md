@@ -2,8 +2,7 @@
 title: "shutdown 시 실패하는 비동기 호출 해결하기 (feat. ThreadLocal Config)"
 description: "shutdown 시 비동기 프로세스가 interrupt 되는 원인이 무엇이며 어떻게 이를 해결할 수 있을까?"
 date: 2025-03-02
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
@@ -12,15 +11,20 @@ draft: false
 
 # Episode 📜
 
----
 
 스케줄러를 통해 이메일 전송을 비동기적으로 처리하는 로직이 있었다.
 
 아래와 같이 작성되었다.
 
-1. 이메일 전송 대상자 자료구조를 입력값으로 받음
-2. 이메일 전송 대상자들에 대해 이메일 전송 이벤트를 publish
-3. 이메일 전송 이벤트들에 대해 listen, 비동기적으로 aws ses 호출
+1.
+
+이메일 전송 대상자 자료구조를 입력값으로 받음
+2.
+
+이메일 전송 대상자들에 대해 이메일 전송 이벤트를 publish
+3.
+
+이메일 전송 이벤트들에 대해 listen, 비동기적으로 aws ses 호출
 
 ```java
 @Slf4j
@@ -85,14 +89,12 @@ public class AutoMailEventListener {
 
 ![](/images/velog/98a76edb97bb3139.png)
 
-
 신기하게도 `@Async` 를 풀고 Sync 로 처리하면 성공한다.
 
 그렇다면 과연 무엇이 문제였을까?
 
 # Reason 🤷‍♂️
 
----
 
 우리는 두 번째 사진에 주목해봐야한다.
 
@@ -100,7 +102,9 @@ public class AutoMailEventListener {
 
 이 에러를 보면 무엇인가로 인해 `InterruptedException` 이 발생했다는 것을 알 수 있다.
 
-그렇다. 가장 근본원인은 Thread 간 `Interrupt`가 발생했다는 것이다.
+그렇다.
+
+가장 근본원인은 Thread 간 `Interrupt`가 발생했다는 것이다.
 
 이에 대해서 아래에 대해 살펴봐야 한다.
 
@@ -124,7 +128,6 @@ public class AutoMailEventListener {
 
 ![](/images/velog/65be78a9d830f667.png)
 
-
 ***Executor*** 인터페이스에는 실행을 위해 ***Runnable*** 인스턴스를 execute 하는 단일 execute 메서드를 가지고 있다.
 
 ```java
@@ -132,7 +135,7 @@ Executor executor = Executors.newSingleThreadExecutor();
 executor.execute(() -> System.out.println("Hello World"));
 ```
 
-ExecutorService 인터페이스에는 작업을 제어하고 서비스 종료를 관리하는 많은 메서드가 포함되어 있다. 
+ExecutorService 인터페이스에는 작업을 제어하고 서비스 종료를 관리하는 많은 메서드가 포함되어 있다.
 
 이 인터페이스를 사용하면 실행을 위해 작업을 submit하고 반환된 Future 인스턴스를 사용하여 작업을 제어할 수도 있다.
 
@@ -144,7 +147,9 @@ String result = future.get();
 
 ```
 
-Executor, ExecutorService 는 로우 레벨 인스턴스이다. 실질적으로 우리가 사용할 때는 이들을 상위에서 한 번 감싼 *ThreadPoolExecutor* 를 사용하게된다.
+Executor, ExecutorService 는 로우 레벨 인스턴스이다.
+
+실질적으로 우리가 사용할 때는 이들을 상위에서 한 번 감싼 *ThreadPoolExecutor* 를 사용하게된다.
 
 그렇다면 *ThreadPoolExecutor*  의 역할은 무엇일까?
 
@@ -206,11 +211,11 @@ assertEquals(1, executor.getQueue().size());
 
 ![](/images/velog/dc924cff8b403c9e.png)
 
-우리가 새 스레드를 생성하게되면 해당 스레드는 *NEW* 상태가 된다. 
+우리가 새 스레드를 생성하게되면 해당 스레드는 *NEW* 상태가 된다.
 
 프로그램이 *start()* 메서드를 사용하여 스레드를 시작할 때까지 이 상태가 유지된다.
 
-스레드에서 *start()* 메서드를 호출하면 스레드는 *RUNNABLE* 상태가 된다. 
+스레드에서 *start()* 메서드를 호출하면 스레드는 *RUNNABLE* 상태가 된다.
 
 이 상태의 스레드는 실행 중이거나 실행할 준비가 된 상태이다.
 
@@ -218,19 +223,19 @@ assertEquals(1, executor.getQueue().size());
 
 바로 이 상태의 스레드들에게 execution 을 submit 하는 것이다.
 
-스레드는 *wait()* 메서드 호출과 같은 다양한 이벤트에 의해 *WAITING* 상태가 될 수 있다. 
+스레드는 *wait()* 메서드 호출과 같은 다양한 이벤트에 의해 *WAITING* 상태가 될 수 있다.
 
 이 상태에서는 스레드가 다른 스레드의 신호를 기다리고 있다.
 
-스레드가 실행을 완료하거나 비정상적으로 종료되면 *TERMINATED* 상태가 된다. 
+스레드가 실행을 완료하거나 비정상적으로 종료되면 *TERMINATED* 상태가 된다.
 
 스레드는 중단될 수 있으며, 스레드가 중단되면 *InterruptedException* 이 발생하게 된다.
 
 ### **그렇다면 InterruptedException 은 무엇이고 왜 발생하는가?**
 
-스레드가 대기 중이거나(waiting), 절전 중이거나(sleeping), 다른 방식으로 점유 중인 상태에서 스레드가 중단되면(occupied) InterruptedException이 발생한다. 
+스레드가 대기 중이거나(waiting), 절전 중이거나(sleeping), 다른 방식으로 점유 중인 상태에서 스레드가 중단되면(occupied) InterruptedException이 발생한다.
 
-즉, 일부 코드가 스레드에서 interrupt() 메서드를 호출한 경우이다. 
+즉, 일부 코드가 스레드에서 interrupt() 메서드를 호출한 경우이다.
 
 이 exception 은 checked exception 이며, Java의 많은 blocking operation에서 이 예외가 발생할 수 있다.
 
@@ -242,7 +247,7 @@ assertEquals(1, executor.getQueue().size());
 
 `SimpleAsyncTaskExecuter` 는 스레드풀과 같이 일정량의 스레드들을 관리 & 재사용하지 않는다.
 
-`SimpleAsyncTaskExecuter` 는 요청마다 스레드를 생성하고 이에 따라 컨텍스트 스위칭이 발생한다. 
+`SimpleAsyncTaskExecuter` 는 요청마다 스레드를 생성하고 이에 따라 컨텍스트 스위칭이 발생한다.
 
 즉, 스레드 생성비용과 유지비용이 발생한다.
 
@@ -298,9 +303,15 @@ public class AsyncConfig {
 
 정확히 말하자면 아래와 같은 순서로 발생하였다.
 
-1. Spring Context 의 생명주기로 인해 빈들이 destory() 되는 과정에서 
-2. ThreadPoolExecutor 에 대한 destory() 가 호출됨에 따라 shutdown() 이 호출되었고
-3. 이 shutdown() 에 의해 진행 중이던 스레드들에 대해 interruption 이 발생한 것이다.
+1.
+
+Spring Context 의 생명주기로 인해 빈들이 destory() 되는 과정에서 
+2.
+
+ThreadPoolExecutor 에 대한 destory() 가 호출됨에 따라 shutdown() 이 호출되었고
+3.
+
+이 shutdown() 에 의해 진행 중이던 스레드들에 대해 interruption 이 발생한 것이다.
 
 즉 Spring Context 로 인한 shutdown() 호출이 문제였다.
 
@@ -337,26 +348,34 @@ ExecutorConfigurationSupport 클래스에 정의된 [shutdown](https://docs.spr
 
 ![](/images/velog/0da5b916538fa240.png)
 
-
 이에 따라  ThreadPoolExecutor 의 shutdown() 이 호출되는데 
 
 새로운 task 를 받지 않고 이전에 submit 된 task 들을 종료처리한다.
 
-하지만 아래를 볼 수 있듯이 task 들의 종료를 기다려주지 않고 종료처리를 한다. 
+하지만 아래를 볼 수 있듯이 task 들의 종료를 기다려주지 않고 종료처리를 한다.
 
 즉 현재 작업 중인 스레드들을 강제로 interrupt 하여 terminated 상태로 몰아넣는 것이다.
 
 ![](/images/velog/1e64046512e7c729.png)
 
-
 이 프로세스를 그림으로 정리하자면 아래 그림과 같이 정리될 수 있을 것이다.
 
-1. Async 를 통해 ThreadPoolExecutor 조회
-2. Bean으로 등록한 ThreadPoolExecutor 주입됨
-3. ThreadPoolExecutor 에 의해 각 task 들을 execute
-4. Spring Server 종료 or Junit 메서드 종료에 의한 Spring Context 종료, destroy() 호출
+1.
+
+Async 를 통해 ThreadPoolExecutor 조회
+2.
+
+Bean으로 등록한 ThreadPoolExecutor 주입됨
+3.
+
+ThreadPoolExecutor 에 의해 각 task 들을 execute
+4.
+
+Spring Server 종료 or Junit 메서드 종료에 의한 Spring Context 종료, destroy() 호출
 5. destroy() 호출됨에 따라 shutdown() 호출
-6. 아직 끝나지 않은 execution 으로 인해 InterruptedException 발생
+6.
+
+아직 끝나지 않은 execution 으로 인해 InterruptedException 발생
 
 ![](/images/velog/768ce63e71124b81.png)
 
@@ -366,7 +385,6 @@ ExecutorConfigurationSupport 클래스에 정의된 [shutdown](https://docs.spr
 
 # Fix 🔧
 
----
 
 **결론부터 말하자면 waitForTasksToCompleteOnShutdown , awaitTerminationSeconds 을 처리하면 된다.**
 
@@ -408,73 +426,34 @@ public class AsyncConfig {
 
 ![](/images/velog/794c0e9e887f3198.png)
 
-~~사실 이 분의 포스트를 참고하여 해결을 하였다. 그런데 이 분의 설명이 기가 막히고 코가 막히다.~~
+~~사실 이 분의 포스트를 참고하여 해결을 하였다.
+
+그런데 이 분의 설명이 기가 막히고 코가 막히다.~~
 
 ~~더 깊이 알고싶다면 꼭 참고해보자.~~
 
 [ThreadPoolTaskExecutor의 waitForTasksToCompleteOnShutdown 속성 알아보기](https://sungjk.github.io/2023/05/22/spring-boot-graceful-shutdown.html)
 
+[^2]: Amazon SES API v2 examples using SDK for Java 2.x - AWS SDK for Java 2.x <https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/java_sesv2_code_examples.html>
+[^3]: AWS SES (Simple Email Service) Spring Boot 프로젝트에서 사용하기 <https://jojoldu.tistory.com/246>
+[^5]: Use asynchronous programming - AWS SDK for Java 2.x <https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/asynchronous.html>
+[^6]: Spring AWS SES 삽질기 <https://leoheo.github.io/AWS-SES/>
+[^8]: How to Handle InterruptedException in Java | Baeldung <https://www.baeldung.com/java-interrupted-exception>
+[^10]: Introduction to Thread Pools in Java | Baeldung <https://www.baeldung.com/thread-pool-java-and-guava>
+[^11]: What are `corePoolSize` and `maxPoolSize` in thread pool configuration?
 
-# Reference
-
----
-
-#### SendEmail 예시코드
-
-[Amazon SES API v2 examples using SDK for Java 2.x - AWS SDK for Java 2.x](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/java_sesv2_code_examples.html)
-
-[AWS SES (Simple Email Service) Spring Boot 프로젝트에서 사용하기](https://jojoldu.tistory.com/246)
-
-#### Asynchronous programming
-
-[Use asynchronous programming - AWS SDK for Java 2.x](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/asynchronous.html)
-
-[Spring AWS SES 삽질기](https://leoheo.github.io/AWS-SES/)
-
-#### Thread 원리 & InterruptedException
-
-[How to Handle InterruptedException in Java | Baeldung](https://www.baeldung.com/java-interrupted-exception)
-
-#### **Executors** , **ExecutorService** , **ThreadPoolExecutor ,** CorePoolSize, MaxPoolSize 설명
-
-[Introduction to Thread Pools in Java | Baeldung](https://www.baeldung.com/thread-pool-java-and-guava)
-
-[What are `corePoolSize` and `maxPoolSize` in thread pool configuration? When is `maxPoolSize` used?](https://medium.com/@raksmeykoung_19675/what-are-corepoolsize-and-maxpoolsize-in-thread-pool-configuration-when-is-maxpoolsize-used-65a84258fea6)
-
-[ThreadPoolTaskExecutor corePoolSize vs. maxPoolSize | Baeldung](https://www.baeldung.com/java-threadpooltaskexecutor-core-vs-max-poolsize)
-
-[Introduction to Thread Pools in Java | Baeldung](https://www.baeldung.com/thread-pool-java-and-guava)
-
-[A Guide to the Java ExecutorService | Baeldung](https://www.baeldung.com/java-executor-service-tutorial)
-
-[ThreadPoolExecutor - Java Thread Pool Example | DigitalOcean](https://www.digitalocean.com/community/tutorials/threadpoolexecutor-java-thread-pool-example-executorservice)
-
-[ThreadPoolExecutor (Java Platform SE 8 )](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html)
-
-[ExecutorService Internal Working in Java](https://medium.com/codex/executorservice-internal-working-in-java-7b286882f54e)
-
-#### PoolSize 가이드라인
-
-[Thread Pool Sizing Guidelines](https://documentation.agilepoint.com/9010/admin/sizingThreadPoolSizingGuidelines.html)
-
-#### `@Async` 적용
-
-[[Spring] @Async로 비동기 처리하기](https://velog.io/@think2wice/Spring-Async-Thread-Pool에-대하여-Async)
-
-#### `@Async` 기본 ThreadPool 선택
-
-[What are the defaults in Spring @Async?](https://stackoverflow.com/questions/57988341/what-are-the-defaults-in-spring-async)
-
-#### Spring Context Bean Lifecycle
-
-[스프링 빈 생명주기(Bean Lifecycle) 메서드와 실행 순서](https://madplay.github.io/post/spring-bean-lifecycle-methods)
-
-[Customizing the Nature of a Bean :: Spring Framework](https://docs.spring.io/spring-framework/reference/core/beans/factory-nature.html#beans-factory-lifecycle-disposablebean)
-
-#### Waiting For Threads For Finish (e.g. **waitForTasksToCompleteOnShutdown)**
-
-[스프링 @Async를 통한 비동기 처리 및 설정값](https://sheerheart.tistory.com/entry/스프링-Async를-통한-비동기-처리-및-설정값)
-
-[ExecutorService - Waiting for Threads to Finish | Baeldung](https://www.baeldung.com/java-executor-wait-for-threads)
-
-[ThreadPoolTaskExecutor의 waitForTasksToCompleteOnShutdown 속성 알아보기](https://sungjk.github.io/2023/05/22/spring-boot-graceful-shutdown.html)
+When is `maxPoolSize` used? <https://medium.com/@raksmeykoung_19675/what-are-corepoolsize-and-maxpoolsize-in-thread-pool-configuration-when-is-maxpoolsize-used-65a84258fea6>
+[^12]: ThreadPoolTaskExecutor corePoolSize vs. maxPoolSize | Baeldung <https://www.baeldung.com/java-threadpooltaskexecutor-core-vs-max-poolsize>
+[^13]: Introduction to Thread Pools in Java | Baeldung <https://www.baeldung.com/thread-pool-java-and-guava>
+[^14]: A Guide to the Java ExecutorService | Baeldung <https://www.baeldung.com/java-executor-service-tutorial>
+[^15]: ThreadPoolExecutor - Java Thread Pool Example | DigitalOcean <https://www.digitalocean.com/community/tutorials/threadpoolexecutor-java-thread-pool-example-executorservice>
+[^16]: ThreadPoolExecutor (Java Platform SE 8 ) <https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html>
+[^17]: ExecutorService Internal Working in Java <https://medium.com/codex/executorservice-internal-working-in-java-7b286882f54e>
+[^19]: Thread Pool Sizing Guidelines <https://documentation.agilepoint.com/9010/admin/sizingThreadPoolSizingGuidelines.html>
+[^21]: [Spring] @Async로 비동기 처리하기 <https://velog.io/@think2wice/Spring-Async-Thread-Pool에-대하여-Async>
+[^23]: What are the defaults in Spring @Async? <https://stackoverflow.com/questions/57988341/what-are-the-defaults-in-spring-async>
+[^25]: 스프링 빈 생명주기(Bean Lifecycle) 메서드와 실행 순서 <https://madplay.github.io/post/spring-bean-lifecycle-methods>
+[^26]: Customizing the Nature of a Bean :: Spring Framework <https://docs.spring.io/spring-framework/reference/core/beans/factory-nature.html#beans-factory-lifecycle-disposablebean>
+[^28]: 스프링 @Async를 통한 비동기 처리 및 설정값 <https://sheerheart.tistory.com/entry/스프링-Async를-통한-비동기-처리-및-설정값>
+[^29]: ExecutorService - Waiting for Threads to Finish | Baeldung <https://www.baeldung.com/java-executor-wait-for-threads>
+[^30]: ThreadPoolTaskExecutor의 waitForTasksToCompleteOnShutdown 속성 알아보기 <https://sungjk.github.io/2023/05/22/spring-boot-graceful-shutdown.html>

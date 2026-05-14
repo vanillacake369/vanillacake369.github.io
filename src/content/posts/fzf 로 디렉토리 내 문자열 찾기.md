@@ -3,22 +3,31 @@ title: "fzf 로 디렉토리 내 문자열 찾기"
 description: "현재 디렉토리 내에서 원하는 문자열을 포함하는 곳을 모두 찾고 싶을 때가 있다."
 date: 2025-06-04
 tags: [linux]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 현재 디렉토리 내에서 원하는 문자열을 포함하는 곳을 모두 찾고 싶을 때가 있다.
+
 이는 IDE 들에서는 제공하고 있는데, 대표적인 예시로 intellij 의 find in files 가 있다.
+
 이를 shell 에서 할 수 없을까 고민하였고, 아래와 같이 정리해보았다.
 
 ![](/images/notion/b15650c323423b2f.png)
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -38,7 +47,8 @@ find . -type f -exec grep --color=always ${원하는 문자열} {} ';'
 
 ## fzf 활용하여 미리 보기
 
-[https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/](https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/) 를  통해 [https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71](https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71) 를 참고하였다.
+[https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/](https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/[^2]) 를  통해 [https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71](https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71[^3]) 를 참고하였다.
+
 아직도 script pipeline 은 참 어렵다 ㅠㅠ
 
 ```bash
@@ -62,10 +72,6 @@ search() {
 
 ![](/images/notion/9b0f20f5e8e71445.gif)
 
-# Reference
-
----
-
-[https://www.youtube.com/shorts/shrd1M17Sbo](https://www.youtube.com/shorts/shrd1M17Sbo)
-[https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/](https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/)
-[https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71](https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71)
+[^1]: https://www.youtube.com/shorts/shrd1M17Sbo <https://www.youtube.com/shorts/shrd1M17Sbo>
+[^2]: https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/ <https://www.reddit.com/r/commandline/comments/vjmkqw/help_with_having_pipe_wait_for_fzf_output/>
+[^3]: https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71 <https://github.com/gennaro-tedesco/dotfiles/blob/b9c22446b63346052817c50b5865ad1d37f0e352/zsh/zshfun#L44-L71>

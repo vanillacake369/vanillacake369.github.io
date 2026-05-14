@@ -3,12 +3,16 @@ title: "NixOS VLAN 설정"
 description: "현대적인 홈랩 구성에서 **NixOS**는 시스템의 상태를 코드로 관리(Declarative)할 수 있는 최고의 플랫폼입니다."
 date: 2026-01-15
 tags: [homelab, nix]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "NixOS Ecosystem", order: 12 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
@@ -17,37 +21,51 @@ draft: false
 - **보안:** OPNsense 방화벽을 가상화하여 모든 트래픽을 통제하고, VLAN을 통해 관리망(Management)과 서비스망(K8s)을 물리적으로 분리한 것과 같은 효과를 냅니다.
 - **효율:** 포트가 하나뿐인 하드웨어에서도 **"Router-on-a-Stick"** 구성을 통해 WAN과 다수의 가상 LAN을 논리적으로 격리하여 운영할 수 있습니다.
 
+# What?
 
+뭘 배움?
 
-# What? 뭘 배움?
+---
 
 ---
 
 [최종 Blueprint](https://www.notion.so/24619c3902908001851fec43ece63aef#2e019c3902908030aa94e5b1b983cdb3) 에 맞춰서 설정하고자 한다.
+
 처리 순서는 다음과 같다.
 
-1. 대상 서버 식별
-2. NixOS 설정
-3. 가상화 VM 활성화
-4. 최종 점검
+1.
+
+대상 서버 식별
+2.
+
+NixOS 설정
+3.
+
+가상화 VM 활성화
+4.
+
+최종 점검
 
 우선 개념부터 짚고 그 다음 대상 서버 식별 단계부터 하나씩 살펴보자.
 
 ## 가볍게 지나가는 VLAN 개념
 
-- **bridges (vmbr):** 가상 스위치입니다. 물리 포트(`enp1s0`)를 `vmbr0`에 꽂으면 외부망 전용 스위치가 되고, 인터페이스 없이 만든 `vmbr1`은 내부 전용 가상 스위치가 됩니다.
+- **bridges (vmbr):** 가상 스위치입니다.
+
+물리 포트(`enp1s0`)를 `vmbr0`에 꽂으면 외부망 전용 스위치가 되고, 인터페이스 없이 만든 `vmbr1`은 내부 전용 가상 스위치가 됩니다.
 - **vlans:** 하나의 선 위로 여러 네트워크 패킷이 흐를 때, 꼬리표(Tag ID)를 붙여 서로 섞이지 않게 분리하는 기술입니다.
 - **interfaces:** NixOS 호스트(물리 서버 자체)가 각 네트워크 대역에서 가질 주소표입니다.
 - **defaultGateway:** 서버가 모르는 외부 주소(예: google.com)를 찾을 때 나가는 "출구" 주소입니다.
 - **nameserver:** 도메인(google.com)을 IP(142.250...)로 바꿔주는 전화번호부 서비스입니다.
 
-
-
 ## 대상 서버 식별
 
 가장 먼저 `ip addr` 명령어를 통해 물리 NIC의 이름을 확인한다.
+
 이를 통해 NIC 이름 에 따른 VLAN 매핑을 할 수 있다.
+
 아래와 같이 현재 서버 상에서는 enp1s0 이더넷 포트 하나만 인식되고 있다.
+
 따라서 이 포트가 외부(WAN)와 내부(VLAN Trunk) 트래픽을 모두 처리하는 통로가 된다.
 
 ```nix
@@ -73,11 +91,10 @@ draft: false
 
 > 💡 만약 서버 확장 혹은 물리포트를 늘리고 싶다면 Managed Switch 장치를 고려해봐야한다.
 
-
-
 ## DHCP를 끄는 이유
 
 네트워크 설정 시 DHCP 를 끄고 정적 IP 를 활용하고자 한다.
+
 서버 환경에서 `useDHCP = false`를 권장하는 이유는 **안정성** 때문입니다.
 
 1. **고정성:** 부팅 시마다 IP가 바뀌면 내부 서비스(K8s 등)가 깨집니다.
@@ -166,15 +183,11 @@ draft: false
 
 ```
 
-
-
 ## 🛠 가상화 및 OPNsense 설정
 
 - **가상화:** `microvm.nix`나 `libvirtd`를 사용하여 OPNsense VM을 생성합니다.
 - **인터페이스 연결:**
 - **OPNsense 내부:** 웹 GUI(10.0.10.1 등)에 접속하여 각 VLAN 대역의 DHCP 서버를 켜고 방화벽 규칙(VLAN 10 -> 20 접근 허용 등)을 설정합니다.
-
-
 
 ## ✅ 최종 점검 가이드라인
 
@@ -301,14 +314,10 @@ rtt min/avg/max/mdev = 0.024/0.076/0.117/0.038 ms
 ❯
 ```
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
-
-
-# Reference
-
----
-
-[https://nixos.wiki/wiki/Networking#:~:text=duid%0A%27%27%3B-,VLANs,-Refer%20to%20networking](https://nixos.wiki/wiki/Networking#:~:text=duid%0A%27%27%3B-,VLANs,-Refer%20to%20networking)
+[^1]: https://nixos.wiki/wiki/Networking#:~:text=duid%0A%27%27%3B-,VLANs,-Refer%20to%20networking <https://nixos.wiki/wiki/Networking#:~:text=duid%0A%27%27%3B-,VLANs,-Refer%20to%20networking>

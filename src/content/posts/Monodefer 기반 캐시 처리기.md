@@ -2,18 +2,15 @@
 title: "Mono.defer() 기반 캐시 처리기"
 description: "대중적인 Cache-Aside 와 Mono.defer() 을 통해 캐시를 처리해보자"
 date: 2025-03-02
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/d01b6c157706ce8f.png)
 
-
 # Episode 📜
 
----
 
 > 💡
 > 
@@ -77,7 +74,6 @@ API 호출없이 캐싱된 데이터를 조회하는지 확인해보았다.
 
 # Reason 🤷‍♂️
 
----
 
 ### Hot Publisher
 
@@ -120,7 +116,9 @@ Subscriber 2 to Hot Source: PURPLE
 ### Cold Publisher
 
 - Subscription이 이루어지기 전까지 데이터를 생성하지 않는 Publisher를 Cold Publisher라고 한다.
-- 이것은 HTTP 요청과 유사하다. 호출을 하지 않으면 결과도 없다.
+- 이것은 HTTP 요청과 유사하다.
+
+호출을 하지 않으면 결과도 없다.
 - 각 Subscription은 해당 Publisher의 데이터를 처음부터 시작한다.
 - Cold Publisher는 데이터를 생성하고 Subscriber가 Subscription을 요청할 때 데이터를 제공한다.
 
@@ -158,7 +156,6 @@ Subscriber 2: PURPLE
 
 # Fix 🔧
 
----
 
 > 이전
 > 
@@ -192,10 +189,8 @@ private Mono<? extends FetchRouteResponse> fetchRoute(Member member, FetchRouteR
 }
 ```
 
-
 # Reference 📚
 
----
 
 https://randro.tistory.com/43
 

@@ -3,44 +3,51 @@ title: "Linux Systemd 를 통해 OpenVPN 활성화하기"
 description: "사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다."
 date: 2025-06-10
 tags: [linux]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다.
 linx distro 에서는 흔히 open vpn 에 대해 systemd service 를 선언하여 사용한다.
+
 필자가 사용하는 nixos 환경에서 이를 구축해보았다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ## How OpenVPN works
 
 OpenVPN 에서는 내부적으로 TUN/TAP 인터페이스를 활용하여 클라이언트와 호스트 간의 연결을 수행한다.
+
 그렇다면 TUN/TAP 인터페이스는 무엇일까?
+
 간단하게 살펴넘어가보자.
 
 ### What is TUN/TAP ?
 
 linux 에서는 virtual device 개념이 있는데 이는 hardware 와 연결되지 않았지만 파일선언, 즉 코드를 통해 실제로 하드웨어 장치가 수행하는 것처럼 할 수 있게 한다.
+
 이 개념이 사용되는 것이 바로 가상 연결을 형성할 수 있는 커널 내의 네트워크 인터페이스인 TUN/TAP 이다.
+
 TUN
 
 - TAP
 
-
-
-
 - OS 측에서의 TUN/TAP 
 - 사용자 공간 프로그램에서의 TUN/TAP
-
-
 
 ### How TUN/TAP being used in OpenVPN
 
@@ -48,8 +55,6 @@ TUN
 - OpenVPN 클라이언트가 eth0에서 패킷을 수신하고 tun0으로 보내기 전에 암호를 해독
 
 ![](/images/notion/ed75ff92b20196a9.png)
-
-
 
 ## Init Manually
 
@@ -75,6 +80,7 @@ TUN
 ca certificat 는 .ovpn 파일 안에 있으며
 private key password 는 각 개발자 별로 부여하게된다.
 openvpn 은 private key password 에 대한 파일을 선언, askpass 명령어를 통해 자동으로 기입할 수 있게 한다.
+
 따라서 .ovpn 파일을 아래와 같이 수정하였다.
 
 > ⚠️ **주의점 : 절대경로**
@@ -114,9 +120,12 @@ resolv-retry infinite
 askpass ${비밀번호파일 절대경로}/${파일명}
 ```
 
-
 OpenVPN 은 내부적으로 TUN or TAP adaptor 를 생성한다고 하였다.
-이 때 sudo 권한이 있어야만한다. 따라서 sudo 권한을 획득하여 openvpn 을 호출한다.
+
+이 때 sudo 권한이 있어야만한다.
+
+따라서 sudo 권한을 획득하여 openvpn 을 호출한다.
+
 이후에 아래와 같이 호출하면 openvpn 연결에 성공하는 걸 볼 수 있다.
 
 > ⚠️ **주의점 : Restart Session**
@@ -179,13 +188,9 @@ Type=notify
      Status: "Initialization Sequence Completed"
 ```
 
-# Reference
-
----
-
-[https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/](https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/)
-[https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con](https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con)
-[https://www.baeldung.com/linux/tun-interface-purpose](https://www.baeldung.com/linux/tun-interface-purpose)
-[https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#](https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#)
-[https://en.wikipedia.org/wiki/Virtual_device](https://en.wikipedia.org/wiki/Virtual_device)
-[https://nixos.wiki/wiki/OpenVPN](https://nixos.wiki/wiki/OpenVPN)
+[^1]: https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/ <https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/>
+[^2]: https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con <https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con>
+[^3]: https://www.baeldung.com/linux/tun-interface-purpose <https://www.baeldung.com/linux/tun-interface-purpose>
+[^4]: https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking# <https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#>
+[^5]: https://en.wikipedia.org/wiki/Virtual_device <https://en.wikipedia.org/wiki/Virtual_device>
+[^6]: https://nixos.wiki/wiki/OpenVPN <https://nixos.wiki/wiki/OpenVPN>

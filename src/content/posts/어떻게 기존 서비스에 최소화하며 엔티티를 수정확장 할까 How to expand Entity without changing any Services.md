@@ -3,20 +3,17 @@ title: "어떻게 기존 서비스에 최소화하며 엔티티를 수정/확장
 description: "만약 아래와 같은 엔티티가 있을 때 어떻게 해야할까?"
 date: 2026-05-11
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Why(For What?)
 
----
 
 > 공부하다 문뜩, 엔티티를 바꿔야 할 일이 생겼다.
 
 # What (What should we know?)
 
----
 
 만약 아래와 같은 엔티티가 있을 때 어떻게 해야할까?
 
@@ -52,15 +49,20 @@ public class UserVersionTwo extends User{
 
 챗지피티의 답변은 이러했다.
 
-1. 상속을 사용할 수도 있다, 하지만 그 대신 컴포지션을 통해 복합 엔티티를 형성할 수 있다.
-2. 데코레이터 패턴
-3. DTO를 통해 기존 엔티티 + 추가적인 필드를 받아라.
-4. 엔티티를 확장할 때마다 버저닝을 해라
+1.
+
+상속을 사용할 수도 있다, 하지만 그 대신 컴포지션을 통해 복합 엔티티를 형성할 수 있다.
+2.
+
+데코레이터 패턴
+3.
+
+DTO를 통해 기존 엔티티 + 추가적인 필드를 받아라.
+4.
+
+엔티티를 확장할 때마다 버저닝을 해라
 
 > **요컨대, 데코레이터 패턴을 사용하는 것이 이상적인 방식이다!!**
-
-
-
 
 ### Decorator Pattern?
 
@@ -68,13 +70,11 @@ public class UserVersionTwo extends User{
 
 > **Simply, “put interface between target system and entities”**
 
-
 **Change This,,,,,**
 
 ![](/images/notion/981c1c5d467da286.png)
 
 **To This,,,**
-
 
 ### 예시코드
 
@@ -144,8 +144,6 @@ public class SamsungPay {
     }
 }
 ```
-
-
 
 `Good Code ✔`
 

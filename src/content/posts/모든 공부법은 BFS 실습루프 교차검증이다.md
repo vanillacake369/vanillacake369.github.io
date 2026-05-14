@@ -2,17 +2,21 @@
 title: "모든 공부법은 BFS 실습루프 + 교차검증이다 "
 description: "요 근래 알고리즘, 쿠버네티스, 리눅스, 투자의 기초를 탄탄히 다져나가고 있다"
 date: 2026-05-07
-tags: [talk]
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 요 근래 알고리즘, 쿠버네티스, 리눅스, 투자의 기초를 탄탄히 다져나가고 있다
+
 공부접근법이 같은 메커니즘을 타고 가는 것 같다
 
 - 개념
@@ -20,69 +24,95 @@ draft: false
 - 실습
 - 추가학습/연구
 
-
 근데 혼자 하다보면 블라인드 스팟, 즉 놓치는 부분이 엄청 많다
+
 가령 CKA 목차대로 공부했다고 k8s 완전히 아는 게 아니다
 가령 스프링 책을 한 권 마스터했다고 스프링을 완전히 아는 게 아니다
 가령 AWS 자격증을 땄다고 AWS 를 완전히 아는 게 아니다
 가령 지표와 차트를 안다고 투자를 완전히 아는 게 아니다
 
 책에서 다루지 않는 실전의 내공을 익혀야 완전히 내 것이 되는 것이다.
+
 그리고 간혹 누군가 방향 잡아주거나 필요한 기술/개념을 툭툭 물어다줄 때가 있다.
 `~~에 대해서는 ~~ 를 보기보다 ~~ 를 한 번 공부해봐` 라던지
 `~~에 대해서는 ~~ 를 써봐` 라던지 말이다
 
 이런 부분들에 대해서는 헷지방안이 어떻게 되는가??
+
 그리고 이런 학습과정에서 AI 를 쓸 때의 가드레일과 주의사항이 무엇인가??
  
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ## BFS 실습루프 : 전체 숲은 직접 걸어나간다 🌲
 
 무슨 공부든 — 개발(홈랩/서버/백엔드/프론트 뭐든)이든, 투자이든, 러시아어든 —
+
 같은 메커니즘을 타고 가는 것 같다
 
-1. 처음에는 BFS 방식으로 얕은 지식을 여러 번 걸쳐서 개념-실습을 하고
-2. n 번의 루프가 끝나면 실제로 활용해나가고
-3. 더 새롭게 발견되거나 알게된 개념들을 축적해나간다
+1.
 
+처음에는 BFS 방식으로 얕은 지식을 여러 번 걸쳐서 개념-실습을 하고
+2. n 번의 루프가 끝나면 실제로 활용해나가고
+3.
+
+더 새롭게 발견되거나 알게된 개념들을 축적해나간다
 
 다만 전체 숲을 배울 때만큼은 직접 해야한다
+
 강의/책이나 스스로 정한 목차/커리큘럼을 따라가보다면 특정 방향벡터에 갇힌다
+
 그 방향벡터에 따라 내가 놓친 스텝은 무엇이며, 실제로는 어떤 유의사례가 있고
 관련하여 어떤 유사스킬들을 활용할 수 있는지 놓칠 수 있기 때문이다.
 
 이를 헷지하려면 방향벡터의 다각화를 실처하면 된다
 
-1. 책/강의들의 목차들을 결합하고 덜어낼 건 덜어내서 하나의 목차를 만든다
-2. 이 목차에 대로 2주씩 2~3번의 루프 학습한다
-3. 부족한 점이나 더 깊게 공부할 것들을 세우고 또 다시 루프를 반복한다
-4. 다른 책/강의/실무자를 통해 부족한 점에 대해서 방향벡터를 다각화한다
+1.
+
+책/강의들의 목차들을 결합하고 덜어낼 건 덜어내서 하나의 목차를 만든다
+2.
+
+이 목차에 대로 2주씩 2~3번의 루프 학습한다
+3.
+
+부족한 점이나 더 깊게 공부할 것들을 세우고 또 다시 루프를 반복한다
+4.
+
+다른 책/강의/실무자를 통해 부족한 점에 대해서 방향벡터를 다각화한다
 
 이런 구조를 통해 BFS 방식의 개념-실습을 반복하다보면
 처음에는 얕은 개념들로 채워나가다가 점점 그 개념의 성숙도가 깊어질 것이다
-또한 짧은 시간의 루프 학습은 집중력을 분산시키지 않고 장기적으로 달릴 수 있게한다
-이후 교차검증을 통해 내가 가진 개념을 더 단단하게 할 수 있다
 
+또한 짧은 시간의 루프 학습은 집중력을 분산시키지 않고 장기적으로 달릴 수 있게한다
+
+이후 교차검증을 통해 내가 가진 개념을 더 단단하게 할 수 있다
 
 ## AI 는 선생님이 아니라 검증/트레이드오프만 ✅
 
 AI 는 편향될 수 있다
-이유인즉슨 AI 는 대화맥락과 학습한 정보를 기반으로 답하기 때문이다
-따라서 우리는 AI 에게 `~~ 을 알려줘` 의 프롬프트를 피해야한다
-되려 AI 에게 `~~ 이라고 알고 있는데 놓치고 있는 부분이 뭔지 검토해줘` 라고 질문해야한다
-만약 가능하다면 교차검증 혹은 트레이드오프가 아닌 프롬프트는 무시하게끔 가드레일을 설정하면 좋다
 
+이유인즉슨 AI 는 대화맥락과 학습한 정보를 기반으로 답하기 때문이다
+
+따라서 우리는 AI 에게 `~~ 을 알려줘` 의 프롬프트를 피해야한다
+
+되려 AI 에게 `~~ 이라고 알고 있는데 놓치고 있는 부분이 뭔지 검토해줘` 라고 질문해야한다
+
+만약 가능하다면 교차검증 혹은 트레이드오프가 아닌 프롬프트는 무시하게끔 가드레일을 설정하면 좋다
 
 ## 멘토가 없다면 잘못된 것이다 ⚠️
 
 형식지(explicit knowledge) 는 책/강의/AI로 채울 수 있지만,
 암묵지(tacit knowledge) 는 그렇지 않다
-이 상황에선 X 말고 Y 써", "그건 함정이야" 같은 휴리스틱은 
+
+이 상황에선 X 말고 Y 써", "그건 함정이야" 같은 휴리스틱은
 누가 옆에서 툭 던져줘야 알게 된다.
+
 이에 대해서는 두 가지 원인이 있다.
 
 - **알려진 미지(known unknowns)**
@@ -95,25 +125,35 @@ AI 는 편향될 수 있다
 
 이러한 조언을 해줄 수 있는 매체는 다음과 같다
 
-1. 시니어 Guru
-2. 시니어가 모인 커뮤니티 
-3. 멘토링 세션
+1.
+
+시니어 Guru
+2.
+
+시니어가 모인 커뮤니티 
+3.
+
+멘토링 세션
 
 만약 돈이 있다면 멘토가 있는 회사에 가던, 멘토를 고용하라
+
 경험 상 커뮤니티에서 해줄 수 있는 한계가 분명히 있고
 특히 인터넷 포스트는 내가 매일매일 구독해서 보지 않는 이상
 나를 봐주기란 쉽지 않기 때문이다.
 
 돈이 없고 지금의 나처럼 백수라면
 커뮤니티를 계속 따라가거나, 시니어에게 과감하게 나를 드러내는 게 맞다
-질문하기 전까지는 스스로가 부끄러운 당신이였다가, 질문하고 발전하면 그를 벗어난다
-따라서 부끄럽더라도 과감히 묻는 게 용기이고, 발전할 수 있는 유일한 길이다
 
+질문하기 전까지는 스스로가 부끄러운 당신이였다가, 질문하고 발전하면 그를 벗어난다
+
+따라서 부끄럽더라도 과감히 묻는 게 용기이고, 발전할 수 있는 유일한 길이다
 
 ## 실패사례 / 사후 분석을 살펴라 🚨
 
-처음 학습 시에는 성공한 패턴을 가르치지만 왜 다른 패턴들이 실패했는지는 잘 안 가르친다. 
+처음 학습 시에는 성공한 패턴을 가르치지만 왜 다른 패턴들이 실패했는지는 잘 안 가르친다.
+
 그런데 unknown unknowns의 대부분은 거기 숨어있다.
+
 꼭 커뮤니티나 포스트들을 활용해서 블라인드 스팟과 트레이드오프를 살펴보아라
 (뭐 이건 개발자/엔지니어면 항상 하는 거지만 그래도,,,ㅎ)
 
@@ -121,16 +161,15 @@ AI 는 편향될 수 있다
 - 투자라면
 - 언어라면
 
+# How?
 
-
-# How? 어떻게 씀?
+어떻게 씀?
 
 ---
 
 ## 예시 : 서버/인프라공부에 대한 학습루프 + 교차검증 🌐
 
 ### 전체 숲을 걸어나갔는가?
-
 
 > SRE Book (Google, 무료)
 
@@ -177,28 +216,36 @@ AI 는 편향될 수 있다
 
 ### 우리의 목차
 
-> Phase 0. Foundation — Linux/Container 밑바닥 + Helm
+> Phase 0.
+
+Foundation — Linux/Container 밑바닥 + Helm
 
 - 현재 Nix 구조 정리 → 글
 - kubelet 에러 이슈 원인/대안/해결 → 글
 [추가] Linux 밑바닥 sanity check (홈랩 진행 중에 짧게):
 - Helm 사용법 (오브젝트, 배포된 차트 확인, valkey 클러스터, top server) → 글
 
-> Phase 1. Storage 전략 + 메모리 분석
+> Phase 1.
+
+Storage 전략 + 메모리 분석
 
 - Top Server 메모리 사용량 분석 → 글
 [추가] Linux 메모리 멘탈모델:
 - 메모리 누수 여부 확인 → 글
 [추가] Storage 전략 설계:
 
-> Phase 2. GitOps + Release Engineering
+> Phase 2.
+
+GitOps + Release Engineering
 
 - 레포 구조 설계
 - FluxCD/ArgoCD 세팅
 - 매니페스트 배포 / drift 감지 검증
 [추가] Release strategy 설계:
 
-> Phase 3. Backup & DR — 목표부터 정의
+> Phase 3.
+
+Backup & DR — 목표부터 정의
 
 [추가] RTO/RPO 정의 (워크로드별 표):
 
@@ -207,7 +254,9 @@ AI 는 편향될 수 있다
 - 스모크 테스트 (네임스페이스 단위)
 [추가] Full DR drill:
 
-> Phase 4. Observability + SRE 프레이밍 (가장 크게 보강)
+> Phase 4.
+
+Observability + SRE 프레이밍 (가장 크게 보강)
 
 [추가] SLI/SLO 정의 (서비스별):
 
@@ -223,7 +272,9 @@ AI 는 편향될 수 있다
 - 의도적 OOM / 노드 다운하여 alert 검증
 [추가] 카오스 엔지니어링 도구화:
 
-> Phase 5. Security + Identity (대폭 보강)
+> Phase 5.
+
+Security + Identity (대폭 보강)
 
 - RBAC + Namespace 전략 + ResourceQuota/LimitRange
 - cert-manager + external-dns + Gateway API + NetworkPolicy + TLS 자동연장
@@ -234,7 +285,9 @@ AI 는 편향될 수 있다
 - 샘플 앱으로 위 전체 검증
 → 글: "홈랩 보안 베이스라인"
 
-> Phase 6. Data layer (분산시스템 이해 포함)
+> Phase 6.
+
+Data layer (분산시스템 이해 포함)
 
 - CloudNativePG 기동
 [추가] PG 운영 깊이:
@@ -242,20 +295,26 @@ AI 는 편향될 수 있다
 [추가] OIDC 학습 깊이: 무엇을 보장하고 무엇을 안 보장하는가, 토큰 lifetime 정책
 - Tailscale OAuth 자동연장
 
-> Phase 7. Application + Quality
+> Phase 7.
+
+Application + Quality
 
 - AI 스크롤 차단 가드레일
 - 서버 모듈 (인증, 공고, 이력서)
 - 단위/통합 테스트
 [추가] API 설계 리뷰:
 
-> Phase 8. CI/CD + Pipeline 보안
+> Phase 8.
+
+CI/CD + Pipeline 보안
 
 - CI/CD 파이프라인 구축
 - 쿠베 위 스모크 테스트
 [추가] Pipeline 보안:
 
-> Phase 9. HA / Fault Tolerance (DDIA 와 SRE 접목)
+> Phase 9.
+
+HA / Fault Tolerance (DDIA 와 SRE 접목)
 
 [추가] DDIA 학습 매핑:
 
@@ -263,13 +322,17 @@ AI 는 편향될 수 있다
 - Consul Fault Tolerance
 [추가] HA 메커니즘 종합:
 
-> Phase 10. Autoscaling + Cost
+> Phase 10.
+
+Autoscaling + Cost
 
 - Kubecost / OpenCost
 [추가] HPA / VPA / KEDA / Cluster Autoscaler 설계:
 - 가시성 정상여부 확인
 
-> Phase 11. Operations Maturity + Visibility
+> Phase 11.
+
+Operations Maturity + Visibility
 
 [추가] 운영 문서:
 
@@ -283,19 +346,14 @@ AI 는 편향될 수 있다
 - 한국 데브옵스/SRE 커뮤니티에 공유
 - 면접 stories 정리: STAR 형식으로 각 Phase에서의 결정 / 트레이드오프 / 결과
 
-
 - [ ] 진행 중
-
 
 - [ ] 개념-실습 루프를 다 돌고 차이 비교 분석하고자 함
 
-
 - [ ] ( 예정 )
-
 
 - [ ] 좀 애매한 점이 맨 땅에 헤딩하며 서버 운영하기라서 제대로 하는 게 맞는지 애매함
 - [ ] 그래서 LFCS 강의랑 병행 중인데 알려주는 내용이 한정적이고 얕아서 추가의 자격증 공부를 고민 중임
-
 
 > 데브옵스/SRE 엔지니어
 
@@ -328,11 +386,9 @@ AI 는 편향될 수 있다
 - Cloudflare blog
 - Netflix Tech blog
 
-
 - [http://github.com/danluu/post-mortems](http://github.com/danluu/post-mortems)
 - AWS incident 공식 RCA
 - GCP incident 공식 RCA
-
 
 - eBPF
 - WASM
@@ -340,11 +396,10 @@ AI 는 편향될 수 있다
 - 데이터센터 / 하드웨어 레이어
 - 멀티클러스터 / 멀티클라우드 패턴
 
-
-
 ## 예시 : 알고리즘공부에 대한 학습루프 + 교차검증 📓
 
 ### 전체 숲을 걸어나갔는가?
+
 ### 책의 목차들은 어떤가???
 
 > **CLRS — Introduction to Algorithms (정전, 두꺼움)**
@@ -360,7 +415,9 @@ AI 는 편향될 수 있다
 > **Skiena — The Algorithm Design Manual (실전적)**
 
 - *Part I*: 알고리즘 설계 / 분석 / 자료구조 / 정렬 / **분할정복** / **해싱·랜덤화** / 그래프 탐색 / 가중치 그래프 / **조합 탐색** / DP / **NP-완전** / 하드 문제 다루기 / **알고리즘 설계 방법론**
-- *Part II*: **75개 표준 문제 카탈로그** — "이 문제는 어떤 알고리즘인가" 를 색인화한 사전. 코딩테스트 시 패턴 매칭 훈련용
+- *Part II*: **75개 표준 문제 카탈로그** — "이 문제는 어떤 알고리즘인가" 를 색인화한 사전.
+
+코딩테스트 시 패턴 매칭 훈련용
 
 > **CPH — Competitive Programmer's Handbook (PS 정전, 무료 PDF)**
 
@@ -395,17 +452,23 @@ AI 는 편향될 수 있다
 > **NeetCode 150 / Blind 75 (코딩테스트용 패턴 정리, 영어)**
 
 - Arrays & Hashing → Two Pointers → Sliding Window → Stack → Binary Search → Linked List → Trees → Tries → Heap → Backtracking → Graphs → Advanced Graphs → 1D DP → 2D DP → Greedy → Intervals → Math & Geometry → Bit Manipulation
-- *순서가 곧 학습 커리큘럼*. NeetCode 유튜브 영상이 짝지어져 있음
+- *순서가 곧 학습 커리큘럼*.
+
+NeetCode 유튜브 영상이 짝지어져 있음
 
 > **Codeforces EDU (무료, 인터랙티브)**
 
 - **이분탐색 / 투포인터·슬라이딩윈도우 / 해시테이블 / DSU / Segment Tree (Pt1, Pt2) / Suffix Array / Backtracking / DP**
-- 각 주제별로 *영상 + 문제 + 자동채점*. 분야별 깊이 학습에 최적
+- 각 주제별로 *영상 + 문제 + 자동채점*.
+
+분야별 깊이 학습에 최적
 
 > **백준 단계별로 풀어보기 + **[**solved.ac**](http://solved.ac/)** 클래스 시스템 (한국어)**
 
 - 단계별: 입출력 → 조건문 → 반복문 → 배열 → 함수 → 문자열 → 정렬 → 재귀 → 백트래킹 → 동적계획법 → 그래프
-- [solved.ac](http://solved.ac/) 클래스: 1~10 단계로 *알고리즘 마스터리 진척도*를 정량화. 본인 현재 클래스를 즉시 알 수 있음
+- [solved.ac](http://solved.ac/) 클래스: 1~10 단계로 *알고리즘 마스터리 진척도*를 정량화.
+
+본인 현재 클래스를 즉시 알 수 있음
 
 > **이코테 — 이것이 코딩테스트다 (나동빈, 한국 코테 표준)**
 
@@ -413,7 +476,9 @@ AI 는 편향될 수 있다
 
 > **바킹독의 실전 알고리즘 (BaaaaarkingDog, 무료 YouTube + 블로그)**
 
-- 한국에서 가장 평이 좋은 PS 강의 시리즈 중 하나. 백준 문제로 진행
+- 한국에서 가장 평이 좋은 PS 강의 시리즈 중 하나.
+
+백준 문제로 진행
 
 > **MIT 6.006 / 6.046 (무료, OCW)**
 
@@ -422,19 +487,25 @@ AI 는 편향될 수 있다
 
 ### 우리의 목차
 
-> **Phase 0. 기반 — 이론과 환경 세팅 (1주)**
+> **Phase 0.
+
+기반 — 이론과 환경 세팅 (1주)**
 
 - 본인 현재 수준 진단:
 - 환경 세팅:
 - 이론 sanity check:
 
-> **Phase 1. 자료구조 베이스 (2주 × 2회차)**
+> **Phase 1.
+
+자료구조 베이스 (2주 × 2회차)**
 
 - *1회차 (개념 + easy)*: 배열·문자열 / 스택·큐·덱 / 해시 / 우선순위큐 / 연결리스트
 - *2회차 (medium 패턴)*: 모노토닉 스택·큐 / **투포인터** / **슬라이딩 윈도우** / **Prefix Sum / Difference Array**
 - 산출물: 각 자료구조별 template 정리 → 글
 
-> **Phase 2. 정렬·이분탐색·재귀 (2주 × 2회차)**
+> **Phase 2.
+
+정렬·이분탐색·재귀 (2주 × 2회차)**
 
 - 정렬 알고리즘 8종 (구현은 1번씩)
 - **이분탐색의 두 얼굴**: 값에 대한 이분탐색 / **답에 대한 이분탐색** (parametric search)
@@ -442,7 +513,9 @@ AI 는 편향될 수 있다
 - 분할정복 (merge sort, 카운팅 inversion)
 - 산출물: "답에 대한 이분탐색 패턴 정리" → 글
 
-> **Phase 3. 트리 + DSU + Trie (2주)**
+> **Phase 3.
+
+트리 + DSU + Trie (2주)**
 
 - 이진트리 순회 (재귀/반복)
 - BST 연산 / LCA
@@ -450,27 +523,35 @@ AI 는 편향될 수 있다
 - Trie / 자동완성 응용
 - 산출물: DSU·LCA template
 
-> **Phase 4. 그래프 기본 (2주 × 2회차)**
+> **Phase 4.
+
+그래프 기본 (2주 × 2회차)**
 
 - *1회차*: BFS / DFS / Floodfill / 사이클 탐지 / 위상정렬 / 이분그래프
 - *2회차*: 최단경로 4종
 - MST: Kruskal / Prim
 - 산출물: "그래프 알고리즘 선택 매트릭스" → 글
 
-> **Phase 5. DP (2주 × 3회차) — 가장 약한 영역일 가능성 큼**
+> **Phase 5.
+
+DP (2주 × 3회차) — 가장 약한 영역일 가능성 큼**
 
 - *1회차 1D*: 피보나치류 / 계단 / 동전 / **LIS**
 - *2회차 2D*: **LCS** / 편집거리 / 격자 / **Knapsack 4종 (0/1, 무한, 분할, 부분합)**
 - *3회차 고급*: **구간 DP / 비트마스크 DP / 트리 DP / 자릿수 DP**
 - 산출물: "DP 점화식 도출 7단계" → 글 (이건 코테 면접용으로 강력)
 
-> **Phase 6. 문자열 + 수학 (2주)**
+> **Phase 6.
+
+문자열 + 수학 (2주)**
 
 - 문자열: **KMP / Z-algorithm / 해싱**
 - 수학: 모듈러 연산 / **GCD·확장 유클리드 / 에라토스테네스** / 모듈러 역원·페르마소정리 / 조합 nCr mod p
 - 산출물: 수학 template
 
-> **Phase 7. 고급 자료구조 (2주, 코테 상위권용)**
+> **Phase 7.
+
+고급 자료구조 (2주, 코테 상위권용)**
 
 - **Segment Tree (point update, range query)**
 - **Lazy Propagation**
@@ -478,7 +559,9 @@ AI 는 편향될 수 있다
 - Sparse Table (RMQ)
 - 산출물: Segment tree 5문제 + template
 
-> **Phase 8. 한국 코테 기출 집중 (2주 × N회차, 취준 직전 모드)**
+> **Phase 8.
+
+한국 코테 기출 집중 (2주 × N회차, 취준 직전 모드)**
 
 - **카카오 기출** (프로그래머스 카카오 모음): 구현 / 문자열 / DFS·BFS / 자료구조 / 그래프 / 이분탐색
 - **삼성 SW 역량테스트** 기출 (시뮬레이션 + 백트래킹 집중)
@@ -486,7 +569,9 @@ AI 는 편향될 수 있다
 - 시간 제한 두고 *모의 테스트* 형태로 진행
 - 산출물: 회사별 출제 패턴 매트릭스 → 글
 
-> **Phase 9. 시계열 누적 (영구히)**
+> **Phase 9.
+
+시계열 누적 (영구히)**
 
 - *매일*: 1-2문제 (현재 학습 중인 Phase 주제 위주, *random 회피*)
 - *매주*: 1회 모의 contest (LeetCode Weekly / Codeforces Div3·Div4 / 프로그래머스 PCCP)
@@ -521,7 +606,9 @@ AI 는 편향될 수 있다
 
 > **글로벌 PS Top-tier 계정 (Codeforces · 작성 글들 가치 큼)**
 
-- **tourist** (Gennady Korotkevich) — 역대 최강. 라이브 스트림에서 사고 흐름 관찰
+- **tourist** (Gennady Korotkevich) — 역대 최강.
+
+라이브 스트림에서 사고 흐름 관찰
 - **jiangly**, **Um_nik**, **Errichto**, **Petr** — 블로그 글이 깊다
 - **Benq** — USACO Guide 의 핵심 contributor
 
@@ -535,7 +622,9 @@ AI 는 편향될 수 있다
 
 > **YouTube / 블로그 (한국어)**
 
-- **바킹독 (BaaaaarkingDog)** — 백준 강의 + 블로그. 한국 PS 학습의 표준 레퍼런스
+- **바킹독 (BaaaaarkingDog)** — 백준 강의 + 블로그.
+
+한국 PS 학습의 표준 레퍼런스
 - **나동빈 (이코테 저자)** — 한국 코테 위주
 - **AlgoDale, 안경잡이개발자, jasonkang, 큰돌의 코딩테스트** — 백준 풀이 / 코테 노하우
 - [**JusticeHui, 알고리즘에 인생을 건 개발자,,,**](https://justicehui.github.io/)
@@ -613,16 +702,17 @@ AI 는 편향될 수 있다
 - [ ] **장기 / 선택 (관심사에 따라)**:
 - [ ] **커리어 통합 방향벡터**:
 
-
-
 ## 예시 : 투자공부에 대한 학습루프 + 교차검증 💰
 
 ### 전체 숲을 걸어나갔는가?
+
 ### 책의 목차들은 어떤가???
 
 > **가치투자**
 
-- *현명한 투자자* (Graham) — Mr. Market, margin of safety
+- *현명한 투자자* (Graham) — Mr.
+
+Market, margin of safety
 - *The Most Important Thing* (Marks) — second-level thinking, 사이클, 리스크
 - 버핏 주주서한 — 무료, 매년 발행
 - *Little Book of Valuation* (Damodaran) — DCF / 상대가치 입문
@@ -680,44 +770,62 @@ AI 는 편향될 수 있다
 
 ### 우리의 목차
 
-기존 3 round 는 거시·매매·기술적 분석에 무게가 쏠려있다. 패시브, 자산배분, 행동재무, 리스크 시스템화가 비어있어 보강 round 를 뒤에 추가한다.
+기존 3 round 는 거시·매매·기술적 분석에 무게가 쏠려있다.
 
-> **Round 0. 환경 세팅 + 자기진단 (1주, 신규)**
+패시브, 자산배분, 행동재무, 리스크 시스템화가 비어있어 보강 round 를 뒤에 추가한다.
+
+> **Round 0.
+
+환경 세팅 + 자기진단 (1주, 신규)**
 
 - 보유 종목 / 비중 / 진입 이유 글로 정리
 - 비상자금 분리 (6~12개월치 생활비)
 - 투자 일지 시작 (thesis / 진입가 / 손절가 / 가설이 깨지는 조건)
 - 한국 세제 sanity check (양도소득세, ISA, 연금저축, IRP)
 
-> **Round 1 (기존). 시장 + 회사 분석**
+> **Round 1 (기존).
+
+시장 + 회사 분석**
 
 - 1주차: 시장이 뭐고 무엇이 움직이나
 - 2주차: 회사를 어떻게 보고 사고팔 것인가
 
-> **Round 2 (기존). 거시 + 백트래킹 + 재무제표 + 밸류에이션**
+> **Round 2 (기존).
+
+거시 + 백트래킹 + 재무제표 + 밸류에이션**
 
 - 실습: 보유 종목 1개의 사업보고서 정독 + 간단한 DCF 작성
 
-> **Round 3 (기존). 시장심리 + 사이클 + 섹터 + 매매 + 리스크 + 차트**
-> **Round 4. 패시브 / 인덱스 (신규)**
+> **Round 3 (기존).
+
+시장심리 + 사이클 + 섹터 + 매매 + 리스크 + 차트**
+> **Round 4.
+
+패시브 / 인덱스 (신규)**
 
 - 1주차: 왜 액티브가 통계적으로 어려운가 (Malkiel + Bogle)
 - 2주차: 인덱스 / 자산배분의 사고방식 (Bernstein + 강환국)
 - 산출물: "내가 액티브를 하는 이유 — 통계와 함께" 글
 
-> **Round 5. 행동재무 / 자기 검증 (신규)**
+> **Round 5.
+
+행동재무 / 자기 검증 (신규)**
 
 - 1주차: 인지 편향 (Kahneman 1부 + Housel)
 - 2주차: 본인 거래 6개월치 회고 — 결과 좋았지만 운인 것 / 결과 나빴지만 과정은 옳았던 것 분리
 - 산출물: "내 투자 행동 회고" 글
 
-> **Round 6. 리스크 관리 시스템화 (신규)**
+> **Round 6.
+
+리스크 관리 시스템화 (신규)**
 
 - 포지션 사이징 / 손절·익절 정책 / 상관관계
 - 꼬리위험 (Taleb)
 - 산출물: "내 포트폴리오 최악 시나리오 + 대응" 글
 
-> **Round 7. 시계열 누적 (영구)**
+> **Round 7.
+
+시계열 누적 (영구)**
 
 - 매월 회고 / 분기 리뷰
 - 매 거래의 thesis 사후 검증 비율 추적
@@ -801,12 +909,6 @@ AI 는 편향될 수 있다
 - **중기 (1~2년)**
 - **장기 (2~5년)**
 
-
-
-# Reference
-
----
-
-[https://medium.com/@sriramk1986/lessons-from-ultralearning-by-scott-young-book-summary-5a77f9682921](https://medium.com/@sriramk1986/lessons-from-ultralearning-by-scott-young-book-summary-5a77f9682921)
-[https://product.kyobobook.co.kr/detail/S000002223919](https://product.kyobobook.co.kr/detail/S000002223919)
-[https://www.soenkeahrens.de/en/takesmartnotes](https://www.soenkeahrens.de/en/takesmartnotes)
+[^1]: https://medium.com/@sriramk1986/lessons-from-ultralearning-by-scott-young-book-summary-5a77f9682921 <https://medium.com/@sriramk1986/lessons-from-ultralearning-by-scott-young-book-summary-5a77f9682921>
+[^2]: https://product.kyobobook.co.kr/detail/S000002223919 <https://product.kyobobook.co.kr/detail/S000002223919>
+[^3]: https://www.soenkeahrens.de/en/takesmartnotes <https://www.soenkeahrens.de/en/takesmartnotes>

@@ -3,12 +3,12 @@ title: "Auth 설계 :: Stackoverflow (이어서) 따라해보기"
 description: "발급한 토큰을 Header에 추가하고 성공했다는 메시지, 상태코드 와 함께 Client에 반환하기"
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Last Review 🗨️
+
 # Episode 📜
 # Domain Design 🛠️
 
@@ -42,7 +42,9 @@ draft: false
 - [ ] 수정
 - [ ] 질문 완료
 
-> 음??? 왜 삭제에 대해서는 요구사항을 안 주셨지????
+> 음???
+
+왜 삭제에 대해서는 요구사항을 안 주셨지????
 
 ### 댓글
 

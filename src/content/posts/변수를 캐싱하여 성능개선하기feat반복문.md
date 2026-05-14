@@ -2,18 +2,15 @@
 title: "변수를 캐싱하여 성능개선하기(feat.반복문)"
 description: "변수를 캐싱하면 호출을 줄일 수 있다고??"
 date: 2024-04-07
-tags: [반복문개선, 변수캐싱, 자바성능튜닝이야기]
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/0317730064a920ff.png)
 
-
 # Intro
 
----
 
 최근 기업과제를 수행하며 “잘못 구현된 부분이 있을까?” 하고 돌아보던 중, REGEX 에 대한 Pattern 객체를 적용 시, 성능적인 Degration 을 체감했던 순간이 있었다.
 
@@ -21,7 +18,6 @@ draft: false
 
 # TL;DR
 
----
 > **이 글의 무엇보다도, Stream 이 언제나 빠른 것이 아니라는 것을 강조하고 싶어서 서두에 이렇게 적는다.**
 > **스트림은 주요 목적은 성능을 극대화하고자 사용하는 게 아니다는 것을 알았으면 좋겠다.**
 
@@ -66,7 +62,7 @@ draft: false
     // 매 호출마다 Pattern 인스턴스를 생성한다.
     public class ValidNickNameValidator implements ConstraintValidator<ValidNickName, String> {
     
-        private final static String NICK_NAME_REGEX = "(?!^\\d+$)^.+$";
+        private final static String NICK_NAME_REGEX = "(?!^\d+$)^.+$";
     
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -77,7 +73,7 @@ draft: false
     ✅
     public class ValidNickNameValidator implements ConstraintValidator<ValidNickName, String> {
     
-        private final static Pattern NICK_NAME_REGEX = Pattern.compile("(?!^\\d+$)^.+$");
+        private final static Pattern NICK_NAME_REGEX = Pattern.compile("(?!^\d+$)^.+$");
     
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -89,7 +85,6 @@ draft: false
 
 # loop 의 target logic 과 관련없다면 캐싱을 해두자.
 
----
 
 책에서 나와있는 내용을 그대로 인용하고자 한다.
 
@@ -112,7 +107,6 @@ for (int loop = 0; loop < listSize; loop++){ ,,, }
 
 # target logic 동일한 생성자 및 변환을 수행 중이라면 캐싱처리를 하자.
 
----
 
 loop 를 통해 처리되어야할 비즈니스 로직을 target logic 이라고 하는데,
 
@@ -142,7 +136,6 @@ for (int i=0; i< treeSetSize; i++) {
 
 # +) Pattern 사용 시 Pattern 객체를 캐싱처리 하자
 
----
 
 String.matches() 를 호출, Pattern.matches() 를 호출하는 모두의 경우에서 Pattern 인스턴스를 생성한다.
 
@@ -169,7 +162,7 @@ public static boolean matches(String regex, CharSequence input) {
 // 매 호출마다 Pattern 인스턴스를 생성한다.
 public class ValidNickNameValidator implements ConstraintValidator<ValidNickName, String> {
 
-    private final static String NICK_NAME_REGEX = "(?!^\\d+$)^.+$";
+    private final static String NICK_NAME_REGEX = "(?!^\d+$)^.+$";
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -186,7 +179,7 @@ public class ValidNickNameValidator implements ConstraintValidator<ValidNickName
 // ✅
 public class ValidNickNameValidator implements ConstraintValidator<ValidNickName, String> {
 
-    private final static Pattern NICK_NAME_REGEX = Pattern.compile("(?!^\\d+$)^.+$");
+    private final static Pattern NICK_NAME_REGEX = Pattern.compile("(?!^\d+$)^.+$");
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -197,7 +190,6 @@ public class ValidNickNameValidator implements ConstraintValidator<ValidNickName
 
 # +) 과연 Stream 은 빠를까
 
----
 
 이 주제는 이 포스트의 코어와 벗어나므로 따로 포스트를 분리하였다.
 

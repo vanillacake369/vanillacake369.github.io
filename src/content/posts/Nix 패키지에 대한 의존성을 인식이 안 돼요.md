@@ -3,12 +3,16 @@ title: "Nix 패키지에 대한 의존성을 인식이 안 돼요"
 description: "flake/home-manager 환경에서 lua, luaunit 을 설치했다."
 date: 2025-06-06
 tags: [nix]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "NixOS Ecosystem", order: 4 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
@@ -23,6 +27,7 @@ lua5.4-luaunit-3.4-1
 ```
 
 luaunit 의존성을 추가하여 lua 를 실행하고자 하였다.
+
 근데 luaunit 이 실행이 안 되었다.
 
 ```lua
@@ -53,19 +58,27 @@ stack traceback:
 
 이에 대해 이유를 찾아보고 해결기를 정리해보았다.
 
-# Why? 왜?
+# Why?
+
+왜?
 
 ---
 
-> [https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F](https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F)
+> [https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F](https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F[^2])
 
 nix 는 profile 에 해당하는 application 을 가져오지만, 의존성을 필요로 하는 library 들에 대한 compile enviroment 는 제공하지 않는다.
+
 왜냐하면 이렇게 해야지 package 들에 대해 bulid 시 의존성 체인을 최대한 방지할 수 있기 때문이다.
+
 따라서 이를 해결하고자 nix 는  `nix-shell` 을 통해 이를 제공한다.
+
 여기서는 -p (packages) 로 넘겨받은 라이브러리들에 대해 의존성을 쉘을 제공한다.
+
 이 쉘을 통해 원하는 compilation 혹은 script 를 실행할 수 있다.
 
-# How? 어떻게 고침?
+# How?
+
+어떻게 고침?
 
 ---
 
@@ -94,9 +107,5 @@ pkgs.mkShell {
 
 ![](/images/notion/7338539b8d8fc244.gif)
 
-# Reference
-
----
-
-[https://discourse.nixos.org/t/autotools-works-via-nix-shell-but-not-via-home-manager/42581](https://discourse.nixos.org/t/autotools-works-via-nix-shell-but-not-via-home-manager/42581)
-[https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F](https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F)
+[^1]: https://discourse.nixos.org/t/autotools-works-via-nix-shell-but-not-via-home-manager/42581 <https://discourse.nixos.org/t/autotools-works-via-nix-shell-but-not-via-home-manager/42581>
+[^2]: https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F <https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F>

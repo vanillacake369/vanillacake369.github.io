@@ -2,18 +2,15 @@
 title: "인터페이스와 함수형을 통해 제니릭한 API 핸들러 개선기"
 description: "동일한 API 호출코드를 인터페이스와 함수형을 활용하여 제네릭하게 처리하자!"
 date: 2024-10-01
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/92e7d60ad43fad73.png)
 
-
 # Episode 📜
 
----
 
 사내에서는 논블로킹 API 호출을 처리하고자  Webflux & Webclient 를 사용 중에 있다.
 
@@ -89,18 +86,18 @@ public <T> Flux<T> fetchBusLaneFlux(
 - retry
 - subscribe 에 대한 scheduler
 
-이를 제너릭하게 만들 수 없을까? 싶었고, 다음에 소개할 제네릭 인터페이스를 구현하게 되었다.
+이를 제너릭하게 만들 수 없을까?
+
+싶었고, 다음에 소개할 제네릭 인터페이스를 구현하게 되었다.
 
 # Reason 🤷‍♂️
 
----
 
 - Webclient API 호출에 대한 중복코드 발생
     - API 별 동일 옵션에 대한 동일 정책 사용
 
 # Fix 🔧
 
----
 
 제네릭과 함수형을 사용하여 인터페이스를 구축하였다.
 
@@ -289,7 +286,6 @@ public <T> Flux<T> fetchBusLaneInfoFlux(
 ```
 # Note that,,, ⚠️
 
----
 
 단점이라고 한다면 API 호출 별로 정책이 획일화되어있다는 것이다.
 

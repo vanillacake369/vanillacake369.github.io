@@ -2,24 +2,28 @@
 title: "Terminal Mode : RAW vs COOKED  (feat. Go TERM 모듈)"
 description: "터미널에는 입력 방법이 두 가지가 있다. 하나는 우리가 흔히 쓰는 Cooked 모드이고, 하나는 Raw 모드이다. 각각의 정의와 차이점에 대해 알아보자"
 date: 2025-12-22
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/8263281746625f5c.png)
 
+# Cooked Mode ?
 
-# Cooked Mode ? Raw Mode ?
+Raw Mode ?
 
 ---
 
-터미널에는 입력 방법이 두 가지가 있다. 하나는 우리가 흔히 쓰는 Cooked 모드이고, 하나는 Raw 모드이다.
+터미널에는 입력 방법이 두 가지가 있다.
+
+하나는 우리가 흔히 쓰는 Cooked 모드이고, 하나는 Raw 모드이다.
 
 ### Canonical Mode (Cooked Mode)
 
-터미널은 기본적으로 **Canonical Mode**로 동작한다. 이 모드는 흔히 **라인 버퍼링(Line Buffering)** 모드라고도 불리운다.
+터미널은 기본적으로 **Canonical Mode**로 동작한다.
+
+이 모드는 흔히 **라인 버퍼링(Line Buffering)** 모드라고도 불리운다.
 
 - 사용자가 키보드를 입력하면 즉시 프로그램으로 전달되지 않습니다.
 - **Enter 키**를 눌러야 비로소 입력된 한 줄 전체가 프로그램에 전달됩니다.
@@ -45,7 +49,6 @@ Raw Mode는 키 입력을 즉시 프로그램으로 전달한다..
 
 # Go 에서의 term 모듈
 
----
 
 https://github.com/golang/term
 
@@ -82,7 +85,8 @@ func main() {
         }
         if n > 0 {
             c := buf[0]
-            fmt.Printf("입력된 키: %q (%d)\n", c, c)
+            fmt.Printf("입력된 키: %q (%d)
+", c, c)
             if c == 'q' { // q 입력 시 종료
                 break
             }
@@ -98,7 +102,9 @@ func main() {
 
 **중요한 것은  term.Restore 을 사용하여 원래 상태로 복구해야한다는 것이다.** 
 
-이유는 term.MakeRaw 동작 원리에 있다. 다음과 같이 작동한다.
+이유는 term.MakeRaw 동작 원리에 있다.
+
+다음과 같이 작동한다.
 
 ```go
 func makeRaw(fd int) (*State, error) {
@@ -145,7 +151,6 @@ func restore(fd int, state *State) error {
 
 # Reference 📚
 
----
 
 https://viewsourcecode.org/snaptoken/kilo/02.enteringRawMode.html
 

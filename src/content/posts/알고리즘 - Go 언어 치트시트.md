@@ -2,8 +2,7 @@
 title: "알고리즘 - Go 언어 치트시트"
 description: "Go 언어 알고리즘 풀이 치트시트: 슬라이스, 맵, 정렬, 변환"
 date: 2025-12-19
-tags: [algorithm, algorithm, go]
-category: uncategorized
+tags: [algorithm, journal]
 lang: ko
 draft: false
 ---
@@ -27,10 +26,6 @@ maxVal := math.MinInt64
 minVal := math.MaxInt64
 ```
 
-
-
-
----
 
 ## Map & Struct
 
@@ -63,8 +58,6 @@ item1 := Item{priority: 3, index: 0}
 item2 := Item{5, 1} // 필드 순서대로 주입
 ```
 
-
-
 ---
 
 ## 배열 → 문자열
@@ -80,25 +73,28 @@ result := strings.Join(strSlice, ",") // "A,B,C"
 ```
 
 
-
-
----
-
 ## 시험 전 치트시트 Java 17
 
 # 알고리즘 유의사항
 
 ## 백트래킹 시 방문 여부에 따른 배열 선언
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 백트래킹 문제 풀이 시 문제 유형에 따라 배열을 몇 개 선언해야하는지에 대해
 유형과 차이점을 notation 하고자 한다. 
 
+# What?
 
-# What? 뭘 배움?
+뭘 배움?
+
+---
 
 ---
 
@@ -109,11 +105,12 @@ result := strings.Join(strSlice, ",") // "A,B,C"
 **다만 차이점은 **[**N과 M (1)**](https://www.acmicpc.net/problem/15649)** 은 배열을 두 개로 필요로하고**
 [N-Queen](https://www.acmicpc.net/problem/9663) 은 하나만 있어도 된다는 점이다.
 
-
 ### [**N과 M (1)**](https://www.acmicpc.net/problem/15649)** **
 
 중복된 숫자 없는 순열에서 중요한 것은 다음 탐색 대상이 새로운 수여야 한다는 것이다.
+
 즉 이전 탐색했던 숫자의 목록을 기억(memo) 해야한다.
+
 이에 따라 1) 탐색 상태 저장공간 2) 탐색했던 숫자 목록을 기억해두는 저장공간 이
 별도로 필요하다.
 
@@ -141,7 +138,8 @@ var (
 
 func main() {
 	defer writer.Flush()
-	fmt.Fscanf(reader, "%d %d\n", &n, &m)
+	fmt.Fscanf(reader, "%d %d
+", &n, &m)
 
 	permutation(0)
 }
@@ -155,7 +153,8 @@ func permutation(index int) {
 		for i := 0; i < m; i++ {
 			fmt.Fprintf(writer, "%d ", arr[i])
 		}
-		fmt.Fprint(writer, "\n")
+		fmt.Fprint(writer, "
+")
 		return
 	}
 
@@ -184,14 +183,14 @@ func permutation(index int) {
 
 ```
 
-
-
 ### [N-Queen](https://www.acmicpc.net/problem/9663)
 
 반면 N-Queen 의 경우, 다르다.
+
 체스판의 row 를 조건에 따라 탐색해나가는 이 문제는
 이전 탐색 목록을 기억해둘 필요가 없다
 단지 조건에 따라 배제하면 된다.
+
 따라서 1) 탐색 상태 저장공간 만 필요하다.
 
 ```go
@@ -216,7 +215,8 @@ var (
 
 func main() {
 	defer writer.Flush()
-	fmt.Fscanf(reader, "%d\n", &n)
+	fmt.Fscanf(reader, "%d
+", &n)
 
 	// 탐색 state machine dynamic array 선언
 	// 이미 이전 행에 대한 탐색 체크로 인해
@@ -261,134 +261,10 @@ func isNotQueenPath(row int, col int, board []int) bool {
 
 ```
 
+# How?
 
-
-# How? 어떻게 씀?
-
----
-
-x
-
-
-# Reference
+어떻게 씀?
 
 ---
 
 x
-
-## 알고리즘 총 정리 & 치트시트
-
-# Rubber Duck
-
-> 💡 시험 보기 전 준비
-
-- 해당 정리본을 훑으며 테크닉과 문제들 복습
-- 해당 정리본을 임베딩, 아래 프롬프트를 통해 주어진 테스트케이스와 기댓값을 만족하는 자바 코드를 만들어달라고 요청
-- 아예 접근법이 기억나지 않으면 힌트를 주는 러버덕 튜터 역할을 부여한 에이전트로부터 힌트를 조금씩 받기
-
-# 자료구조
-
-## Map
-
-### 테크닉 : putIfAbsent(), computeIfAbsent()
-
-> 💡 언제 쓰나
-
-```java
-// 1) 그룹핑: key -> List<V>
-map.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
-
-// 2) 키가 없을 때만 1회 초기화
-map.putIfAbsent(key, 0); // 이미 있으면 덮어쓰지 않음
-
-// 3) 빈도/합산: 아래가 더 직관적인 경우 많음
-count.merge(key, 1, Integer::sum);
-sum.merge(key, delta, Long::sum);
-```
-
-### 문제 : Closest Equal Element Queries
-
-> 요구사항
-> 접근/원리
-
-```java
-import java.util.*;
-
-class Solution {
-    public List<Integer> solveQueries(int[] nums, int[] queries) {
-        int n = nums.length;
-        Map<Integer, List<Integer>> pos = new HashMap<>();
-        for (int i = 0; i < n; i++) {
-            pos.computeIfAbsent(nums[i], k -> new ArrayList<>()).add(i);
-        }
-
-        List<Integer> ans = new ArrayList<>(queries.length);
-        for (int q : queries) {
-            List<Integer> idxs = pos.get(nums[q]);
-            if (idxs.size() == 1) {
-                ans.add(-1);
-                continue;
-            }
-
-            int p = Collections.binarySearch(idxs, q);
-            int prev = idxs.get((p - 1 + idxs.size()) % idxs.size());
-            int next = idxs.get((p + 1) % idxs.size());
-
-            int d1 = circularDist(q, prev, n);
-            int d2 = circularDist(q, next, n);
-            ans.add(Math.min(d1, d2));
-        }
-        return ans;
-    }
-
-    private int circularDist(int i, int j, int n) {
-        int d = Math.abs(i - j);
-        return Math.min(d, n - d);
-    }
-}
-```
-
-### 문제 : Minimum Absolute Distance Between Mirror Pairs
-
-> 요구사항
-> 접근/원리
-
-```java
-import java.util.*;
-
-class Solution {
-    public int minMirrorPairDistance(int[] nums) {
-        int ans = Integer.MAX_VALUE;
-        Map<Integer, Integer> seen = new HashMap<>(); // value -> index
-
-        for (int i = 0; i < nums.length; i++) {
-            Integer j = seen.get(nums[i]);
-            if (j != null) ans = Math.min(ans, i - j);
-            seen.put(reverseInt(nums[i]), i);
-        }
-
-        return ans == Integer.MAX_VALUE ? -1 : ans;
-    }
-
-    private int reverseInt(int x) {
-        long r = 0;
-        while (x != 0) {
-            r = r * 10 + (x % 10);
-            x /= 10;
-        }
-        return (int) r;
-    }
-}
-```
-
-### 테크닉 : Arrays.sort()
-
-> Tip 💡
-
-```java
-int[] nums = {3,12,-1,2919};
-
-Arrays.sort(nums); // {-1,3,12,2919};
-Arrays.sort(nums, (a,b) -> {a-b}); // {-1,3,12,2919};
-Arrays.sort(nums, (a,b) -> {b-a}); // {2919,12,3,-1};
-```

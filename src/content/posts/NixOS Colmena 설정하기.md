@@ -3,12 +3,16 @@ title: "NixOS Colmena 설정하기"
 description: "Colmena는 NixOS 기반 인프라를 SSH 원격에서 선언적으로 배포할 수 있게 해주므로,"
 date: 2026-01-22
 tags: [homelab, nix]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "NixOS Ecosystem", order: 5 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
@@ -20,19 +24,29 @@ Colmena는 NixOS 기반 인프라를 SSH 원격에서 선언적으로 배포할 
 
 Colmena 는 홈랩 운영 및 배포를 위한 핵심 도구입니다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 Colmena는 다음 구조로 구성될 수 있다.
 
-1. 호스트(homelab) + VM 전체를 Hive로 묶음
-2. 호스트 배포 기준
-3. VM 노드 자동 구성
+1.
 
+호스트(homelab) + VM 전체를 Hive로 묶음
+2.
 
+호스트 배포 기준
+3.
 
-# How? 어떻게 씀?
+VM 노드 자동 구성
+
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -89,9 +103,5 @@ colmena apply --on @k8s
 
 ```
 
-# Reference
-
----
-
-[https://github.com/Mic92/sops-nix?tab=readme-ov-file#usage-example](https://github.com/Mic92/sops-nix?tab=readme-ov-file#usage-example)
-[https://michael.stapelberg.ch/posts/2025-08-24-secret-management-with-sops-nix/](https://michael.stapelberg.ch/posts/2025-08-24-secret-management-with-sops-nix/)
+[^1]: https://github.com/Mic92/sops-nix?tab=readme-ov-file#usage-example <https://github.com/Mic92/sops-nix?tab=readme-ov-file#usage-example>
+[^2]: https://michael.stapelberg.ch/posts/2025-08-24-secret-management-with-sops-nix/ <https://michael.stapelberg.ch/posts/2025-08-24-secret-management-with-sops-nix/>

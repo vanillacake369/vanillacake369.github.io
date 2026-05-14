@@ -3,18 +3,25 @@ title: "System Architecture :: Zero 부터 한 스텝씩 개선하기"
 description: "로직처리, 데이터저장 등등 모든 일을 하나의 서버에서 맡아서 하는 아키텍처이다."
 date: 2024-01-04
 tags: [system-design]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 > 어떻게 체계적으로 서비스를 키울 수 있을까?
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -25,6 +32,7 @@ draft: false
 ### 단일 서버의 한계점
 
 사용자가 많아져서 요청이 증진되면, 용도에 따라 서버를 증진한다.
+
 각각의 용도에 따라 서버를 분리하기도 한다.
 
 - 트래픽 처리 용도
@@ -64,7 +72,9 @@ draft: false
 - 샤딩 :: DB를 샤드라는 작은 단위로 분할한다.
 - 다만 샤딩을 도입하면 풀어야할 숙제가 늘어난다.
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -85,7 +95,3 @@ draft: false
 ### DB 수평적 확장
 
 - 샤딩
-
-# Reference
-
----

@@ -3,33 +3,37 @@ title: "RAG 란 무엇이고 어떻게 작동하는가 ? (feat. ElasticSearch)"
 description: "LangChain 과 ELK 기반 따라할 수 있는 예제"
 date: 2026-01-10
 tags: [ai, database]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
 
 ---
 
+---
 
+# What?
 
-# What? 뭘 배움?
+뭘 배움?
 
 ---
 
+---
 
+# How?
 
-# How? 어떻게 씀?
+어떻게 씀?
 
 ---
 
 LangChain 과 ELK 기반 따라할 수 있는 예제
-[https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch](https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch)
-[https://raeul0304.tistory.com/24](https://raeul0304.tistory.com/24)
-[https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic](https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic)
-[https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation](https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation)
-
+[https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch](https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch[^5])
+[https://raeul0304.tistory.com/24](https://raeul0304.tistory.com/24[^6])
+[https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic](https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic[^7])
+[https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation](https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation[^8])
 
 ## Agentic RAG에서 반드시 딥다이브해야 할 핵심 영역
 
@@ -50,8 +54,6 @@ LangChain 과 ELK 기반 따라할 수 있는 예제
 - Self-consistency, Tree-of-Thought
 - RAG 평가 프레임워크 (RAGAS, LLM Eval)
 - 구현하면서 아직 해결하지 못한 문제들
-
-
 
 ## 🔍 딥다이브 포인트
 
@@ -160,35 +162,16 @@ Agentic RAG는 **비싸집니다**.
 - 동일 query + context → 결과 캐싱
 - vectorstore hit 시 websearch 차단 옵션
 
-
-
-
-
-
-# Reference
-
----
-
-> PostgreSQL pgvector 를 사용한 RAG
-
-[https://edbkorea.com/blog/postgres-%EB%B0%8F-pgvector%EA%B0%80-%ED%8F%AC%ED%95%A8%EB%90%9C-rag-%EC%95%B1/](https://edbkorea.com/blog/postgres-%EB%B0%8F-pgvector%EA%B0%80-%ED%8F%AC%ED%95%A8%EB%90%9C-rag-%EC%95%B1/)
-[https://medium.com/@levi_stringer/rag-with-pg-vector-with-sql-alchemy-d08d96bfa293](https://medium.com/@levi_stringer/rag-with-pg-vector-with-sql-alchemy-d08d96bfa293)
-
-
-> ElasticSearch 를 사용한 RAG
-
-[https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch](https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch)
-[https://raeul0304.tistory.com/24](https://raeul0304.tistory.com/24)
-[https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic](https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic)
-[https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation](https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation)
-[https://blog.bizspring.co.kr/%ED%85%8C%ED%81%AC/elasticsearch-%EA%B8%B0%EB%B0%98%EC%9D%98-vector-database-%EA%B5%AC%EC%84%B1/](https://blog.bizspring.co.kr/%ED%85%8C%ED%81%AC/elasticsearch-%EA%B8%B0%EB%B0%98%EC%9D%98-vector-database-%EA%B5%AC%EC%84%B1/)
-[https://vamlin.tistory.com/20](https://vamlin.tistory.com/20)
-[https://docs.spring.io/spring-ai/reference/api/chatclient.html](https://docs.spring.io/spring-ai/reference/api/chatclient.html)
-[https://www.themoonlight.io/ko/review/optimizing-retrieval-augmented-generation-with-elasticsearch-for-enhanced-question-answering-systems](https://www.themoonlight.io/ko/review/optimizing-retrieval-augmented-generation-with-elasticsearch-for-enhanced-question-answering-systems)
-
-
-> 어떻게 로컬 RAG 를 구현하는가?
-
-[https://news.hada.io/topic?id=25854](https://news.hada.io/topic?id=25854)
-[https://www.youtube.com/watch?v=eiXNA9rH4Rc](https://www.youtube.com/watch?v=eiXNA9rH4Rc)
-[https://www.youtube.com/watch?v=zI7rin2S_Ak](https://www.youtube.com/watch?v=zI7rin2S_Ak)
+[^2]: https://edbkorea.com/blog/postgres-%EB%B0%8F-pgvector%EA%B0%80-%ED%8F%AC%ED%95%A8%EB%90%9C-rag-%EC%95%B1/ <https://edbkorea.com/blog/postgres-%EB%B0%8F-pgvector%EA%B0%80-%ED%8F%AC%ED%95%A8%EB%90%9C-rag-%EC%95%B1/>
+[^3]: https://medium.com/@levi_stringer/rag-with-pg-vector-with-sql-alchemy-d08d96bfa293 <https://medium.com/@levi_stringer/rag-with-pg-vector-with-sql-alchemy-d08d96bfa293>
+[^5]: https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch <https://www.elastic.co/search-labs/kr/blog/agentic-rag-news-assistant-langchain-elasticsearch>
+[^6]: https://raeul0304.tistory.com/24 <https://raeul0304.tistory.com/24>
+[^7]: https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic <https://www.elastic.co/search-labs/blog/elasticsearch-rag-with-llama3-opensource-and-elastic>
+[^8]: https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation <https://cookbook.openai.com/examples/vector_databases/elasticsearch/elasticsearch-retrieval-augmented-generation>
+[^9]: https://blog.bizspring.co.kr/%ED%85%8C%ED%81%AC/elasticsearch-%EA%B8%B0%EB%B0%98%EC%9D%98-vector-database-%EA%B5%AC%EC%84%B1/ <https://blog.bizspring.co.kr/%ED%85%8C%ED%81%AC/elasticsearch-%EA%B8%B0%EB%B0%98%EC%9D%98-vector-database-%EA%B5%AC%EC%84%B1/>
+[^10]: https://vamlin.tistory.com/20 <https://vamlin.tistory.com/20>
+[^11]: https://docs.spring.io/spring-ai/reference/api/chatclient.html <https://docs.spring.io/spring-ai/reference/api/chatclient.html>
+[^12]: https://www.themoonlight.io/ko/review/optimizing-retrieval-augmented-generation-with-elasticsearch-for-enhanced-question-answering-systems <https://www.themoonlight.io/ko/review/optimizing-retrieval-augmented-generation-with-elasticsearch-for-enhanced-question-answering-systems>
+[^14]: https://news.hada.io/topic?id=25854 <https://news.hada.io/topic?id=25854>
+[^15]: https://www.youtube.com/watch?v=eiXNA9rH4Rc <https://www.youtube.com/watch?v=eiXNA9rH4Rc>
+[^16]: https://www.youtube.com/watch?v=zI7rin2S_Ak <https://www.youtube.com/watch?v=zI7rin2S_Ak>

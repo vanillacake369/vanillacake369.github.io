@@ -2,16 +2,18 @@
 title: "Aerospace :: yabai 의 한계점을 극복한 mac window manager"
 description: "불편한 mac 기본 window manager 와 yabai 대신 aerospace 를 사용해보는 건 어떨까?"
 date: 2025-12-22
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/e27fca0003d9ddec.png)
 
+# Why?
 
-# Why? 왜 배움?
+왜 배움?
+
+---
 
 ---
 
@@ -25,7 +27,11 @@ mac 에서는 mac 전용의 tilling manager 앱과 설정을 따로 구성해주
 
 옛날에는 tilling manager 의 중요성을 모르고 살았지만, 점점 개발하면 할수록 답답하여 공부 및 적용하게 되었다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -89,7 +95,7 @@ yabai -m rule --add app="^Alacritty$" space=^1
 
 skhd 는 macOS용 키보드 단축키 데몬이다.
 
-yabai 개발자가 함께 만든 도구로, yabai와 함께 사용하여 키보드로 윈도우를 제어한다. 
+yabai 개발자가 함께 만든 도구로, yabai와 함께 사용하여 키보드로 윈도우를 제어한다.
 
 아래와 같이 `~/.skhdrc` 를 생성하여 설정한다.
 
@@ -192,11 +198,15 @@ hyprland waybar 와 같이 말이다.
 
 그렇게 세팅하던 와중 위 세 가지 조합의 치명적 단점이 거슬렸다.
 
-1. 키 조합이 분산되어 있어 설정 뿐 아니라 관리가 너무 어려웠다.
+1.
+
+키 조합이 분산되어 있어 설정 뿐 아니라 관리가 너무 어려웠다.
 
 2. sketchybar 커스터마이징의 학습곡선이 너무 높다
 
-3. 프로세스가 세 개나 활성화되어 있어야 했다.
+3.
+
+프로세스가 세 개나 활성화되어 있어야 했다.
 
 이 세 가지 조합은 간단한 window manager 를 위해서 몇 날 몇 일의 프로그래밍을 해야하는 지경에 이르르게 된다
 
@@ -208,7 +218,9 @@ hyprland waybar 와 같이 말이다.
 
 위와 같은 단점 때문에 쉽게 yabai 스택에 정착하지 못 했다.
 
-그래서 통합 솔루션은 없을까? 찾던 와중 yabai 를 소개해준 유튜버가 aerospace 로 정착한 것을 알게 되었다.
+그래서 통합 솔루션은 없을까?
+
+찾던 와중 yabai 를 소개해준 유튜버가 aerospace 로 정착한 것을 알게 되었다.
 
 https://github.com/mehd-io/dotfiles/tree/main?tab=readme-ov-file
 
@@ -216,7 +228,9 @@ https://github.com/mehd-io/dotfiles/tree/main?tab=readme-ov-file
 
 yabai 는 mac workspace 에 대해 직접 의존하는 반면, aerospace 는 자체 workspace 에뮬레이션을 구현한다.
 
-aerospace 를 쓴다면 skhd 는 불필요하다. 단축키 설정과 워크스페이스 설정을 하나의 .toml 에서 선언되기 때문이다.
+aerospace 를 쓴다면 skhd 는 불필요하다.
+
+단축키 설정과 워크스페이스 설정을 하나의 .toml 에서 선언되기 때문이다.
 
 workspace 상태바를 기본 menu bar 에 띄워주기 때문에 sketchybar 가 없어도 된다.
 
@@ -242,7 +256,9 @@ workspace 상태바를 기본 menu bar 에 띄워주기 때문에 sketchybar 가
 
 RAM 사용률이 비교적 낮다는 게 최대 매력 포인트였다.
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -310,30 +326,13 @@ https://github.com/vanillacake369/tonys-nix/blob/main/dotfiles/aerospace/aerospa
 
 만약 본인 입맛에 맞추어 수정하고자 한다면 튜토리얼 영상과 공식문서는 한 번쯤 보기를 권장한다.
 
-https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s
+https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s[^11]
 
-# Reference
-
----
-
-> yabai
-> 
-
-https://www.youtube.com/watch?v=J4SXh8UhiCQ&t=444s
-
-https://www.youtube.com/watch?v=k94qImbFKWE&t=366s
-
-https://github.com/mehd-io/dotfiles/tree/backup-yabai?tab=readme-ov-file
-
-https://www.josean.com/posts/yabai-setup
-
-https://www.reddit.com/r/unixporn/comments/1d8pc0g/yabai_please_recommend_sketchybar_configs_for_me/
-
-https://zackreed.me/posts/aerospace_and_sketchybar_setup_on_macos/
-
-> aerospace
-> 
-
-https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s
-
-https://www.youtube.com/watch?v=5nwnJjr5eOo&t=148s
+[^3]: https://www.youtube.com/watch?v=J4SXh8UhiCQ&t=444s <https://www.youtube.com/watch?v=J4SXh8UhiCQ&t=444s>
+[^4]: https://www.youtube.com/watch?v=k94qImbFKWE&t=366s <https://www.youtube.com/watch?v=k94qImbFKWE&t=366s>
+[^5]: https://github.com/mehd-io/dotfiles/tree/backup-yabai?tab=readme-ov-file <https://github.com/mehd-io/dotfiles/tree/backup-yabai?tab=readme-ov-file>
+[^6]: https://www.josean.com/posts/yabai-setup <https://www.josean.com/posts/yabai-setup>
+[^7]: https://www.reddit.com/r/unixporn/comments/1d8pc0g/yabai_please_recommend_sketchybar_configs_for_me/ <https://www.reddit.com/r/unixporn/comments/1d8pc0g/yabai_please_recommend_sketchybar_configs_for_me/>
+[^8]: https://zackreed.me/posts/aerospace_and_sketchybar_setup_on_macos/ <https://zackreed.me/posts/aerospace_and_sketchybar_setup_on_macos/>
+[^11]: https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s <https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s>
+[^12]: https://www.youtube.com/watch?v=5nwnJjr5eOo&t=148s <https://www.youtube.com/watch?v=5nwnJjr5eOo&t=148s>

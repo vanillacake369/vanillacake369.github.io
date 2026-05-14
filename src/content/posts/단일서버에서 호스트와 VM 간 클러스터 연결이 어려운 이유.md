@@ -3,7 +3,6 @@ title: "단일서버에서 호스트와 VM 간 클러스터 연결이 어려운 
 description: "현재 홈랩 환경은 다음과 같이 구성되어 있습니다:"
 date: 2026-01-29
 tags: [homelab, nix]
-category: uncategorized
 lang: ko
 draft: false
 ---
@@ -18,16 +17,26 @@ draft: false
 - **MicroVM 3대**: k8s-master, k8s-worker1, k8s-worker2
 - **네트워크**: VLAN 기반 브릿지(vmbr0)를 통해 VM들이 통신
 
-원래 목표는 GPU 워크로드(Ollama AI 모델 서빙)를 Kubernetes에서 스케줄링하는 것이었습니다. GPU는 물리 호스트에만 있으므로, 호스트를 K8s 워커 노드로 추가해야 했습니다.
+원래 목표는 GPU 워크로드(Ollama AI 모델 서빙)를 Kubernetes에서 스케줄링하는 것이었습니다.
+
+GPU는 물리 호스트에만 있으므로, 호스트를 K8s 워커 노드로 추가해야 했습니다.
 
 ### 문제의 시작: Flannel + br_netfilter 충돌
 
-Flannel CNI는 Pod 간 통신을 위해 **br_netfilter** 커널 모듈을 필요로 합니다. 이 모듈은 Linux 브릿지를 통과하는 패킷을 iptables로 필터링할 수 있게 해줍니다.
-문제는 호스트에서 br_netfilter를 활성화하면, VM들이 사용하는 vmbr0 브릿지 트래픽도 iptables를 거치게 된다는 점입니다. NixOS의 기본 방화벽 정책(nixos-filter-forward 체인)이 이 트래픽을 차단하여 **VM 네트워크가 완전히 불통**이 됩니다.
+Flannel CNI는 Pod 간 통신을 위해 **br_netfilter** 커널 모듈을 필요로 합니다.
+
+이 모듈은 Linux 브릿지를 통과하는 패킷을 iptables로 필터링할 수 있게 해줍니다.
+
+문제는 호스트에서 br_netfilter를 활성화하면, VM들이 사용하는 vmbr0 브릿지 트래픽도 iptables를 거치게 된다는 점입니다.
+
+NixOS의 기본 방화벽 정책(nixos-filter-forward 체인)이 이 트래픽을 차단하여 **VM 네트워크가 완전히 불통**이 됩니다.
 
 ### Cilium 검토 이유
 
-Cilium은 **eBPF(extended Berkeley Packet Filter)** 기반으로 동작하며, br_netfilter 없이도 Pod 네트워킹이 가능합니다. 이론적으로 호스트를 K8s 노드로 추가하면서도 VM 브릿지 네트워크를 유지할 수 있을 것으로 기대했습니다.
+Cilium은 **eBPF(extended Berkeley Packet Filter)** 기반으로 동작하며, br_netfilter 없이도 Pod 네트워킹이 가능합니다.
+
+이론적으로 호스트를 K8s 노드로 추가하면서도 VM 브릿지 네트워크를 유지할 수 있을 것으로 기대했습니다.
+
 하지만 결론적으로, Cilium도 다른 방식으로 호스트 네트워크 전체를 장악하여 VM 브릿지와 충돌했습니다.
 
 ### 목표했던 아키텍처
@@ -59,13 +68,14 @@ graph TB
 
 ### 근본적인 충돌 원인
 
-단일 서버에서 호스트와 VM을 하나의 K8s 클러스터로 구성할 때, **CNI가 호스트의 네트워크 스택을 변경**하면서 VM 브릿지 네트워크와 충돌이 발생합니다. 이 충돌은 CNI의 종류와 관계없이 발생하며, 그 메커니즘만 다릅니다.
+단일 서버에서 호스트와 VM을 하나의 K8s 클러스터로 구성할 때, **CNI가 호스트의 네트워크 스택을 변경**하면서 VM 브릿지 네트워크와 충돌이 발생합니다.
+
+이 충돌은 CNI의 종류와 관계없이 발생하며, 그 메커니즘만 다릅니다.
 
 | CNI | 충돌 메커니즘 | 결과 |
 | --- | --- | --- |
 | **Flannel** | br_netfilter가 모든 브릿지 트래픽을 iptables로 보냄 | VM 트래픽이 방화벽에서 차단됨 |
 | **Cilium** | eBPF가 모든 네트워크 인터페이스를 장악 | VM 브릿지 동작 방해 |
-
 
 ### Flannel vs Cilium 기술 비교
 
@@ -79,7 +89,6 @@ graph TB
 | **복잡도** | 단순 | 복잡 |
 | **리소스 사용량** | 가벼움 (~100MB) | 상대적으로 무거움 (~500MB) |
 | **호스트 네트워크 영향** | br_netfilter로 브릿지 트래픽 변경 | eBPF로 모든 인터페이스 제어 |
-
 
 ### 패킷 처리 방식 비교
 
@@ -102,7 +111,9 @@ flowchart LR
 
 ### 현재 네트워크 아키텍처 (homelab 환경)
 
-아래 다이어그램은 현재 homelab의 네트워크 구조입니다. 호스트의 vmbr0 브릿지가 VLAN을 기반으로 VM들에게 네트워크를 제공합니다.
+아래 다이어그램은 현재 homelab의 네트워크 구조입니다.
+
+호스트의 vmbr0 브릿지가 VLAN을 기반으로 VM들에게 네트워크를 제공합니다.
 
 ```mermaid
 graph TB
@@ -139,13 +150,17 @@ graph TB
 
 ```
 
-**핵심 포인트**: vmbr0는 VM들의 생명선입니다. CNI가 이 브릿지의 동작을 방해하면 VM들은 네트워크 접근을 완전히 잃게 됩니다.
+**핵심 포인트**: vmbr0는 VM들의 생명선입니다.
+
+CNI가 이 브릿지의 동작을 방해하면 VM들은 네트워크 접근을 완전히 잃게 됩니다.
 
 ---
 
 ## HOW: 검토 과정 및 실험
 
-### 1. Cilium 설치 시도
+### 1.
+
+Cilium 설치 시도
 
 Flannel의 br_netfilter 문제를 해결하기 위해 Cilium을 설치해 보았습니다.
 
@@ -155,17 +170,19 @@ helm repo add cilium <https://helm.cilium.io/>
 helm repo update
 
 # Cilium 설치 (호스트 노드 포함)
-helm install cilium cilium/cilium \\
-  --namespace kube-system \\
-  --set operator.replicas=1 \\
-  --set ipam.mode=kubernetes \\
-  --set tunnel=vxlan \\
-  --set bpf.masquerade=true \\
+helm install cilium cilium/cilium \
+  --namespace kube-system \
+  --set operator.replicas=1 \
+  --set ipam.mode=kubernetes \
+  --set tunnel=vxlan \
+  --set bpf.masquerade=true \
   --set nodePort.enabled=true
 
 ```
 
-### 2. Cilium 설치 후 발생한 문제
+### 2.
+
+Cilium 설치 후 발생한 문제
 
 설치 직후 호스트에서 VM으로의 모든 네트워크 연결이 끊어졌습니다.
 
@@ -190,7 +207,9 @@ lxc_health: <BROADCAST,MULTICAST,UP,LOWER_UP>
 
 Cilium이 호스트의 네트워크 인터페이스에 eBPF 프로그램을 attach하여 vmbr0 브릿지의 정상적인 동작을 방해했습니다.
 
-### 3. Cilium 제거 및 Flannel 롤백
+### 3.
+
+Cilium 제거 및 Flannel 롤백
 
 VM 네트워크 복구를 위해 Cilium을 완전히 제거해야 했습니다.
 
@@ -230,11 +249,17 @@ kubectl apply -f <https://github.com/flannel-io/flannel/releases/latest/download
 
 ```
 
-**중요**: Cilium은 제거 후에도 많은 잔여물(인터페이스, iptables 규칙, taint)을 남깁니다. 이것들을 모두 수동으로 정리해야 네트워크가 정상 복구됩니다.
+**중요**: Cilium은 제거 후에도 많은 잔여물(인터페이스, iptables 규칙, taint)을 남깁니다.
 
-### 4. NixOS 설정에서 br_netfilter 조건부 활성화
+이것들을 모두 수동으로 정리해야 네트워크가 정상 복구됩니다.
 
-최종적으로 채택한 해결책은 **호스트에서는 br_netfilter를 비활성화**하고, **VM에서만 활성화**하는 것입니다. 이렇게 하면 VM들끼리는 Flannel로 정상 통신하고, 호스트의 vmbr0 브릿지는 영향받지 않습니다.
+### 4.
+
+NixOS 설정에서 br_netfilter 조건부 활성화
+
+최종적으로 채택한 해결책은 **호스트에서는 br_netfilter를 비활성화**하고, **VM에서만 활성화**하는 것입니다.
+
+이렇게 하면 VM들끼리는 Flannel로 정상 통신하고, 호스트의 vmbr0 브릿지는 영향받지 않습니다.
 
 ```nix
 # k8s-node.nix에서 isVM 변수로 호스트/VM 구분
@@ -278,7 +303,9 @@ networking.firewall = {
 
 이 섹션에서는 하이브리드 클러스터 구성 시도 중 겪은 다양한 문제들과 그 해결 방법을 상세히 설명합니다.
 
-### 1. VM 네트워크 완전 불통 (br_netfilter 문제)
+### 1.
+
+VM 네트워크 완전 불통 (br_netfilter 문제)
 
 이 문제는 호스트에서 Flannel을 실행하려고 할 때 발생했습니다.
 **증상:**
@@ -294,7 +321,10 @@ From 10.0.20.1 icmp_seq=2 Destination Host Unreachable
 
 VM들은 SSH 접속도 불가능해지며, 완전히 고립됩니다.
 **원인 분석:**
-br_netfilter 커널 모듈이 로드되면, Linux 커널은 **모든 브릿지 인터페이스**를 통과하는 패킷을 iptables로 보냅니다. 이는 Kubernetes의 cni0 브릿지뿐만 아니라, VM들이 사용하는 vmbr0 브릿지에도 적용됩니다.
+br_netfilter 커널 모듈이 로드되면, Linux 커널은 **모든 브릿지 인터페이스**를 통과하는 패킷을 iptables로 보냅니다.
+
+이는 Kubernetes의 cni0 브릿지뿐만 아니라, VM들이 사용하는 vmbr0 브릿지에도 적용됩니다.
+
 NixOS의 기본 방화벽에는 `nixos-filter-forward` 체인이 있으며, 이 체인은 명시적으로 허용되지 않은 forwarded 트래픽을 DROP합니다. vmbr0를 통한 VM 트래픽은 이 필터에 걸려 차단됩니다.
 **진단 방법:**
 
@@ -326,11 +356,17 @@ sudo iptables -L nixos-filter-forward -v -n
 
 ---
 
-### 2. Cilium이 호스트 네트워크 전체를 장악
+### 2.
 
-Flannel 대신 Cilium을 시도했을 때 발생한 문제입니다. Cilium은 br_netfilter가 필요 없지만, 다른 방식으로 네트워크를 장악합니다.
+Cilium이 호스트 네트워크 전체를 장악
+
+Flannel 대신 Cilium을 시도했을 때 발생한 문제입니다.
+
+Cilium은 br_netfilter가 필요 없지만, 다른 방식으로 네트워크를 장악합니다.
 **증상:**
-Cilium 설치 후 VM 네트워크가 불통이 됩니다. Flannel과 달리, Cilium을 제거한 후에도 문제가 지속될 수 있습니다.
+Cilium 설치 후 VM 네트워크가 불통이 됩니다.
+
+Flannel과 달리, Cilium을 제거한 후에도 문제가 지속될 수 있습니다.
 
 ```bash
 # Cilium이 생성한 인터페이스들
@@ -343,7 +379,10 @@ $ ip link show | grep -E "cilium|lxc"
 ```
 
 **원인 분석:**
-Cilium은 eBPF 프로그램을 사용하여 패킷을 처리합니다. 이 프로그램들은 네트워크 인터페이스의 `tc` (traffic control) 훅에 attach되어 패킷 경로를 직접 제어합니다.
+Cilium은 eBPF 프로그램을 사용하여 패킷을 처리합니다.
+
+이 프로그램들은 네트워크 인터페이스의 `tc` (traffic control) 훅에 attach되어 패킷 경로를 직접 제어합니다.
+
 문제는 Cilium이 **호스트의 모든 네트워크 인터페이스**에 이 프로그램들을 attach한다는 점입니다. vmbr0 브릿지와 VLAN 인터페이스도 예외가 아니며, Cilium의 eBPF 프로그램이 이들의 정상적인 패킷 포워딩을 방해합니다.
 **진단 방법:**
 
@@ -380,7 +419,7 @@ sudo ip link delete cilium_vxlan 2>/dev/null
 sudo ip link delete lxc_health 2>/dev/null
 
 # 3. eBPF 프로그램 정리 (tc 필터 삭제)
-for iface in $(ip link show | grep -oP '^\\d+: \\K[^:@]+'); do
+for iface in $(ip link show | grep -oP '^\d+: \K[^:@]+'); do
   sudo tc filter del dev $iface ingress 2>/dev/null
   sudo tc filter del dev $iface egress 2>/dev/null
 done
@@ -404,7 +443,9 @@ sudo systemctl restart kubelet
 
 ---
 
-### 3. CNI 플러그인이 시스템 명령어를 덮어씀 (bridge 명령 충돌)
+### 3.
+
+CNI 플러그인이 시스템 명령어를 덮어씀 (bridge 명령 충돌)
 
 NixOS에서 cni-plugins 패키지를 설치했을 때 발생하는 문제입니다.
 **증상:**
@@ -418,9 +459,13 @@ Usage: bridge add <net_config> <container_id> ...
 
 ```
 
-`iproute2`의 `bridge` 명령 대신 CNI의 `bridge` 플러그인이 실행됩니다. 네트워크 디버깅이 불가능해집니다.
+`iproute2`의 `bridge` 명령 대신 CNI의 `bridge` 플러그인이 실행됩니다.
+
+네트워크 디버깅이 불가능해집니다.
 **원인 분석:**
-NixOS에서 `cni-plugins` 패키지를 `environment.systemPackages`에 추가하면, 패키지의 모든 바이너리가 PATH에 추가됩니다. CNI 플러그인 중 `bridge`라는 이름의 바이너리가 있어서 `iproute2`의 `bridge` 명령을 덮어씁니다.
+NixOS에서 `cni-plugins` 패키지를 `environment.systemPackages`에 추가하면, 패키지의 모든 바이너리가 PATH에 추가됩니다.
+
+CNI 플러그인 중 `bridge`라는 이름의 바이너리가 있어서 `iproute2`의 `bridge` 명령을 덮어씁니다.
 
 ```bash
 # 어떤 bridge가 실행되는지 확인
@@ -434,7 +479,9 @@ $ ls /run/current-system/sw/bin/bridge*
 ```
 
 **해결 방법 (NixOS):**
-`cni-plugins`를 systemPackages에서 제거하고, `/opt/cni/bin`에 심볼릭 링크만 생성합니다. 이렇게 하면 kubelet은 CNI 플러그인을 찾을 수 있지만, PATH에는 추가되지 않습니다.
+`cni-plugins`를 systemPackages에서 제거하고, `/opt/cni/bin`에 심볼릭 링크만 생성합니다.
+
+이렇게 하면 kubelet은 CNI 플러그인을 찾을 수 있지만, PATH에는 추가되지 않습니다.
 
 ```nix
 # 잘못된 방법: cni-plugins가 PATH에 추가됨
@@ -463,7 +510,9 @@ systemd.tmpfiles.rules = [
 
 ---
 
-### 4. Flannel Pod가 Error 상태 (br_netfilter 미로드)
+### 4.
+
+Flannel Pod가 Error 상태 (br_netfilter 미로드)
 
 VM에서 Flannel을 실행할 때 발생할 수 있는 문제입니다.
 **증상:**
@@ -486,7 +535,9 @@ stat /proc/sys/net/bridge/bridge-nf-call-iptables: no such file or directory
 ```
 
 **원인 분석:**
-Flannel은 시작할 때 `br_netfilter` 커널 모듈이 로드되어 있는지 확인합니다. 이 모듈이 없으면 `/proc/sys/net/bridge/bridge-nf-call-iptables` 파일이 존재하지 않고, Flannel은 이를 치명적 오류로 처리합니다.
+Flannel은 시작할 때 `br_netfilter` 커널 모듈이 로드되어 있는지 확인합니다.
+
+이 모듈이 없으면 `/proc/sys/net/bridge/bridge-nf-call-iptables` 파일이 존재하지 않고, Flannel은 이를 치명적 오류로 처리합니다.
 **해결 방법:**
 
 ```bash
@@ -517,7 +568,9 @@ boot.kernel.sysctl = lib.optionalAttrs isVM {
 
 ---
 
-### 5. Pod가 Pending 상태에서 벗어나지 않음 (Cilium taint 잔존)
+### 5.
+
+Pod가 Pending 상태에서 벗어나지 않음 (Cilium taint 잔존)
 
 Cilium을 제거한 후 발생할 수 있는 문제입니다.
 **증상:**
@@ -544,8 +597,13 @@ Events:
 ```
 
 **원인 분석:**
-Cilium은 설치될 때 모든 노드에 `node.cilium.io/agent-not-ready:NoSchedule` taint를 추가합니다. 이 taint는 Cilium Agent가 준비되기 전에 Pod가 스케줄링되는 것을 방지합니다.
-문제는 Cilium을 제거해도 이 taint가 자동으로 제거되지 않는다는 것입니다. 노드에 taint가 남아 있으면 새 Pod는 스케줄링될 수 없습니다.
+Cilium은 설치될 때 모든 노드에 `node.cilium.io/agent-not-ready:NoSchedule` taint를 추가합니다.
+
+이 taint는 Cilium Agent가 준비되기 전에 Pod가 스케줄링되는 것을 방지합니다.
+
+문제는 Cilium을 제거해도 이 taint가 자동으로 제거되지 않는다는 것입니다.
+
+노드에 taint가 남아 있으면 새 Pod는 스케줄링될 수 없습니다.
 **진단:**
 
 ```bash
@@ -581,7 +639,9 @@ kubectl get pods
 
 ---
 
-### 6. CNI 설정 파일 충돌 (제거된 CNI를 계속 사용)
+### 6.
+
+CNI 설정 파일 충돌 (제거된 CNI를 계속 사용)
 
 Cilium에서 Flannel로 전환하거나, CNI를 교체할 때 발생하는 문제입니다.
 **증상:**
@@ -600,8 +660,13 @@ Events:
 
 Cilium은 이미 제거했는데 kubelet이 계속 cilium-cni를 사용하려고 합니다.
 **원인 분석:**
-kubelet은 `/etc/cni/net.d/` 디렉토리에서 CNI 설정 파일을 읽습니다. 파일 이름의 알파벳 순서대로 처리하며, 첫 번째로 찾은 설정을 사용합니다.
-Cilium은 `05-cilium.conflist` 같은 이름으로 설정 파일을 생성하고, Flannel은 `10-flannel.conflist`를 사용합니다. Cilium 설정이 먼저 오므로, Cilium이 제거되어도 kubelet은 cilium-cni를 사용하려 합니다.
+kubelet은 `/etc/cni/net.d/` 디렉토리에서 CNI 설정 파일을 읽습니다.
+
+파일 이름의 알파벳 순서대로 처리하며, 첫 번째로 찾은 설정을 사용합니다.
+
+Cilium은 `05-cilium.conflist` 같은 이름으로 설정 파일을 생성하고, Flannel은 `10-flannel.conflist`를 사용합니다.
+
+Cilium 설정이 먼저 오므로, Cilium이 제거되어도 kubelet은 cilium-cni를 사용하려 합니다.
 
 ```bash
 # CNI 설정 파일 확인
@@ -634,12 +699,18 @@ kubectl get pods -A
 **예방책:**
 CNI를 교체할 때는 항상 다음 순서를 따르세요:
 
-1. 이전 CNI 완전 제거 (helm uninstall 등)
+1.
+
+이전 CNI 완전 제거 (helm uninstall 등)
 2. `/etc/cni/net.d/`의 설정 파일 삭제
 3. `/var/run/<cni-name>` 디렉토리 삭제
-4. CNI 관련 인터페이스 삭제 (`ip link delete`)
+4.
+
+CNI 관련 인터페이스 삭제 (`ip link delete`)
 5. containerd, kubelet 재시작
-6. 새 CNI 설치
+6.
+
+새 CNI 설치
 
 ---
 
@@ -653,7 +724,9 @@ CNI를 교체할 때는 항상 다음 순서를 따르세요:
 2. **Cilium**: eBPF가 모든 인터페이스를 장악하여 VM 브릿지 동작 방해
 3. **Calico, Weave 등 다른 CNI**: 유사한 문제가 예상됨 (모두 호스트 네트워크 스택에 개입)
 
-근본적인 문제는 **CNI가 K8s 노드의 네트워크 스택 전체에 영향을 미친다**는 것입니다. VM 하이퍼바이저가 실행되는 호스트에서는 이것이 VM 네트워킹과 충돌합니다.
+근본적인 문제는 **CNI가 K8s 노드의 네트워크 스택 전체에 영향을 미친다**는 것입니다.
+
+VM 하이퍼바이저가 실행되는 호스트에서는 이것이 VM 네트워킹과 충돌합니다.
 
 ### 최종 아키텍처
 

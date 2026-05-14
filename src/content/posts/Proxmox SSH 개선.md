@@ -3,35 +3,45 @@ title: "Proxmox SSH 개선"
 description: "Proxmox는 설치 직후부터 기본적으로 root 계정의 SSH 접속을 허용하고 있다."
 date: 2025-12-29
 tags: [homelab]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "Proxmox Homelab", order: 1 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
 
 ---
 
-Proxmox는 설치 직후부터 기본적으로 root 계정의 SSH 접속을 허용하고 있다. 
+---
+
+Proxmox는 설치 직후부터 기본적으로 root 계정의 SSH 접속을 허용하고 있다.
+
 하지만 기본 설정 그대로 두는 것보다 보안을 위해 다음 설정들을 처리해야만 한다
 
 - 로그인 방식 변경
 - 관리 전용 사용자
 - Fail2Ban
 
-
 기존 SSH 방식이 왜 위험한지, 위 설정들은 무엇인지, 어떻게 하면 설정할 수 있는지를 알아본다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 [안전한 SSH 구축 방법](https://www.notion.so/20f19c3902908018b512fec4e62ecce1#2d819c3902908033b89ed33ca6baa5a9) 
 사실 금번 내용은 이전 포스트에서 사실 다룬 내용이다.
+
 따라서 What 에 대해서는 이전 포스트인 위 글을 참고하길 바란다.
 
+# How?
 
-# How? 어떻게 씀?
+어떻게 씀?
 
 ---
 
@@ -124,15 +134,14 @@ ssh: connect to host 192.168.45.82 port 22327: Connection refuse
 
 위 두 가지를 해결하니 문제가 해결되었다.
 
-
 ## Fail2ban 세팅
 
 ### fail2ban 설치 시 발생한 문제 & 해결법
 
 fail2ban 서비스를 systemd 상에서 실행하려 하니 아래와 동일한 현상의 에러가 발생했다.
 
-
 찾아보니 1.1.0 이하의 fail2ban 에 해당 문제가 있었고 최신 버전에 수정되었다고 한다.
+
 어느 debian repo 도 최신 버전을 지원해주지 않고 있었다.
 [https://discuss.frappe.io/t/fail2ban-fails-on-ubuntu-24-04-lts/127658](https://discuss.frappe.io/t/fail2ban-fails-on-ubuntu-24-04-lts/127658) 조언에 따라 아래와 같이 해결하였다.
 
@@ -325,9 +334,5 @@ Status for the jail: sshd
    `- Banned IP list:
 ```
 
-# Reference
-
----
-
-[https://monkeybusiness.tistory.com/696](https://monkeybusiness.tistory.com/696)
-[https://www.digitalocean.com/community/tutorials/how-fail2ban-works-to-protect-services-on-a-linux-server](https://www.digitalocean.com/community/tutorials/how-fail2ban-works-to-protect-services-on-a-linux-server)
+[^1]: https://monkeybusiness.tistory.com/696 <https://monkeybusiness.tistory.com/696>
+[^2]: https://www.digitalocean.com/community/tutorials/how-fail2ban-works-to-protect-services-on-a-linux-server <https://www.digitalocean.com/community/tutorials/how-fail2ban-works-to-protect-services-on-a-linux-server>

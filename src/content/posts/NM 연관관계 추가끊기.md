@@ -3,7 +3,6 @@ title: "N:M 연관관계 추가&끊기"
 description: "FK에  여부를 지정할 수 있다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
@@ -44,16 +43,30 @@ private List<Car> cars;
 
 ## Hobby 추가
 
-1. 추가하고자 하는 인스턴스를 args로 받음
-2. 주어진 Post와 Hobby에 대한 PostHobby 인스턴스 생성
-3. Hobby의 PostHobby 리스트에 생성한 PostHobby 인스턴스 추가
-4. Post의 PostHobby 리스트에 생성한 PostHobby 인스턴스 추가
+1.
 
+추가하고자 하는 인스턴스를 args로 받음
+2.
 
+주어진 Post와 Hobby에 대한 PostHobby 인스턴스 생성
+3.
+
+Hobby의 PostHobby 리스트에 생성한 PostHobby 인스턴스 추가
+4.
+
+Post의 PostHobby 리스트에 생성한 PostHobby 인스턴스 추가
 
 ## Hobby 끊기
 
-1. 지우고자 하는 인스턴스를 args로 받음
-2. 주어진 Post와 Hobby에 대한 PostHobby 인스턴스 삭제
-3. Hobby의 PostHobby 리스트에서 생성한 PostHobby 인스턴스 삭제
-4. Post의 PostHobby 리스트에서 생성한 PostHobby 인스턴스 삭제
+1.
+
+지우고자 하는 인스턴스를 args로 받음
+2.
+
+주어진 Post와 Hobby에 대한 PostHobby 인스턴스 삭제
+3.
+
+Hobby의 PostHobby 리스트에서 생성한 PostHobby 인스턴스 삭제
+4.
+
+Post의 PostHobby 리스트에서 생성한 PostHobby 인스턴스 삭제

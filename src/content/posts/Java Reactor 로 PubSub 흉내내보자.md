@@ -2,15 +2,13 @@
 title: "Java Reactor 로 Pub/Sub 흉내내보자 !!"
 description: "FluxSink/MonoSink 기반 이벤트 발행을 통해 값 조회를 할 수 있다고?"
 date: 2024-11-15
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 # Before explanation,,, 👀
 
----
 
 > ☝
 > 
@@ -20,7 +18,6 @@ draft: false
 
 # Episode 📜
 
----
 
 ### 주어진 요구사항
 
@@ -118,7 +115,6 @@ Kafaka 나 Redis PUB/SUB 에서는 발행자와 구독자가 이벤트 발행과
 
 # About 💁‍♂️
 
----
 
 > ApplicationEventPublisher 에 대해서는 아래 링크를 참고해보세요.
 > 
@@ -126,7 +122,9 @@ Kafaka 나 Redis PUB/SUB 에서는 발행자와 구독자가 이벤트 발행과
 > https://www.baeldung.com/spring-events
 > 
 
-> Mono.create() & MonoSink 도 아래에서 설명할 FluxSink 와 비슷하게 처리됩니다. 아래 링크를 참고해보세요.
+> Mono.create() & MonoSink 도 아래에서 설명할 FluxSink 와 비슷하게 처리됩니다.
+
+아래 링크를 참고해보세요.
 > 
 > 
 > https://kkoon9.tistory.com/156
@@ -152,7 +150,9 @@ Mono / Flux 생성 방법에 따라 처리방법을 조작하거나 결과값을
 
 create 를 사용하면 각 단계마다 값을 여러 개 생산하는 Flux 를 만들 수 있으며, 심지어 멀티스레드로도 가능하다.
 
-이 메서드는 next, error, complete 메서드를 가지고 있는 FluxSink 를 노출하고 있다. 콜백에서 멀티스레드 기반 이벤트를 트리거할 수 있다.
+이 메서드는 next, error, complete 메서드를 가지고 있는 FluxSink 를 노출하고 있다.
+
+콜백에서 멀티스레드 기반 이벤트를 트리거할 수 있다.
 
 ```java
 Flux.create(fluxSink -> {
@@ -170,15 +170,21 @@ Flux.create(fluxSink -> {
 
 ### Flux.create() 주의점
 
-1. 무한 파이프라인 ([참고](https://godekdls.github.io/Reactor%20Core/reactorcorefeatures/#:~:text=%EC%9E%88%EC%96%B4%20%EB%A7%A4%EC%9A%B0%20%EC%9C%A0%EC%9A%A9%ED%95%98%EB%8B%A4.-,create,-%EB%8A%94%20%EB%B9%84%EB%8F%99%EA%B8%B0%20API))
+1.
+
+무한 파이프라인 ([참고](https://godekdls.github.io/Reactor%20Core/reactorcorefeatures/#:~:text=%EC%9E%88%EC%96%B4%20%EB%A7%A4%EC%9A%B0%20%EC%9C%A0%EC%9A%A9%ED%95%98%EB%8B%A4.-,create,-%EB%8A%94%20%EB%B9%84%EB%8F%99%EA%B8%B0%20API))
 
 create 는 비동기 API와 함께 사용할 수 있다고 해서,  코드를 병렬화해 주거나 비동기로 만들어 주지는 않는다 
 
-람다 내에서 블로킹하면 교착 상태나 이와 유사한 부작용을 경험할 것이다. 
+람다 내에서 블로킹하면 교착 상태나 이와 유사한 부작용을 경험할 것이다.
 
-람다에서 오랫동안 블로킹하고 있으면 ( sinke.next(t) 를 호출하는 무한 루프 등) 파이프라인이 잠겨 버릴 수 있다: 요청을 수행해야 할 스레드에서 루프를 실행하고 있기 때문에 요청을 수행할 수 없다. 이때는 subscribeOn(Scheduler, false)  메소드를 사용해라: create 는 requestOnSeparateThread = false 면 Scheduler 스레드를 사용하고, 기존 스레드에서 request 를 수행하기 때문에 데이터 흐름을 멈추지 않는다.
+람다에서 오랫동안 블로킹하고 있으면 ( sinke.next(t) 를 호출하는 무한 루프 등) 파이프라인이 잠겨 버릴 수 있다: 요청을 수행해야 할 스레드에서 루프를 실행하고 있기 때문에 요청을 수행할 수 없다.
 
-2. Publisher 에 대한 배압관리 ([참고](https://javacan.tistory.com/entry/Reactor-Start-3-RS-create-stream))
+이때는 subscribeOn(Scheduler, false)  메소드를 사용해라: create 는 requestOnSeparateThread = false 면 Scheduler 스레드를 사용하고, 기존 스레드에서 request 를 수행하기 때문에 데이터 흐름을 멈추지 않는다.
+
+2.
+
+Publisher 에 대한 배압관리 ([참고](https://javacan.tistory.com/entry/Reactor-Start-3-RS-create-stream))
 
 Flux create 는 Subscriber가 요청한 개수보다 Publisher 가 더 많은 데이터를 방출할 수 있다.
 
@@ -193,11 +199,11 @@ Flux<Integer> flux = Flux.create( (FluxSink<Integer> sink) -> {
 });
 ```
 
-이 코드는 Subscriber가 요청한 개수보다 3개 데이터를 더 발생한다. 
+이 코드는 Subscriber가 요청한 개수보다 3개 데이터를 더 발생한다.
 
-이 경우 어떻게 될까? 
+이 경우 어떻게 될까?
 
-기본적으로 Flux.create()로 생성한 Flux는 초과로 발생한 데이터를 버퍼에 보관한다. 
+기본적으로 Flux.create()로 생성한 Flux는 초과로 발생한 데이터를 버퍼에 보관한다.
 
 버퍼에 보관된 데이터는 다음에 Subscriber가 데이터를 요청할 때 전달된다.
 
@@ -207,7 +213,9 @@ Flux<Integer> flux = Flux.create( (FluxSink<Integer> sink) -> {
 - ERROR : 익셉션(IllegalStateException) 발생
 - DROP : Subscriber가 데이터를 받을 준비가 안 되어 있으면 데이터 발생 누락
 - LATEST : 마지막 신호만 Subscriber에 전달
-- BUFFER : 버퍼에 저장했다가 Subscriber 요청시 전달. 버퍼 제한이 없으므로 OutOfMemoryError 발생 가능
+- BUFFER : 버퍼에 저장했다가 Subscriber 요청시 전달.
+
+버퍼 제한이 없으므로 OutOfMemoryError 발생 가능
 
 Flux.create()의 두 번째 인자로 처리 방식을 전달하면 된다.
 
@@ -215,7 +223,9 @@ Flux.create()의 두 번째 인자로 처리 방식을 전달하면 된다.
 Flux.create(sink -> { ... }, FluxSink.OverflowStrategy.IGNORE);
 ```
 
-3. Subscriber 에 대한 배압관리 ([참고](https://godekdls.github.io/Reactor%20Core/reactorcorefeatures/#441-synchronous-generate:~:text=%ED%8A%9C%EB%8B%9D%ED%95%A0%20%EC%88%98%20%EC%9E%88%EB%8B%A4.-,limitRate,-(N)%EC%9D%80))
+3.
+
+Subscriber 에 대한 배압관리 ([참고](https://godekdls.github.io/Reactor%20Core/reactorcorefeatures/#441-synchronous-generate:~:text=%ED%8A%9C%EB%8B%9D%ED%95%A0%20%EC%88%98%20%EC%9E%88%EB%8B%A4.-,limitRate,-(N)%EC%9D%80))
 
 limitRate() 를 사용하여 다운스트림 요청을 분할 할 수 있다.
 
@@ -250,10 +260,18 @@ Flux<String> flux = Flux.generate(
 
 위 Flux 의 동작과정은 아래와 같다.
 
-1. 최초 상태로 0,1 을 제공한다.
-2. 상태를 보고 방출할 데이터를 결정한다 (상태 값은 3의 곱셈표에서 행 번호를 의미한다고 볼 수 있다).
-3. 언제 중단할지 결정할 때도 상태를 사용한다.
-4. 다음 실행에서 사용할 새 상태 값을 반환한다 (시퀀스가 종료되지 않았다면).
+1.
+
+최초 상태로 0,1 을 제공한다.
+2.
+
+상태를 보고 방출할 데이터를 결정한다 (상태 값은 3의 곱셈표에서 행 번호를 의미한다고 볼 수 있다).
+3.
+
+언제 중단할지 결정할 때도 상태를 사용한다.
+4.
+
+다음 실행에서 사용할 새 상태 값을 반환한다 (시퀀스가 종료되지 않았다면).
 
 https://velog.io/@redjen/Java-Reactive-Programming-4-Flux-%EC%83%9D%EC%84%B1
 
@@ -298,17 +316,26 @@ public class MetroEventHandler {
 
 즉, FluxSink 가 채널의 역할을 하게되는 것이다.
 
-1. FluxSink 를 Event 의 필드값으로 둔다.
-2. Event 를 발행한다.
-3. Event 구독자는 Flux<T> 스트림을 생성한다.
-    1. 여기서는 API 호출이 되겠다.
-4. Flux<T> 에 대해 next(),cancel(),complete() 시그널에 따라 처리한다.
+1.
+
+FluxSink 를 Event 의 필드값으로 둔다.
+2.
+
+Event 를 발행한다.
+3.
+
+Event 구독자는 Flux<T> 스트림을 생성한다.
+    1.
+
+여기서는 API 호출이 되겠다.
+4.
+
+Flux<T> 에 대해 next(),cancel(),complete() 시그널에 따라 처리한다.
 
 각각 알아보자.
 
 # Apply 🧑‍💻
 
----
 
 ### Event
 
@@ -539,18 +566,17 @@ class FetchSubwayClientImplTest {
 
 # Further Improvement ,,, 💡
 
----
 
 이 모든 뻘짓이,,, 
   
 모놀리식 구조로 마이크로서비스 흉내를 내다보니 발행하는 일이라고 생각한다.
-  
+
 마이크로서비스 흉내를 낼 것이라면,,, 
   
 도메인 단위로 찢어내는 게 가장 현명하고 빠른 길이라고 생각한다.
-  
+
 그러나 분리했음에도 다양한 방법이 있을 것이다.
-  
+
 다음은 필자가 생각하기에 좋은 방법이라고 고려하는 것들이다.
   
 - Kafka 사용

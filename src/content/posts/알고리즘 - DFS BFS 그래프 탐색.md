@@ -2,8 +2,7 @@
 title: "알고리즘 - DFS BFS 그래프 탐색"
 description: "DFS/BFS 그래프 탐색 알고리즘 정리 및 풀이"
 date: 2025-12-19
-tags: [algorithm, algorithm]
-category: uncategorized
+tags: [algorithm]
 lang: ko
 draft: false
 ---
@@ -76,42 +75,58 @@ while (!pq.isEmpty()) {
 
 ---
 
-## 4. 그래프 + BFS, DFS
+## 4.
+
+그래프 + BFS, DFS
 
 > 📌 keyword
 
 그래프에서 가장 많이 출제되는 유형은 크게 두 가지 있습니다.
 
+1.
 
-1. 연결된 영역 그룹(개수, 넓이, 요소의 개수 등)
-2. 최단거리
+연결된 영역 그룹(개수, 넓이, 요소의 개수 등)
+2.
 
+최단거리
 
-연결된 영역 그룹에 관련된 문제는 BFS, DFS의 공통적인 특성인 “연결되어 있는 모든 노드를 탐색한다”를 활용하는 것입니다. 해당 유형은 [[리트코드] number of islands](https://leetcode.com/problems/number-of-islands/description/),  [[리트코드] keys and rooms](https://leetcode.com/problems/keys-and-rooms/)문제를 통해서 학습하실 수 있습니다. 비슷한 유형으로는 [[프로그래머스] 네트워크](https://school.programmers.co.kr/learn/courses/30/lessons/43162), [[백준 11724] 연결 요소의 개수](https://www.acmicpc.net/problem/11724)이 있습니다.
+연결된 영역 그룹에 관련된 문제는 BFS, DFS의 공통적인 특성인 “연결되어 있는 모든 노드를 탐색한다”를 활용하는 것입니다.
 
-최단거리 문제는 BFS로 풀 수 있고, 시험에서는 훨씬 더 자주 나오는 유형입니다. 최단거리 문제 유형은 두 가지 형식으로 출제됩니다.
+해당 유형은 [[리트코드] number of islands](https://leetcode.com/problems/number-of-islands/description/),  [[리트코드] keys and rooms](https://leetcode.com/problems/keys-and-rooms/)문제를 통해서 학습하실 수 있습니다.
+
+비슷한 유형으로는 [[프로그래머스] 네트워크](https://school.programmers.co.kr/learn/courses/30/lessons/43162), [[백준 11724] 연결 요소의 개수](https://www.acmicpc.net/problem/11724)이 있습니다.
+
+최단거리 문제는 BFS로 풀 수 있고, 시험에서는 훨씬 더 자주 나오는 유형입니다.
+
+최단거리 문제 유형은 두 가지 형식으로 출제됩니다.
 
 > (1) 그래프 + BFS
 > (2) 암시적그래프(grid) + BFS
 
-
 (1) 그래프 + BFS
 
 - 그래프 변환 (인접리스트)
-- BFS문제인지 알아차리기가 어렵다. 최단거리, 최소비용 등을 힌트로 알아차리자
+- BFS문제인지 알아차리기가 어렵다.
+
+최단거리, 최소비용 등을 힌트로 알아차리자
 - 유형 문제
 
 (2) 암시적그래프(grid) + BFS
 
-## 5. 트리 + DFS (최근 트렌드)
+## 5.
+
+트리 + DFS (최근 트렌드)
 
 > 📌 keyword
 
 트리는 그래프 문제의 확장으로 생각하시면 됩니다.
 
 트리에서 가장 중요한건 DFS 입니다.
+
 기본적으로 트리는 재귀적인 자료구조이기 때문에 문제풀이 유형도 재귀(DFS)와 연관이 아주 깊습니다.
+
 트리의 DFS에서는 전위순회, 중위순회, 후위순회가 있습니다.
+
 가장 많이 나오는 것은 후위순회입니다.
 
 **후위 순회 (Postorder Traversal)**
@@ -120,8 +135,8 @@ while (!pq.isEmpty()) {
 - 출제 방식:
 - 예제 문제
 
-
 특히 트리에서는 입력값을 어떻게 인접리스트 코드로 구현할지를 미리 학습해 두어야 합니다.
+
 문제에서 트리를 표현하는 방식이 다양하기 때문에 미리 살펴보면 큰 도움이 됩니다.
 
 ## BFS
@@ -487,5 +502,3 @@ class Solution {
 ```
 
 # Graph
-
----

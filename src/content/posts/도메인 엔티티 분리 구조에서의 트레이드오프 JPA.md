@@ -2,16 +2,18 @@
 title: "도메인 엔티티 분리 구조에서의 트레이드오프 : JPA"
 description: "도메인과 엔티티를 분리했을 때 JPA 에서의 트레이드오프는 무엇이 있을까?"
 date: 2025-06-01
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/763f1c6b49bfe746.png)
 
+# Why?
 
-# Why? 왜 배움?
+왜 배움?
+
+---
 
 ---
 
@@ -29,7 +31,11 @@ draft: false
 
 이러한 의심을 해소하고자 아래 내용들을 공부해보았다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -187,10 +193,14 @@ public abstract class AbstractPersistable<PK extends Serializable> implements Pe
 
 ### JpaMetamodelEntityInformation
 
-1. 버저닝 필드에 대한 검증을 시도한다.
+1.
+
+버저닝 필드에 대한 검증을 시도한다.
     - 만약 Version-property가 있고 그 값이 null이라면, 해당 엔티티는 새로운 것으로 간주
     - 만약 Version-property가 없다면, 엔티티의 식별자(Id-property)를 검사하여 그 값이 null이면 새로운 엔티티로 간주하고, 그렇지 않으면 기존 엔티티로 간주
-2. 만약 버저닝에서 검증이 성공했다면 super.isNew() 를 호출하여 `AbstractEntityInformation` 클래스의 isNew() 를 호출한다.
+2.
+
+만약 버저닝에서 검증이 성공했다면 super.isNew() 를 호출하여 `AbstractEntityInformation` 클래스의 isNew() 를 호출한다.
     
     `AbstractEntityInformation.isNew()` 는 아래와 같은 케이스에 따라 새로운 객체인지를 판단한다.
     
@@ -272,10 +282,18 @@ public abstract class AbstractEntityInformation<T, ID> implements EntityInformat
 > 
 > `EntityManager` 의 `merge()` 는 Event-Driven 구조를 통해 아래와 같이 처리된다.
 > 
-> 1. 세션 검증 및 MergeEvent 발행
-> 2. 중복 병합 방지
-> 3. 식별자를 통해 영속성 컨텍스트 내 존재 여부 검증
-> 4. 영속상태에 따라 영속화 진행
+> 1.
+
+세션 검증 및 MergeEvent 발행
+> 2.
+
+중복 병합 방지
+> 3.
+
+식별자를 통해 영속성 컨텍스트 내 존재 여부 검증
+> 4.
+
+영속상태에 따라 영속화 진행
 
 새로운 객체가 아니라면 비영속, 준영속 상태의 객체를 영속 상태로 처리하기 위해 
 
@@ -320,7 +338,6 @@ public class SessionImpl
 	}
 }
 ```
-
 
 ### 세션 검증 및 MergeEvent 발행 ( SessionImpl.merge() )
 
@@ -705,18 +722,9 @@ class UserInfraImplTest {
 
 DynamicUpdate 를 활용하던, 모든 컬럼에 대한 UPDATE 를 그대로 처리하던지 둘 중 선택해서 말이다
 
-# Reference
-
----
-
-https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity
-
-https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html
-
-https://velog.io/@yglee8048/JPA-Persistable
-
-https://ttl-blog.tistory.com/852
-
-https://bjwan-career.tistory.com/221
-
-https://devs0n.tistory.com/113
+[^1]: https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity <https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity>
+[^2]: https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html <https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html>
+[^3]: https://velog.io/@yglee8048/JPA-Persistable <https://velog.io/@yglee8048/JPA-Persistable>
+[^4]: https://ttl-blog.tistory.com/852 <https://ttl-blog.tistory.com/852>
+[^5]: https://bjwan-career.tistory.com/221 <https://bjwan-career.tistory.com/221>
+[^6]: https://devs0n.tistory.com/113 <https://devs0n.tistory.com/113>

@@ -2,8 +2,7 @@
 title: "슬라이딩 윈도우 알고리즘 (feat.투포인터)"
 description: "각각의 경우를 찾아나갈 때, 종종 double for loop 를 쓴다. 이를 개선하기 위해 탐색범위를 효과적으로 줄이는 방법인 sliding window 알고리즘을 사용해보자."
 date: 2024-05-14
-tags: [sliding-window, boj, two pointer]
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
@@ -22,9 +21,15 @@ draft: false
 
 1. left pointer, right pointer 를 생성
 
-2. 초기에 N 크기만큼을 선택하기 위해 right pointer 를 expand 한다.
+2.
 
-3. 이제 right pointer,left pointer 를 움직여 window 를 움직일 차례다. 우선 left pointer 요소를 제거한다.
+초기에 N 크기만큼을 선택하기 위해 right pointer 를 expand 한다.
+
+3.
+
+이제 right pointer,left pointer 를 움직여 window 를 움직일 차례다.
+
+우선 left pointer 요소를 제거한다.
 
 4. window size 를 맞추기 위해 left pointer 를 expand 한다.
 
@@ -57,9 +62,13 @@ for i in range(0,n):
 		sum += a[j]
 ```
 
-위와 같은 접근은 O(N^2) 이다. 조금 더 개선할 수 있을까?
+위와 같은 접근은 O(N^2) 이다.
 
-있다. Sliding Window 를 사용하여 다음과 같이 탐색 범위를 줄이는 것이다.
+조금 더 개선할 수 있을까?
+
+있다.
+
+Sliding Window 를 사용하여 다음과 같이 탐색 범위를 줄이는 것이다.
 
 - 오른쪽 포인터를 움직여 범위를 확장
 - 왼쪽 포인터를 움직여 조건에 맞게 범위를 줄인다.
@@ -118,7 +127,6 @@ maxDP3[i] = arr[i][2] + max(maxDP2[i-1], maxDP3[i-1])
 
 값을 입력받을 때마다 갱신해주는 식으로 처리하였다.
 
-
 ```python
 from sys import stdin
 
@@ -137,10 +145,4 @@ print(max(maxDP), min(minDP))
 
 ```
 
-# Reference
----
-- [Algorithm Sliding Window - Dynamic Version
-](https://www.youtube.com/watch?v=nCcSwjFmfMM&ab_channel=DuoWeiEducation)
-- [[알고리즘] 슬라이딩 윈도우 알고리즘](https://velog.io/@ninto_2/%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%94%A9-%EC%9C%88%EB%8F%84%EC%9A%B0-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98)
-- [[백준] 2096번: 내려가기 문제 풀이 파이썬
-](https://velog.io/@hyuntall/%EB%B0%B1%EC%A4%80-2096%EB%B2%88-%EB%82%B4%EB%A0%A4%EA%B0%80%EA%B8%B0-%EB%AC%B8%EC%A0%9C-%ED%92%80%EC%9D%B4-%ED%8C%8C%EC%9D%B4%EC%8D%AC)
+[^3]: [알고리즘] 슬라이딩 윈도우 알고리즘 <https://velog.io/@ninto_2/%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%94%A9-%EC%9C%88%EB%8F%84%EC%9A%B0-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98>

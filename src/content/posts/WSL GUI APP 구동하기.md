@@ -3,28 +3,36 @@ title: "WSL GUI APP 구동하기"
 description: "모든 환경을 nix 에서 관리하는 편이다."
 date: 2025-11-27
 tags: [tools]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 모든 환경을 nix 에서 관리하는 편이다.
 jdk, nvim, env 등등을 말이다.
+
 따라서 회사 컴퓨터인 win11 / wsl 에서도 동일하게 구성 중인데
 이 놈의 win11 만 intellij 가 wsl 경로를 인식하지 못 하고 자꾸 ide sync 가 되지 않았다
 너무 답답한 나머지 그냥 wsl 에서 gui 를 구동하기로 하였다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ### VcXsrv (XServer) 설치
 
-[https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd](https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd) 을 따라서 VcXsrv 를 설치한다
+[https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd](https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd[^1]) 을 따라서 VcXsrv 를 설치한다
 
 ### Intellij 설치
 
@@ -95,9 +103,5 @@ wsl 환경에서 아래와 같이 앱을 실행한다.
 idea-ultimate &
 ```
 
-# Reference
-
----
-
-[https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd](https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd)
-[https://kimchki.blogspot.com/2017/11/vcxsrv-windows-x-server.html](https://kimchki.blogspot.com/2017/11/vcxsrv-windows-x-server.html)
+[^1]: https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd <https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd>
+[^2]: https://kimchki.blogspot.com/2017/11/vcxsrv-windows-x-server.html <https://kimchki.blogspot.com/2017/11/vcxsrv-windows-x-server.html>

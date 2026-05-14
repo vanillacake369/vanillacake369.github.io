@@ -2,13 +2,15 @@
 title: "LFCS - Operations Deployment (서비스, 부팅, 스토리지)"
 description: "LFCS 시험 Operations Deployment: 네트워크 동작원리, 서비스 관리"
 date: 2025-12-29
-tags: [linux, linux]
-category: uncategorized
+tags: [linux]
 lang: ko
 draft: false
+series: { id: "Linux LFCS", order: 2 }
 ---
 
-## 03-2. 자가 점검 질문 (공부용)
+## 03-2.
+
+자가 점검 질문 (공부용)
 
 ### 최종 정리 및 자가 점검
 
@@ -22,11 +24,21 @@ draft: false
 
 이제 최종적으로 아래 순서를 확인하여 어떻게 네트워크를 진단하고 상태를 파악하는지 점검해보자.
 
-1. 링크(L2): `ip -c link`
-2. 주소(L3): `ip -c addr`
-3. 라우팅(L3): `ip route` + `ip route get 8.8.8.8`
-4. DNS(Userspace/daemon): `resolvectl status` + `resolvectl query example.com`
-5. 포트/프로세스(L4): `ss -tun` (가능하면 `netstat`보다 `ss`)
+1.
+
+링크(L2): `ip -c link`
+2.
+
+주소(L3): `ip -c addr`
+3.
+
+라우팅(L3): `ip route` + `ip route get 8.8.8.8`
+4.
+
+DNS(Userspace/daemon): `resolvectl status` + `resolvectl query example.com`
+5.
+
+포트/프로세스(L4): `ss -tun` (가능하면 `netstat`보다 `ss`)
 
 ```bash
 sudo ss -tunlp
@@ -40,13 +52,15 @@ sudo netstat -tunlp
 # ss 대신 netstat 쓸 수 있으나 미래에 사라질 예정이다
 ```
 
-# 04. Users / Groups
+# 04.
+
+Users / Groups
 
 Lab 이 
 
+# 05.
 
-
-# 05. Networking
+Networking
 
 ### Bridge / Bond 사용하여 NIC 에 대한 매니징
 
@@ -88,7 +102,8 @@ flowchart TB
   BOND0 --> S1 --> SW
   BOND0 --> S2 --> SW
 
-  Note1["Bridge: L2 switching (FDB)\\nBond: L2 link aggregation / failover (mode-dependent)"]:::note
+  Note1["Bridge: L2 switching (FDB)
+Bond: L2 link aggregation / failover (mode-dependent)"]:::note
   Note1 -.-> BR0
   Note1 -.-> BOND0
 ```

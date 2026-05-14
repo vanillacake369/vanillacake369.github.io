@@ -3,35 +3,46 @@ title: "Nix Disko 설정"
 description: "무슨 파일시스템을 구성할지 고민되었다."
 date: 2026-01-14
 tags: [homelab, nix]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "NixOS Ecosystem", order: 1 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
 
 ---
 
+---
 
  
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ## Why ZFS, BTRFS are overkill ?
 
 무슨 파일시스템을 구성할지 고민되었다.
+
 만약 ZFS 혹은 BTRFS 를 사용하게되면 RAID 및 스냅샷, 무결성을 보장할 수 있다.
+
 다만 이것은 싱글 스토리지인 현재 스펙에선 어울리지 않는 선택이다.
+
 Write Amplification 에 따른 SSD warn out 현상이 발생할 수 있고
 RAID 구성을 할 수 없어 의미가 없기 때문이다.
-따라서 ext & LVM 기반으로 진행한 뒤 추가 스토리지 확장하게 되면 그 때 마이그레이션 작업을 이어나가기로 하였다.
 
+따라서 ext & LVM 기반으로 진행한 뒤 추가 스토리지 확장하게 되면 그 때 마이그레이션 작업을 이어나가기로 하였다.
 
 ## How do I configure disk partition ?
 
 위 사항들로 인해 ZFS,BTRFS 대신 ext4 를 사용하기로 결정하였다.
+
 다만 ext4 에 대한 설정에 앞서 아래와 같은 기준점을 정리해보았다.
 
 - 자동 복구 지원할 수 있는가
@@ -40,14 +51,13 @@ RAID 구성을 할 수 없어 의미가 없기 때문이다.
 - OS 영역과 데이터 영역을 분리할 수 있는가
 - Write Amplification 에 따른 SSD warnout 현상이 있는가?
 
-
 위 기준에 따라 아래와 같이 스왑, LVM Thin Provisioning, SSD 최적화를 구성하였다.
+
 만약 해당 내용에 있어 모르는 부분이 있다면 아래를 살펴보길 바란다.
 
 > 💡 스왑이란 ??
 > 💡 LVM ?
 > 💡 SSD 최적화
-
 
 이후 계층 별로 파티셔닝 구성도를 그려보았다.
 
@@ -64,11 +74,9 @@ RAID 구성을 할 수 없어 의미가 없기 때문이다.
 | **Reserve** | `Free Space` | **~83 GB** | - | **긴급 확장용 (LVM VG 여유)** | `-` |
 | **합계** | **Physical Disk** | **~1,020 GB** | **~1,637 GB** | **약 160% 효율 달성** | - |
 
+# How?
 
-
-
-
-# How? 어떻게 씀?
+어떻게 씀?
 
 ---
 
@@ -223,16 +231,14 @@ disko.devices = {
 };
 ```
 
-
-
-
-
 ### LVM Volume Group 선언
 
 1. **시스템 (****`root`****)**
 2. **VM Thin Pool & LV (****`vms`****)**
 3. **Data Thin Pool & LV (****`data`****)**
-4. Vault 전용 구역 (`vault`)
+4.
+
+Vault 전용 구역 (`vault`)
 
 ```nix
     lvm_vg.homelab_vg = {
@@ -336,8 +342,6 @@ disko.devices = {
 
 ```
 
-
-
 ### SSD 수명 관리
 
 - SSD에 더 이상 사용하지 않는 데이터 블록이 어디인지 알려주는 TRIM 명령어를 주마다 실행한다
@@ -353,11 +357,10 @@ disko.devices = {
 
 ```
 
-
-
 ### LVM 자동 확장
 
 Thin Provisioning 의 최대 단점은 실제 물리 공간이 꽉 차면 파일 시스템이 깨질 수 있다는 점이다.
+
 이를 방지하기 위해 아래와 같은 설정 파일을 선언하여 관리할 수 있다.
 
 - **Threshold :** Thin Pool 의 물리적 사용량이 n %에 도달하면 자동으로 확장을 시도한다
@@ -386,8 +389,6 @@ Thin Provisioning 의 최대 단점은 실제 물리 공간이 꽉 차면 파일
 
 ```
 
-
-
 ### 메모리 기반 임시 디렉토리
 
 - **기능:** `/tmp` 경로를 실제 SSD가 아닌 **RAM(메모리)**에 할당합니다.
@@ -404,9 +405,3 @@ Thin Provisioning 의 최대 단점은 실제 물리 공간이 꽉 차면 파일
   };
 
 ```
-
-
-
-# Reference
-
----

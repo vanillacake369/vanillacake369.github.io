@@ -2,27 +2,36 @@
 title: "Go 테스트 모듈 구성 방법 (feat. TestContainer)"
 description: "이후 아래와 같이 connection 확인하는 로직 구성함"
 date: 2025-04-25
-tags: [go]
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 - Go 로직을 짜던 도중 로직 작동 확인이 필요함
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
 
 ---
 
-- Go Test 에는 [native test](https://go.dev/doc/tutorial/add-a-test), [testify library](https://20h.dev/post/golang/go-test/) 가 대표적으로 사용됨
+---
+
+- Go Test 에는 [native test](https://go.dev/doc/tutorial/add-a-test[^1]), [testify library](https://20h.dev/post/golang/go-test/[^2]) 가 대표적으로 사용됨
 - BDD DSL 기반 test 구성을 한다면 [testify library](https://20h.dev/post/golang/go-test/) 사용
 - [native test](https://go.dev/doc/tutorial/add-a-test) 가 조금 더 쓰기 편하다고 느껴짐
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -94,11 +103,5 @@ func TestOnFile(t *testing.T) {
 
 ```
 
-# Reference
-
----
-
-[https://go.dev/doc/tutorial/add-a-test](https://go.dev/doc/tutorial/add-a-test)
-
-
-[https://20h.dev/post/golang/go-test/](https://20h.dev/post/golang/go-test/)
+[^1]: https://go.dev/doc/tutorial/add-a-test <https://go.dev/doc/tutorial/add-a-test>
+[^2]: https://20h.dev/post/golang/go-test/ <https://20h.dev/post/golang/go-test/>

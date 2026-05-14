@@ -3,20 +3,29 @@ title: "로컬 Nvim 통해 SSH 접속 서버에서 코딩하기"
 description: "로컬 Nvim 설정을 그대로 원격 서버에서 쓰고 싶었다."
 date: 2026-01-11
 tags: [linux, tools, neovim]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 로컬 Nvim 설정을 그대로 원격 서버에서 쓰고 싶었다.
-그대로 SSH 접속한 경우 원격서버에 깔린 nvim 과 설정을 바라보게된다. 
+
+그대로 SSH 접속한 경우 원격서버에 깔린 nvim 과 설정을 바라보게된다.
+
 어떻게하면 SSH 를 사용하면서 로컬 nvim 설정을 그대로 사용하여 코딩할 수 있을까?
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -39,7 +48,9 @@ brew install macos-fuse-t/homebrew-cask/fuse-t-sshfs
 
 > ⚠️ 핵심 이슈: macFUSE 사용 불가
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -61,8 +72,6 @@ brew install macos-fuse-t/homebrew-cask/fuse-t-sshfs
 1. **마운트 (연결하기)**
 2. **언마운트 (연결 끊기)**
 
-
-
 ### **주의점 (Caveats)**
 
 - **네트워크 의존성:** 네트워크가 끊기면 연결된 폴더도 응답을 멈춥니다.
@@ -81,9 +90,5 @@ brew uninstall fuse-t
 # 2. 탭 제거 (선택 사항)
 brew untap macos-fuse-t/cask
 ```
-
----
-
-# Reference
 
 ---

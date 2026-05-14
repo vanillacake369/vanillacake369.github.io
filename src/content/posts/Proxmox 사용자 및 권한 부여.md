@@ -3,34 +3,47 @@ title: "Proxmox 사용자 및 권한 부여"
 description: "Proxmox VE stores user attributes in /etc/pve/user.cfg."
 date: 2026-01-06
 tags: [homelab]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "Proxmox Homelab", order: 3 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
  
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
 
 ---
 
+---
 
+# How?
 
-# How? 어떻게 씀?
+어떻게 씀?
 
 ---
 
-# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_users](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_users)
+# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_users](https://pve.proxmox.com/pve-docs/chapter-pveum.html[^1]#pveum_users)
 
 > 🤔 [유튜브 영상](https://www.youtube.com/watch?v=-NRM1JNly6Y) 을 보니 직접 GUI 로 추가하는 방법도 있던데 다른 건가,,,?
 
 ## Users
 
-Proxmox VE stores user attributes in /etc/pve/user.cfg. Passwords are not stored here; users are instead associated with the [authentication realms](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_authentication_realms) described below. Therefore, a user is often internally identified by their username and realm in the form <userid>@<realm>.
+Proxmox VE stores user attributes in /etc/pve/user.cfg.
+
+Passwords are not stored here; users are instead associated with the [authentication realms](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_authentication_realms) described below.
+
+Therefore, a user is often internally identified by their username and realm in the form <userid>@<realm>.
+
 Each user entry in this file contains the following information:
 
 - First name
@@ -42,21 +55,34 @@ Each user entry in this file contains the following information:
 - Whether this user is enabled or disabled
 - Optional two-factor authentication keys
 
-
 ### System administrator
 
-The system’s root user can always log in via the Linux PAM realm and is an unconfined administrator. This user cannot be deleted, but attributes can still be changed. System mails will be sent to the email address assigned to this user.
+The system’s root user can always log in via the Linux PAM realm and is an unconfined administrator.
+
+This user cannot be deleted, but attributes can still be changed.
+
+System mails will be sent to the email address assigned to this user.
 
 ## Groups
 
-Each user can be a member of several groups. Groups are the preferred way to organize access permissions. You should always grant permissions to groups instead of individual users. That way you will get a much more maintainable access control list.
+Each user can be a member of several groups.
 
+Groups are the preferred way to organize access permissions.
 
-# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management)
+You should always grant permissions to groups instead of individual users.
+
+That way you will get a much more maintainable access control list.
+
+# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management[^2])
 
 ### Privileges
 
-A privilege is the right to perform a specific action. To simplify management, lists of privileges are grouped into roles, which can then be used in the permission table. Note that privileges cannot be directly assigned to users and paths without being part of a role.
+A privilege is the right to perform a specific action.
+
+To simplify management, lists of privileges are grouped into roles, which can then be used in the permission table.
+
+Note that privileges cannot be directly assigned to users and paths without being part of a role.
+
 We currently support the following privileges:
 Node / System related privileges
 • Group.Allocate: create/modify/remove groups
@@ -158,8 +184,22 @@ Node / System related privileges
 
 ### Objects and Paths
 
-Access permissions are assigned to objects, such as virtual machines, storages or resource pools. We use file system like paths to address these objects. These paths form a natural tree, and permissions of higher levels (shorter paths) can optionally be propagated down within this hierarchy.
-Paths can be templated. When an API call requires permissions on a templated path, the path may contain references to parameters of the API call. These references are specified in curly braces. Some parameters are implicitly taken from the API call’s URI. For instance, the permission path /nodes/{node} when calling */nodes/mynode/status* requires permissions on /nodes/mynode, while the path {path} in a PUT request to /access/acl refers to the method’s path parameter.
+Access permissions are assigned to objects, such as virtual machines, storages or resource pools.
+
+We use file system like paths to address these objects.
+
+These paths form a natural tree, and permissions of higher levels (shorter paths) can optionally be propagated down within this hierarchy.
+
+Paths can be templated.
+
+When an API call requires permissions on a templated path, the path may contain references to parameters of the API call.
+
+These references are specified in curly braces.
+
+Some parameters are implicitly taken from the API call’s URI.
+
+For instance, the permission path /nodes/{node} when calling */nodes/mynode/status* requires permissions on /nodes/mynode, while the path {path} in a PUT request to /access/acl refers to the method’s path parameter.
+
 Some examples are:
 
 - /nodes/{node}: Access to Proxmox VE server machines
@@ -170,14 +210,19 @@ Some examples are:
 - /access/groups: Group administration
 - /access/realms/{realmid}: Administrative access to realms
 
-
-
-# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool](https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool)
+# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool](https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool[^3])
 
 ## Command-line Tool
 
-Most users will simply use the GUI to manage users. But there is also a fully featured command-line tool called pveum (short for “**P**roxmox **VE** **U**ser **M**anager”). Please note that all Proxmox VE command-line tools are wrappers around the API, so you can also access those functions through the REST API.
-Here are some simple usage examples. To show help, type:
+Most users will simply use the GUI to manage users.
+
+But there is also a fully featured command-line tool called pveum (short for “**P**roxmox **VE** **U**ser **M**anager”).
+
+Please note that all Proxmox VE command-line tools are wrappers around the API, so you can also access those functions through the REST API.
+
+Here are some simple usage examples.
+
+To show help, type:
 ` pveum`
 or (to show detailed help about a specific command)
 ` pveum help user add`
@@ -195,6 +240,7 @@ Create a new role:
 ### Administrator Group
 
 It is possible that an administrator would want to create a group of users with full administrator rights (without using the root account).
+
 To do this, first define the group:
 ` pveum group add admin -comment "System Administrators"`
 Then assign the role:
@@ -202,10 +248,6 @@ Then assign the role:
 Finally, you can add users to the new *admin* group:
 ` pveum user modify testuser@pve -group admin`
 
-# Reference
-
----
-
-[https://pve.proxmox.com/pve-docs/chapter-pveum.html](https://pve.proxmox.com/pve-docs/chapter-pveum.html)
-[https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management](https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management)
-[https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool](https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool)
+[^1]: https://pve.proxmox.com/pve-docs/chapter-pveum.html <https://pve.proxmox.com/pve-docs/chapter-pveum.html>
+[^2]: https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management <https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management>
+[^3]: https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool <https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool>

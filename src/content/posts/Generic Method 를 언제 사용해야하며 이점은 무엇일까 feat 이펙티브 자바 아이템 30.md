@@ -2,14 +2,14 @@
 title: "Generic Method 를 언제 사용해야하며, 이점은 무엇일까? (feat. 이펙티브 자바 아이템 30)"
 description: "누군가 실수로 엉뚱한 타입의 객체를 넣어두면 런타임에 형변환 오류가 난다.제네릭은 이를 우회한다.제너릭을 사용하면 컬렉션이 담을 수 있는 타입을 컴파일러에게 알려주다. 따라서 엉뚱한 타입의 객체를 넣는 시도를 컴파일 과정에서 차단하여 안전한 프로그래밍을 지향할 수 있게"
 date: 2024-02-18
-tags: [effective-java, generic]
-category: uncategorized
+tags: [effective-java, journal]
 lang: ko
 draft: false
+series: { id: "Effective Java", order: 3 }
 ---
 
 # Generic 을 사용할 때의 이점
----
+
 
 > 누군가 실수로 엉뚱한 타입의 객체를 넣어두면 런타임에 형변환 오류가 난다.
 > 
@@ -28,7 +28,7 @@ draft: false
 > - 제너릭을 최대 활용법
 
 # Generic Method 를 왜 사용하는가 ?
----
+
 
 > 제너릭메서드를 사용할 때 이점이 명확하기에 권장함!
 > 
@@ -43,17 +43,24 @@ draft: false
 > 
 > 따라서 제너릭에 대한 깊은 이해도는 필수적이게 되는 것 같다.
 > 
-> [2. Java에서 기본적으로 제공하는 함수형 인터페이스](https://www.notion.so/2-Java-687c2fd070774547a3b2efa98d47973a?pvs=21) 
+> [2.
+
+Java에서 기본적으로 제공하는 함수형 인터페이스](https://www.notion.so/2-Java-687c2fd070774547a3b2efa98d47973a?pvs=21) 
 > 
 > ![](/images/velog/b4156f17967fc49e.png)
 >
 
 # 어떤 경우에 Generic Method 를 사용해야할까 ?
----
-> <span style="color:yellowgreen">**1. 대상 타입이 미지정 되어있지만, 알고리즘은 명세화 되어있을 때**
-> <span style="color:yellowgreen">**2. 여러 도메인에 걸쳐서 사용되는 메서드일 때 -- 특히 정적 메서드인 경우 좋다**
+
+> <span style="color:yellowgreen">**1.
+
+대상 타입이 미지정 되어있지만, 알고리즘은 명세화 되어있을 때**
+> <span style="color:yellowgreen">**2.
+
+여러 도메인에 걸쳐서 사용되는 메서드일 때 -- 특히 정적 메서드인 경우 좋다**
 
 ## 어떻게 Generic Method 를 정의하나요?
+
 - 외부에서 입력,반환의 타입을 명시할 수 있게 하자
     
     ⇒ 타입 매개변수 목록 사용
@@ -76,8 +83,13 @@ public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
 ```
 
 ## Wild Card 를 사용하여 더욱 확장성 있게 하자
-- 왜?? 어떻게??
-    - 매개변수화 타입은 불공변, 즉 바뀔 수 없다. 따라서 다형적으로 사용할 수 없다.
+
+- 왜??
+
+어떻게??
+    - 매개변수화 타입은 불공변, 즉 바뀔 수 없다.
+
+따라서 다형적으로 사용할 수 없다.
     - 아래와 같이 지정하면 **(본인 + 하위타입)**을 받을 수 있다.
         - **Lower Bounded Wildcard**
         
@@ -97,7 +109,7 @@ public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
         ```
 
 # 응용 1 :: Generic Singleton Factory
----
+
 
 ### 제너릭 싱글턴 팩터리란?
 
@@ -183,25 +195,28 @@ public static<T>UnaryOperator<T> identityFunc() {
 
 따라서 `@SuppressWarnings`를 추가하여 오류와 경고 없이 컴파일 해주도록 하자.
 
-
-
 ![](/images/velog/13ed7754deb14143.png)
 
 > Unchecked cast??
 >    
 > Raw Types Generic 을 쓰거나, Paramatized Generic을 쓰는 경우, 형변환 시, unchecked cast를 던질 수 있다.  
 > Java 컴파일러는 실행되는 모든 시점에서 각 변수의 유형을 알 수 있는데, 만약 잘못된 cating으로 호환되지 않는 유형으로 작동하면 컴파일 오류이기 때문에, 컴파일 이전에 unchecked cast에 관련된 경고를 던진다.
+
 만약 이를 무시하고 형변환 이후에, 호환되지 않는 값을 사용하게 되는 경우, 해당 코드가 실행되어야만 예외를 던진다.
+
 즉, 호환되지 않는 값에 대한 처리를 하기 전까지는 멀쩡히 돌아가게 된다.
 >    
 > If we cast a raw type collection containing data with the wrong types to a parameterized type collection, the ***ClassCastException* won’t be thrown until we load the data with the wrong type**.
 > 따라서 raw type은 웬만하면 쓰지 말거나, 형변환 시 유의하는 게 좋다
 
-
 # 응용 2 :: Overriding Operator 
----
 
-> 해당 응용은 Effective Java 에서 제시하는 예시 중 하나일 뿐이다. 단지 여러 도메인에 걸쳐 활용되는 연산자를 Generic 을 사용하여 재정의할 뿐이다. 실제 비즈니스 컨텍스트에 적용하기는 어려울 수 있으니 유의해서 살펴보자.
+
+> 해당 응용은 Effective Java 에서 제시하는 예시 중 하나일 뿐이다.
+
+단지 여러 도메인에 걸쳐 활용되는 연산자를 Generic 을 사용하여 재정의할 뿐이다.
+
+실제 비즈니스 컨텍스트에 적용하기는 어려울 수 있으니 유의해서 살펴보자.
 
 ## 응용2 :: 연산자 오버로딩
 
@@ -261,16 +276,4 @@ public static <T extends Comparable<T>> int countGreaterThan(T[] anArray, T elem
 - `Comparable` 인터페이스와 재귀적 타입바운드를 통해 이 한계를 극복한다.
 - Java 가 문법적으로 연산자 오버 로딩을 지원했다면 이런 기능도 필요 없었을 거라 판단된다.
 
-# Reference
----
-### Effective Java Ch5 Generic > Item30. Favor generic methods
-- https://github.com/clxering/Effective-Java-3rd-edition-Chinese-English-bilingual/blob/dev/Chapter-5/Chapter-5-Item-30-Favor-generic-methods.md
-
-### About Generic
-
-- [https://velog.io/@yhlee9753/Java-의-Generics5-사용-방식](https://velog.io/@yhlee9753/Java-%EC%9D%98-Generics5-%EC%82%AC%EC%9A%A9-%EB%B0%A9%EC%8B%9D)
-
-### About Unchecked TypeCasting
-
-- https://www.baeldung.com/java-warning-unchecked-cast
-- https://dwenn.tistory.com/91
+[^4]: https://velog.io/@yhlee9753/Java-의-Generics5-사용-방식 <https://velog.io/@yhlee9753/Java-%EC%9D%98-Generics5-%EC%82%AC%EC%9A%A9-%EB%B0%A9%EC%8B%9D>

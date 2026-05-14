@@ -2,19 +2,22 @@
 title: "k6 를 활용한 다양한 테스트 기법 (LoadTest, StressTest ,,,)"
 description: "k6 로 활용하여 LoadTest, StressTest 등등 다양한 테스트 기법들을 구현해보자!"
 date: 2025-06-03
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 중요한 로직에 대해 처리량 및 정상 수행 여부를 확인하려면 e2e 테스트 혹은 통합 테스트가 필요하다.
 
-또한 성능 저하 로직들은 시스템을 멈출 수 있다. 
+또한 성능 저하 로직들은 시스템을 멈출 수 있다.
 
 대규모 트래픽 서비스인지 여부를 떠나서 이러한 점들을 위해 테스트가 필요하다.
 
@@ -22,7 +25,11 @@ draft: false
 
 이를 위해 테스트 기법과 k6 사용법에 대해 간략히 소개하고자 한다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -164,7 +171,8 @@ func main() {
 		case http.MethodPost:
 			var previousCount = count
 			count++
-			fmt.Fprintf(w, "Previous count : %d -> Current count : %d\n", previousCount, count)
+			fmt.Fprintf(w, "Previous count : %d -> Current count : %d
+", previousCount, count)
 			return
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -340,12 +348,14 @@ export default function () {
 
 ### k6 옵션 활용법
 
-k6 는 옵션을 지정하여 어떻게 test 를 구성할 지 지정할 수 있다. 
+k6 는 옵션을 지정하여 어떻게 test 를 구성할 지 지정할 수 있다.
 
 대표적인 설정은 아래와 같고, 부가적인 설정을 하고자 한다면 [k6 options reference](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/) 를 참고해보자.
 
 - [vus](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#vus)
-    - An integer value specifying the number of VUs to run concurrently, used together with the [iterations](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#iterations) or [duration](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#duration) options. If you’d like more control look at the [`stages`](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#stages) option or [scenarios](https://grafana.com/docs/k6/latest/using-k6/scenarios/).
+    - An integer value specifying the number of VUs to run concurrently, used together with the [iterations](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#iterations) or [duration](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#duration) options.
+
+If you’d like more control look at the [`stages`](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#stages) option or [scenarios](https://grafana.com/docs/k6/latest/using-k6/scenarios/).
     - 동시에 실행할 가상 사용자의 수를 지정
     - iteration 과 duration 과 함께 사용
     - Available in `k6 run` and `k6 cloud` commands.
@@ -440,7 +450,7 @@ k6 는 옵션을 지정하여 어떻게 test 를 구성할 지 지정할 수 있
     
 - [hosts](https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#hosts)
     - DNS 테이블을 선언하여 다양한 URL 들을 매핑
-        - 리눅스의 `/etc/hosts` 혹은 윈도우의 `C:\Windows\System32\drivers\etc\hosts` 와 유사
+        - 리눅스의 `/etc/hosts` 혹은 윈도우의 `C:\Windows\System32\driverstc\hosts` 와 유사
     - "domain" : "ip:port" 형태로 호스트를 지정할 수 있다.
     - v0.42.0 부터 asterisk 사용 가능하다.
     
@@ -671,14 +681,12 @@ export default function () {
 
 # Further work 📝
 
----
 
 - k6 cloud
 - k6 grafana dashboard
 
 # Reference 📚
 
----
 
 https://eltonminetto.dev/en/post/2024-01-05-load-test-types/
 
