@@ -1,15 +1,21 @@
-/* Deep black + strong accent dark theme */
+/* High-contrast black + green dark theme */
 [data-theme='dark'] {
   --color-bg: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface-muted: #111111;
   --color-text: #e0e0e0;
-  --color-text-secondary: #888888;
+  --color-text-secondary: #8c8c8c;
   --color-accent: #00ff88;
+  --color-accent-soft: rgba(0, 255, 136, 0.12);
   --color-border: #222222;
+  --color-border-strong: #2f2f2f;
   --color-code-bg: #0a0a0a;
   --color-blockquote-bg: #0a0a0a;
-  --color-tag-bg: #1a1a1a;
-  --color-tag-text: #cccccc;
-  --color-hover-bg: #1a1a1a;
+  --color-tag-bg: #121212;
+  --color-tag-text: #d0d0d0;
+  --color-hover-bg: #161616;
+
+  --body-gradient: none;
 
   /* Vim UI — dark overrides */
   --vim-highlight-bg: rgba(255, 214, 0, 0.2);
