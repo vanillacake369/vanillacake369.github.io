@@ -1,11 +1,10 @@
 ---
 title: "출근 첫 날, 나는 뭘 해야할까? Checklist"
-description: "https://www.youtube.com/watch?v=MGgKWA-rX2s&ab_channel=tvNDENT"
+description: "새 직장 첫 출근날 챙겨야 할 체크리스트. 팀 적응, 개발환경 세팅, 매뉴얼 숙지까지 항목별로 정리했다."
 date: 2024-05-27
-tags: [talk]
-category: uncategorized
+tags: [journal]
 lang: ko
-draft: false
+draft: true
 ---
 
 # 적응기

@@ -3,16 +3,15 @@ title: "Unit & Integration Testing(feat.Junit5)"
 description: "기준없이 유닛 테스트와 통합 테스트를 짜던 시절을 버리고 싶다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
-draft: false
+draft: true
 ---
 
 # Why(What For?) 🤷‍♂️
 
----
 
 기준없이 유닛 테스트와 통합 테스트를 짜던 시절을 버리고 싶다.
+
 해당 내용을 정리하면서 아래 내용에 대한 나만의 기준을 가져보자.
 ~~가져보는 시간을 가져보도록 하는 시간을 가져보도록 하는 것을 가져보도록 하자~~
 
@@ -25,10 +24,7 @@ draft: false
 
 # What(What should I know?) 👇
 
----
 
 > 길게 주절주절 정리할 필요가 없이, 아래 두 포스트를 잘 살펴보면, 이제 단위,통합 테스트를 어떻게 구성해야할지 막막했던 걸 좀 털어낼 수 있을 것 같다.
 
 # How(How to apply to code?) ✍️
-
----

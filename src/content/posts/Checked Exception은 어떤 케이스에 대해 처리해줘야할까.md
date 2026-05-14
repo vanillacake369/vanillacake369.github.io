@@ -1,22 +1,19 @@
 ---
 title: "Checked Exception은 어떤 케이스에 대해 처리해줘야할까?"
-description: "https://www.baeldung.com/java-checked-unchecked-exceptions"
+description: "비즈니스 예외를 설계하면서 Checked Exception을 언제 사용하고 어떤 케이스에 처리해야 하는지 고민한 내용을 담았다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
-draft: false
+draft: true
 ---
 
 # Why(What For?) 🤷‍♂️
 
----
 
 > 비즈니스 예외들을 만들고 있었다.
 
 # What(What should I know?) 👇
 
----
 
 [https://www.baeldung.com/java-checked-unchecked-exceptions](https://www.baeldung.com/java-checked-unchecked-exceptions)
 
