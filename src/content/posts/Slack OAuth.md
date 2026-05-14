@@ -1,16 +1,14 @@
 ---
 title: "Slack OAuth"
-description: "1."
+description: "1. **로그인** – 슬랙 가입한 사내 이메일만 허용 2. **JWT 발급** – 짧은 만료(액세스), 장기 리프레시 토큰 관리."
 date: 2025-08-13
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # 요구사항
 
----
 
 ## 기능
 
@@ -32,18 +30,27 @@ draft: false
 
 # 로그인
 
----
 
 ## 전체 프로세스
 
-1. 애플리케이션 등록
-2. 권한 지정 및 Redirect URI 
-3. 슬랙 계정을 통한 OAuth 처리
-4. OAuth 에 따른 콜백 & 토큰 교환
-5. 토큰에 따른 사용자 확인
-6. 사용자 토큰 관리
+1.
 
+애플리케이션 등록
+2.
 
+권한 지정 및 Redirect URI 
+3.
+
+슬랙 계정을 통한 OAuth 처리
+4.
+
+OAuth 에 따른 콜백 & 토큰 교환
+5.
+
+토큰에 따른 사용자 확인
+6.
+
+사용자 토큰 관리
 
 ### 1) 애플리케이션 등록 (Slack App 생성)
 
@@ -145,10 +152,16 @@ sequenceDiagram
 
 사용자 토큰은 저장 및 리프레쉬 토큰 사용법은 아래를 참조
 
-- Access Token: 수명이 짧음(약 12시간). 만료 전·후에는 반드시 Refresh Token으로 갱신.
+- Access Token: 수명이 짧음(약 12시간).
+
+만료 전·후에는 반드시 Refresh Token으로 갱신.
 - Refresh Token: 사용할 때마다 회전(rotate) → 항상 DB에 최신값으로 교체 저장.
-- TTL은 직접 설정하지 않는다. 토큰 만료는 “로테이션” 방식으로 관리(로그아웃/강제차단 시만 `auth.revoke` 사용).
-- 저장소는 영속 DB(MySQL 등). 애플리케이션은 API 호출 전마다 유효성 확인 → 필요 시 갱신 패턴 유지.
+- TTL은 직접 설정하지 않는다.
+
+토큰 만료는 “로테이션” 방식으로 관리(로그아웃/강제차단 시만 `auth.revoke` 사용).
+- 저장소는 영속 DB(MySQL 등).
+
+애플리케이션은 API 호출 전마다 유효성 확인 → 필요 시 갱신 패턴 유지.
 - DB 저장 시 **암호화(at-rest)** 필수, 암호 키는 **환경변수/비밀관리자**에 보관.
 - 사용자 매핑: **`authed_user.id`(slack_user_id)**를 기본키로 사용, **이메일은 보조 식별용**으로만 활용(SSO·변경 가능성 고려).
 
@@ -175,20 +188,13 @@ sequenceDiagram
 > 💡 Bolt(Java) 사용 시
 > 💡 보안·운영 체크리스트
 
-
-
 # 로그아웃
 
----
 
 - 특정 사용자/세션을 끊어야 할 경우:
 - DB에서도 해당 설치건 토큰 필드를 **즉시 삭제·무효화**.
 
-
-
 # Show me the code ! 🧑‍💻
-
----
 
 
 // 설명 나열 요망
@@ -197,7 +203,6 @@ sequenceDiagram
 
 # Reference 📚
 
----
 
 [https://api.slack.com/authentication/oauth-v2#exchanging](https://api.slack.com/authentication/oauth-v2#exchanging)
 [https://api.slack.com/methods/oauth.v2.access](https://api.slack.com/methods/oauth.v2.access)

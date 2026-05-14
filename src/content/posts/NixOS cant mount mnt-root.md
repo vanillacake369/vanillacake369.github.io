@@ -3,18 +3,26 @@ title: "NixOS :: can’t mount mnt-root"
 description: "NixOS 가 한 번 망가져서 망가진 이유를 찾았다."
 date: 2025-05-19
 tags: [nix]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "NixOS Ecosystem", order: 13 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 NixOS 가 한 번 망가져서 망가진 이유를 찾았다.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -27,13 +35,16 @@ NixOS 가 한 번 망가져서 망가진 이유를 찾았다.
 ```
 
 ruby 에 대한 installPhase 에서 끝나질 않는다.
+
 이 놈 때문에 내 nix config 가 잘못된 줄 알고 한참을 헤맸다,,,
 
 ## nixos 와 home-manager 버전은 일치해야함
 
 필자는 unstable version 을 애용하는데 — 최신 버전을 우선시하므로 — 
 이에 따라 home-manager 세팅 또한 unstable version 으로 되어있다.
+
 하지만 nixos booting iso 는 24.11 에 멈춰있다.
+
 이를 위해 nixos 를 unstable version 으로 업데이트 해주야만 했다.
 
 ```nix
@@ -47,8 +58,10 @@ sudo nixos-rebuild switch --upgrade
 ## 새로운 swap path 설정
 
 동일한 config 를 받고, flake 를 통해 설치를 해주었으나 갑자기 emergency mode 로 들어가더니 `can’t mount mnt-root` 에러가 발생하였다.
+
 처음에는 systemd 문제인가 싶었지만 알고보니 swap 설정에 대한 문제였다.
 nix 는 swap 설정을 할 때 hardware-configuration.nix 에 하게되는데, 스왑 설정 또한 해당 파일에 처리가 된다.
+
 문제는 이 스왑 설정이 정적값으로 이루어진다는 것이다.
 
 ```nix
@@ -89,14 +102,9 @@ cp /etc/nixos/hardware-configuration.nix ${내 nixos 설정경로}/hardware-conf
 
 # Further work
 
----
 
 - Vagrant 쓰고 싶은데 모종의 이유로 설치가 안 되는 게 이상하다.
 
-# Reference
-
----
-
-[https://nixos.org/manual/nixos/stable/index.html#sec-upgrading](https://nixos.org/manual/nixos/stable/index.html#sec-upgrading)
-[https://discourse.nixos.org/t/error-during-stage-1-cant-mount-mnt-root/39123](https://discourse.nixos.org/t/error-during-stage-1-cant-mount-mnt-root/39123)
-[Reddit :: don’t conver a parition](https://www.reddit.com/r/NixOS/comments/1cmk8x1/dont_convert_a_partition_to_swap_without_removing/#:~:text=%20nixos%2Dgenerate%2Dconfig%20will%20regenerate%20/etc/nixos/hardware%2Dconfiguration.nix%20and%20part%20of%20that%20will%20be%20to%20make%20the%20mounts%20and%20swap%20devices%20match%20the%20current%20state%20of%20the%20system.)
+[^1]: https://nixos.org/manual/nixos/stable/index.html#sec-upgrading <https://nixos.org/manual/nixos/stable/index.html#sec-upgrading>
+[^2]: https://discourse.nixos.org/t/error-during-stage-1-cant-mount-mnt-root/39123 <https://discourse.nixos.org/t/error-during-stage-1-cant-mount-mnt-root/39123>
+[^3]: Reddit :: don’t conver a parition <https://www.reddit.com/r/NixOS/comments/1cmk8x1/dont_convert_a_partition_to_swap_without_removing/#:~:text=%20nixos%2Dgenerate%2Dconfig%20will%20regenerate%20/etc/nixos/hardware%2Dconfiguration.nix%20and%20part%20of%20that%20will%20be%20to%20make%20the%20mounts%20and%20swap%20devices%20match%20the%20current%20state%20of%20the%20system.>

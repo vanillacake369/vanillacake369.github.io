@@ -2,17 +2,20 @@
 title: "About MySQL Exporter"
 description: "데이터베이스의 상태를 모니터링하고 싶을 때는 어떻게 해야 할까?"
 date: 2025-12-22
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
 
 ---
 
-데이터베이스의 상태를 보고 싶을 때는 어떻게 해야 할까? 
+---
+
+데이터베이스의 상태를 보고 싶을 때는 어떻게 해야 할까?
 
 이때 등장하는 것이 바로 **MySQL Exporter**다.
 
@@ -20,12 +23,15 @@ Node Exporter가 서버의 CPU, 메모리, 디스크를 관찰한다면 MySQL Ex
 
 MySQL Exporter 는 무엇이고 어떻게 동작할까?
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ![](/images/velog/e3fda470777610b5.png)
-
 
 ## 정의
 
@@ -90,7 +96,9 @@ MySQL Exporter는 내부적으로 다음 과정을 거친다.
 
 - 호스트에 접근 가능한 계정
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -169,10 +177,5 @@ MySQL Exporter가 제공하는 Prometheus 메트릭을 쿼리할 때, 특히 커
     `textmysql_slave_status_seconds_behind_master`
     
 
-# Reference
-
----
-
-https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.mysql/
-
-https://techblog.goinc.jp/entry/2024/11/29/171127
+[^1]: https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.mysql/ <https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.mysql/>
+[^2]: https://techblog.goinc.jp/entry/2024/11/29/171127 <https://techblog.goinc.jp/entry/2024/11/29/171127>

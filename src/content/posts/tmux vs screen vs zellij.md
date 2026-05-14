@@ -3,19 +3,25 @@ title: "tmux vs screen vs zellij"
 description: "화면 분할 및 여러 세션 관리를 위해 tmux 와 screen 을 사용해보고자 소개 및 장단점 비교를 해보았다."
 date: 2025-05-25
 tags: [linux]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 화면 분할 및 여러 세션 관리를 위해 tmux 와 screen 을 사용해보고자 소개 및 장단점 비교를 해보았다.
 
+# What?
 
-# What? 뭘 배움?
+뭘 배움?
+
+---
 
 ---
 
@@ -62,10 +68,8 @@ draft: false
 | 스크롤(Scrollback) | ✅ | ✅ | ✅ |
 | 다중 연결(multi-attach) | ✅ | ✅ | ✅ |
 
-
 # 결국 무엇을 쓰기로 하였나?
 
----
 
 필자는 zellij 의 장점을 높게 사서 한동안 zellij 에 정착하기로 하였다.
 
@@ -74,14 +78,10 @@ draft: false
 - tmux 키바인딩 또한 지원
 - session resurrection : 죽였던 session 들에 대해서 볼 수 있고 살릴 수 있음
 
-
 기존에 tmux 사용 중이고, 이미 여러 플러그인을 탑재했다면 tmux 에 정착할 것 같다.
+
 하지만 tmux 의 learning curve 보다 좀 더 단순한 zellij 를 사용해보기로 하였다.
 
-# Reference
-
----
-
-[https://rrmartins.medium.com/zellij-vs-tmux-complete-comparison-or-almost-8e5b57d234ae](https://rrmartins.medium.com/zellij-vs-tmux-complete-comparison-or-almost-8e5b57d234ae)
-[https://www.youtube.com/watch?v=ZPfQS5FHNYQ&pp=ygUGemVsbGlq](https://www.youtube.com/watch?v=ZPfQS5FHNYQ&pp=ygUGemVsbGlq)
-[https://www.youtube.com/watch?v=ZndhImXIGlg&ab_channel=DevOpsToolkit](https://www.youtube.com/watch?v=ZndhImXIGlg&ab_channel=DevOpsToolkit)
+[^1]: https://rrmartins.medium.com/zellij-vs-tmux-complete-comparison-or-almost-8e5b57d234ae <https://rrmartins.medium.com/zellij-vs-tmux-complete-comparison-or-almost-8e5b57d234ae>
+[^2]: https://www.youtube.com/watch?v=ZPfQS5FHNYQ&pp=ygUGemVsbGlq <https://www.youtube.com/watch?v=ZPfQS5FHNYQ&pp=ygUGemVsbGlq>
+[^3]: https://www.youtube.com/watch?v=ZndhImXIGlg&ab_channel=DevOpsToolkit <https://www.youtube.com/watch?v=ZndhImXIGlg&ab_channel=DevOpsToolkit>

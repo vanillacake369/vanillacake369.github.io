@@ -2,13 +2,16 @@
 title: "About Node Exporter"
 description: "어떻게 하면 서버 호스트 자체의 시스템 메트릭을 모니터링 할 수 있을까?"
 date: 2025-12-22
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
@@ -18,12 +21,15 @@ draft: false
 
 그렇다면 Node Exporter 는 무엇이고 어떻게 동작하는지 알아보자.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
 ![](/images/velog/848db17f9ed24a4a.png)
-
 
 ## 정의
 
@@ -39,14 +45,22 @@ draft: false
 > 
 > 아래 단계와 같이 처리합니다.
 > 
-> 1. 애플리케이션에서 해당 시스템이 사용하는 형식(예: XML)으로 데이터를 수집를 가져와,
-> 2. 이를 프로메테우스가 활용할 수 있는 메트릭으로 변환한 후 
-> 3. 프로메테우스에 제공되는 도메인 URL에 노출하고
-> 4. 프로메테우스는 이를 수집하여 메트릭 데이터를 중앙화합니다.
-> 
-> 메트릭을 내보내 프로메테우스 메트릭으로 변환할 수 있는 애플리케이션 라이브러리가 방대하며, 해당 목록은 [여기](https://prometheus.io/docs/instrumenting/exporters/)에서 확인할 수 있습니다.
+> 1.
 
-대부분의 쿠버네티스 클러스터는 클러스터 수준 서버 메트릭과 컨테이너 수준 메트릭을 노출합니다. 
+애플리케이션에서 해당 시스템이 사용하는 형식(예: XML)으로 데이터를 수집를 가져와,
+> 2.
+
+이를 프로메테우스가 활용할 수 있는 메트릭으로 변환한 후 
+> 3.
+
+프로메테우스에 제공되는 도메인 URL에 노출하고
+> 4.
+
+프로메테우스는 이를 수집하여 메트릭 데이터를 중앙화합니다.
+> 
+> 메트릭을 내보내 프로메테우스 메트릭으로 변환할 수 있는 애플리케이션 라이브러리가 방대하며, 해당 목록은 [여기](https://prometheus.io/docs/instrumenting/exporters/[^1])에서 확인할 수 있습니다.
+
+대부분의 쿠버네티스 클러스터는 클러스터 수준 서버 메트릭과 컨테이너 수준 메트릭을 노출합니다.
 
 그러나 노드 수준 메트릭은 제공되지 않습니다.
 
@@ -69,12 +83,12 @@ Node Exporter는 다음과 같은 다양한 메트릭을 측정합니다:
 1. path.rootfs 처리
     
     핵심 메커니즘은 파일 시스템 경로 앞에 path.rootfs 접두사를 추가하는 rootfsFilePath() 함수입니다.
-    
-    수집기가 시스템 파일에 접근해야 할 때 이 함수를 호출하여 올바른 경로를 얻습니다.
-    
-    이는 --path.rootfs=/host가 설정되었을 때 /proc/mounts를 /host/proc/mounts로 변환합니다.
-    
-    이를 통해 익스포터가 컨테이너화되어 실행되든 아니든 관계없이 메트릭스가 /host/media/volume1 대신 /media/volume1로 표시되어 일관성을 유지합니다. 
+
+수집기가 시스템 파일에 접근해야 할 때 이 함수를 호출하여 올바른 경로를 얻습니다.
+
+이는 --path.rootfs=/host가 설정되었을 때 /proc/mounts를 /host/proc/mounts로 변환합니다.
+
+이를 통해 익스포터가 컨테이너화되어 실행되든 아니든 관계없이 메트릭스가 /host/media/volume1 대신 /media/volume1로 표시되어 일관성을 유지합니다. 
     
     [filesystem_linux.go:124](https://github.com/prometheus/node_exporter/blob/38d32a39/collector/filesystem_linux.go#L124) 
     
@@ -118,15 +132,17 @@ Node Exporter는 다음과 같은 다양한 메트릭을 측정합니다:
     	}
     ```
     
-2. 컬렉터 초기화
+2.
+
+컬렉터 초기화
     
     node exporter 내부에는 각 메트릭에 대한 수집기 컴포넌트가 있습니다. 
     
     (이에 대한 목록은 [여기](https://github.com/prometheus/node_exporter?tab=readme-ov-file#collectors)서 살펴보실 수 있습니다.)
     
-    이 수집기가 초기화될 때, 구성된 경로를 수신합니다. 
-    
-    가령, btrfs 컬렉터는 sysPath 변수를 사용하여 파일 시스템 핸들을 생성합니다. [btrfs_linux.go:43-46](https://github.com/prometheus/node_exporter/blob/38d32a39/collector/btrfs_linux.go#L41) 
+    이 수집기가 초기화될 때, 구성된 경로를 수신합니다.
+
+가령, btrfs 컬렉터는 sysPath 변수를 사용하여 파일 시스템 핸들을 생성합니다. [btrfs_linux.go:43-46](https://github.com/prometheus/node_exporter/blob/38d32a39/collector/btrfs_linux.go#L41) 
     
     마찬가지로, NFS 컬렉터는 procPath를 사용하여 /proc 파일에 접근합니다. [nfs_linux.go:51-54](https://github.com/prometheus/node_exporter/blob/38d32a39/collector/nfs_linux.go#L49)
     
@@ -163,11 +179,13 @@ Node Exporter는 다음과 같은 다양한 메트릭을 측정합니다:
     }
     ```
     
-3. 네임스페이스 접근
+3.
+
+네임스페이스 접근
     
-    --net=“host” 및 --pid=“host” 플래그는 node_exporter 코드 자체가 아닌 Docker 수준에서 작동합니다. 
-    
-    이 플래그는 Docker에 호스트의 네트워크 및 프로세스 네임스페이스를 컨테이너와 공유하도록 지시하므로, exporter 가 /proc(또는 바인드 마운트를 사용한 /host/proc)에서 읽을 때 컨테이너의 격리된 뷰가 아닌 호스트의 프로세스를 볼 수 있습니다.
+    --net=“host” 및 --pid=“host” 플래그는 node_exporter 코드 자체가 아닌 Docker 수준에서 작동합니다.
+
+이 플래그는 Docker에 호스트의 네트워크 및 프로세스 네임스페이스를 컨테이너와 공유하도록 지시하므로, exporter 가 /proc(또는 바인드 마운트를 사용한 /host/proc)에서 읽을 때 컨테이너의 격리된 뷰가 아닌 호스트의 프로세스를 볼 수 있습니다.
     
 
 ## 필수요건
@@ -209,11 +227,13 @@ services:
 - 경로 접두사 구성
     
     --path.rootfs=/host 플래그를 사용하여 node_exporter에 호스트 파일 시스템이 마운트된 위치를 알려줍니다.
-    
-    이 접두사는 수집기가 메트릭을 읽을 때 모든 파일 시스템 경로 앞에 추가됩니다.
+
+이 접두사는 수집기가 메트릭을 읽을 때 모든 파일 시스템 경로 앞에 추가됩니다.
     
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -265,14 +285,7 @@ receivers:
 # ,,, processor 나 exporter 에 대해서는 생략 ,,,
 ```
 
-# Reference
-
----
-
-https://prometheus.io/docs/instrumenting/exporters/
-
-https://www.virtana.com/glossary/what-is-a-node-exporter/
-
-https://www.opsramp.com/guides/prometheus-monitoring/prometheus-node-exporter/
-
-https://deepwiki.com/search/how-nodeexporter-collect-host_8548fd41-4b01-4035-b326-169db7c7c2f9?mode=fast
+[^1]: https://prometheus.io/docs/instrumenting/exporters/ <https://prometheus.io/docs/instrumenting/exporters/>
+[^2]: https://www.virtana.com/glossary/what-is-a-node-exporter/ <https://www.virtana.com/glossary/what-is-a-node-exporter/>
+[^3]: https://www.opsramp.com/guides/prometheus-monitoring/prometheus-node-exporter/ <https://www.opsramp.com/guides/prometheus-monitoring/prometheus-node-exporter/>
+[^4]: https://deepwiki.com/search/how-nodeexporter-collect-host_8548fd41-4b01-4035-b326-169db7c7c2f9?mode=fast <https://deepwiki.com/search/how-nodeexporter-collect-host_8548fd41-4b01-4035-b326-169db7c7c2f9?mode=fast>

@@ -2,13 +2,16 @@
 title: "About cAdvisor"
 description: "어떻게 하면 배포한 컨테이너들에 대한 시스템 메트릭을 모니터링할 수 있을까?"
 date: 2025-12-22
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
@@ -20,7 +23,11 @@ CAdvisor 를 사용하면 코드 없이 간단히 설정하여 수집하게 할 
 
 그렇다면 CAdvisor 는 무엇이고 어떻게 동작하는지 알아보자.
 
-# What? 뭘 배움?
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -28,12 +35,15 @@ CAdvisor 를 사용하면 코드 없이 간단히 설정하여 수집하게 할 
 
 ![](/images/velog/b9d62ccbdb86c23e.png)
 
-
 ## 정의
 
-컨테이너 어드바이저(cAdvisor)는 Google이 개발한 오픈소스 컨테이너 모니터링 도구입니다. 파일 시스템 및 네트워크 정보, CPU, 메모리 사용량 등 컨테이너 기반 메트릭을 수집, 집계, 처리 및 내보낼 수 있습니다.
+컨테이너 어드바이저(cAdvisor)는 Google이 개발한 오픈소스 컨테이너 모니터링 도구입니다.
 
-이 도구는 단일 쿠버네티스 클러스터부터 완전한 도커 설치 환경에 이르기까지 모든 컨테이너화된 환경에서 사용하기 쉽습니다. 다용도성, 사용 편의성, 거의 모든 모니터링 요구 사항을 충족할 수 있는 능력 덕분에 cAdvisor는 컨테이너 모니터링을 위한 최고의 선택지 중 하나입니다.
+파일 시스템 및 네트워크 정보, CPU, 메모리 사용량 등 컨테이너 기반 메트릭을 수집, 집계, 처리 및 내보낼 수 있습니다.
+
+이 도구는 단일 쿠버네티스 클러스터부터 완전한 도커 설치 환경에 이르기까지 모든 컨테이너화된 환경에서 사용하기 쉽습니다.
+
+다용도성, 사용 편의성, 거의 모든 모니터링 요구 사항을 충족할 수 있는 능력 덕분에 cAdvisor는 컨테이너 모니터링을 위한 최고의 선택지 중 하나입니다.
 
 ## 제공 기능
 
@@ -48,9 +58,13 @@ CAdvisor 를 사용하면 코드 없이 간단히 설정하여 수집하게 할 
 ## 단점 및 제한점
 
 - cAdvisor는 기본적인 리소스 사용량 데이터만 수집하므로, 더 상세한 메트릭이 필요한 경우에는 충분하지 않을 수 있습니다.
-- 메트릭 수집을 위해서는 운영체제마다 다른 설정이 필요합니다. 예를 들어, RHEL과 CentOS는 특권 모드에서 실행해야 하는 반면, Debian은 메모리 cgroups를 활성화해야 합니다.
+- 메트릭 수집을 위해서는 운영체제마다 다른 설정이 필요합니다.
+
+예를 들어, RHEL과 CentOS는 특권 모드에서 실행해야 하는 반면, Debian은 메모리 cgroups를 활성화해야 합니다.
 - GPU와 같은 맞춤형 하드웨어 데이터 수집을 위해서는 추가 구성이 필요하며, 이 구성은 기반 인프라에 따라 달라집니다.
-- cAdvisor가 실행 중인 상태에서 런타임 옵션을 변경하려면 업데이트된 매개변수로 cAdvisor 컨테이너를 재시작해야 합니다. 즉, 사용자는 기존 cAdvisor 컨테이너를 중지한 후 원하는 구성 변경 사항을 적용하여 새 컨테이너를 시작해야 합니다.
+- cAdvisor가 실행 중인 상태에서 런타임 옵션을 변경하려면 업데이트된 매개변수로 cAdvisor 컨테이너를 재시작해야 합니다.
+
+즉, 사용자는 기존 cAdvisor 컨테이너를 중지한 후 원하는 구성 변경 사항을 적용하여 새 컨테이너를 시작해야 합니다.
 - 추가 분석을 수행하고 수집된 데이터를 장기간 저장하려면 cAdvisor는 외부 도구가 필요합니다.
 
 ## 기본 동작 원리
@@ -82,11 +96,15 @@ sudo docker run \
 
 Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 때 cAdvisor는 다음 이유로 모든 컨테이너를 모니터링할 수 있습니다:
 
-1. 공유 Docker 데몬
+1.
+
+공유 Docker 데몬
     
     Docker Compose 배포 환경의 모든 컨테이너는 호스트의 동일한 Docker 데몬을 공유합니다.
     
-2. 컨테이너 감지
+2.
+
+컨테이너 감지
     
     cAdvisor의 Docker 팩토리는 Docker 클라이언트를 사용하여 컨테이너를 검사하고 발견합니다. [factory.go:167-184](https://github.com/google/cadvisor/blob/5adb1c3b/container/docker/factory.go#L167) 
     
@@ -114,7 +132,9 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
     
     ```
     
-3. 네임스페이스 처리
+3.
+
+네임스페이스 처리
     
     매니저는 /rootfs/proc의 존재 여부를 확인하여 cAdvisor가 호스트 네임스페이스에서 실행 중인지 감지합니다. [manager.go:183-188](https://github.com/google/cadvisor/blob/5adb1c3b/manager/manager.go)
     
@@ -128,7 +148,9 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
     	}
     ```
     
-4. 컨테이너 핸들러 생성
+4.
+
+컨테이너 핸들러 생성
     
     발견된 각 컨테이너에 대해 cAdvisor는 마운트된 볼륨을 사용하여 컨테이너 데이터에 접근하는 핸들러를 생성합니다. [manager.go:913-931](https://github.com/google/cadvisor/blob/5adb1c3b/manager/manager.go) 
     
@@ -175,11 +197,13 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
 
 중요한 요구 사항은 cAdvisor 컨테이너가 Docker 소켓과 호스트 파일 시스템에 접근하기 위해 적절한 볼륨 마운트를 가져야 한다는 것입니다.
 
-이러한 마운트가 없으면 cAdvisor는 동일한 Docker Compose 배포에 있더라도 다른 컨테이너를 검색하거나 모니터링할 수 없습니다. 
+이러한 마운트가 없으면 cAdvisor는 동일한 Docker Compose 배포에 있더라도 다른 컨테이너를 검색하거나 모니터링할 수 없습니다.
 
 일부 시스템(RHEL/CentOS 등)에서는 cAdvisor가 Docker 데몬에 충분한 접근 권한을 얻기 위해 --privileged 플래그가 필요할 수도 있습니다.
 
-# How? 어떻게 씀?
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -287,14 +311,7 @@ receivers:
 # ,,, processor 나 exporter 에 대해서는 생략 ,,,
 ```
 
-# Reference
-
----
-
-https://cast.ai/blog/cadvisor/
-
-https://deepwiki.com/search/how-cadvisor-collect-container_c2b22e92-8089-4b56-abb7-ff410e682c4f?mode=fast
-
-https://github.com/google/cadvisor/blob/5adb1c3b/docs/running.md
-
-https://prometheus.io/docs/guides/cadvisor/
+[^1]: https://cast.ai/blog/cadvisor/ <https://cast.ai/blog/cadvisor/>
+[^2]: https://deepwiki.com/search/how-cadvisor-collect-container_c2b22e92-8089-4b56-abb7-ff410e682c4f?mode=fast <https://deepwiki.com/search/how-cadvisor-collect-container_c2b22e92-8089-4b56-abb7-ff410e682c4f?mode=fast>
+[^3]: https://github.com/google/cadvisor/blob/5adb1c3b/docs/running.md <https://github.com/google/cadvisor/blob/5adb1c3b/docs/running.md>
+[^4]: https://prometheus.io/docs/guides/cadvisor/ <https://prometheus.io/docs/guides/cadvisor/>

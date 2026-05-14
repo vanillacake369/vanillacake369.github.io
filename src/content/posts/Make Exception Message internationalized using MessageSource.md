@@ -3,23 +3,21 @@ title: "Make Exception Message internationalized using MessageSource "
 description: "모든 소스코드는 해당 깃허브를 참고하면 된다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Why(What For?) 🤷‍♂️
 
----
 
 > 만약 내 서비스를 세계 어디서든 사용한다고 생각해보자.
 > 알고보니,,, 메세지 국제화는 보통 Front 단에서 처리한다고 한다,,,
 
 # What(What should I know?) 👇
 
----
 
 모든 소스코드는 [해당 깃허브](https://github.com/sparta-nullnull/otil)를 참고하면 된다.
+
 Message Source에 대한 build.gradle 설정을 해주자.
 
 ```java
@@ -288,7 +286,6 @@ spring:
     alwaysUseMessageFormat:true
 ```
 
-
 다음으로 메세지 소스에 대한 설정을 해주자.
 
 ```java
@@ -355,14 +352,18 @@ public class MessageSourceConfig implements WebMvcConfigurer {
 위 설정을 통해 각기 다른 지역에 따라, 다른 yml 파일을 읽게 할 수 있다.
 
 이제 예외처리 할 때, 메세지 국제화한 값을 예외메세지로 반환하게 해주게 할 수 있다.
+
 이 때, 조금 어색하지만 중요한 작업을 해주어야만 돌아가게끔 해주었다.
+
 바로 “Bean에 대한 의존성 주입을 static variable로 받게 하기” 이다.
 
 사실 이러한 행위는 DI를 역행하는 행위이다.
+
 하지만 이렇게 해야만 하는 이유가 있었는데, 
 그것은 바로 MessageSource 인스턴스 자체는 동적으로 변경되고 주입되지만, 예외처리는 static 한 상황에서 처리하게끔 하고자 하기 때문이다.
 
 MessageSource 인스턴스가 지역에 따라 다르게 변경되는 반면, 예외처리는 정적으로 처리하게끔해야한다.
+
 만약, 예외처리를 동적으로 — MessageSource 인스턴스를 주입받아 하고자한다면 — 매 번 새로운 인스턴스를 주입받아야 할 것이고, 이는 오버헤드가 상당히 크다고 판단하였다.
 
 따라서 `@PostConstruct`를 통해 미리 주입받은 뒤, 예외메세지를 처리해주었다.
@@ -377,7 +378,6 @@ public void init() {
     messageSource = wiredMessageSource;
 }
 ```
-
 
 이렇게 처리한 MessageSource 를 통해 에러 케이스 코드를 변환해주었다.
 
@@ -419,8 +419,8 @@ public static HttpStatus getStatus(ErrorCase errorCase) throws NoSuchMessageExce
 }
 ```
 
-
 이제 모든 설정은 다 끝났다.
+
 GlobalExceptionHandler를 통해 예외처리를 AOP를 통해 하는 핸들러를 만들어주면 된다!
 
 ```java
@@ -493,7 +493,6 @@ public class GlobalExceptionHandler {
 }
 ```
 
-
 혹시 몰라 테스트 코드 또한 작성해주었다. 
 
 ```java
@@ -550,7 +549,6 @@ class ErrorCaseResolverTest {
 
 # Reference 📚
 
----
 
 [https://blog.hkwon.me/spring-boot-spring-i18n-configuration/](https://blog.hkwon.me/spring-boot-spring-i18n-configuration/)
 [https://velog.io/@maketheworldwise/다국어-처리의-모든-것](https://velog.io/@maketheworldwise/다국어-처리의-모든-것)

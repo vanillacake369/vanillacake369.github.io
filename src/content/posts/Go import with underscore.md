@@ -2,21 +2,26 @@
 title: "Go import with underscore(_)"
 description: "만약 우리가 아래와 같이 mysql 드라이버 blank import 를 뺀다면,"
 date: 2025-04-25
-tags: [go]
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
 - Golang 작성 중 import 문이 _ 으로된 문이 있어 확인
 
+# What?
 
+뭘 배움?
 
-# What? 뭘 배움?
+---
 
 ---
 
@@ -24,9 +29,9 @@ draft: false
 - `import _ ~~`는 golang 에서 blank import 라고 함
 - 해당 패키지에서 직접적인 의존성이 없으나 호출하는 메서드 내부로직에서 의존하고 있다면 blank import 를 선언하여야 함
 
+# How?
 
-
-# How? 어떻게 씀?
+어떻게 씀?
 
 ---
 
@@ -92,11 +97,7 @@ func TestShowDiff(t *testing.T) {
 
 ![](/images/notion/85b85a0aced0b759.png)
 
-# Reference
-
----
-
-[https://go.dev/doc/effective_go#blank_import](https://go.dev/doc/effective_go#blank_import)
-[https://pkg.go.dev/database/sql#Register](https://pkg.go.dev/database/sql#Register)
-[https://www.calhoun.io/why-we-import-sql-drivers-with-the-blank-identifier/](https://www.calhoun.io/why-we-import-sql-drivers-with-the-blank-identifier/)
-[https://www.digitalocean.com/community/tutorials/understanding-init-in-go](https://www.digitalocean.com/community/tutorials/understanding-init-in-go)
+[^1]: https://go.dev/doc/effective_go#blank_import <https://go.dev/doc/effective_go#blank_import>
+[^2]: https://pkg.go.dev/database/sql#Register <https://pkg.go.dev/database/sql#Register>
+[^3]: https://www.calhoun.io/why-we-import-sql-drivers-with-the-blank-identifier/ <https://www.calhoun.io/why-we-import-sql-drivers-with-the-blank-identifier/>
+[^4]: https://www.digitalocean.com/community/tutorials/understanding-init-in-go <https://www.digitalocean.com/community/tutorials/understanding-init-in-go>

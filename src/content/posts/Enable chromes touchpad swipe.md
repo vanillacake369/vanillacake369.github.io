@@ -3,25 +3,22 @@ title: "Enable chrome’s touchpad swipe"
 description: "터치패드를 통해 이전 페이지로 돌아가는 편이다."
 date: 2025-05-17
 tags: [linux]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Context
 
----
 
 터치패드를 통해 이전 페이지로 돌아가는 편이다.
-Gnome/Wayland 환경에서 자꾸 안 되길래 해결해보았다.
 
+Gnome/Wayland 환경에서 자꾸 안 되길래 해결해보았다.
 
 # Core Reason
 
----
 
 찾아보니 해당 터치패드 스와이프에 대한 옵션이 linux 에 대해서는 기본값으로 꺼져있음을 알게 되었다.
-[https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743](https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743)
+[https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743](https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743[^3])
 
 ```nix
 // Allows swipe left/right from touchpad change browser navigation. Currently
@@ -41,9 +38,10 @@ ChromeOS, WindowsOS 가 아닌 OS 들은 TouchpadOverscrollHistoryNavigation 옵
 
 # Solution
 
----
 
-방법은 간단하다. 해당 플래그를 활성화해주면 된다.
+방법은 간단하다.
+
+해당 플래그를 활성화해주면 된다.
 
 > 시작 시 활성화
 
@@ -140,12 +138,8 @@ google-chrome-stable --ozone-platform-hint=auto --enable-features=TouchpadOversc
 
 ```
 
-# Reference
-
----
-
-[https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/HandlingTouchEvents/HandlingTouchEvents.html](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/HandlingTouchEvents/HandlingTouchEvents.html)
- [https://medium.com/@nikitavoloboev/take-control-of-your-trackpad-on-macos-45c581f542e0](https://medium.com/@nikitavoloboev/take-control-of-your-trackpad-on-macos-45c581f542e0) 
-[https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743](https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743)
-[https://www.reddit.com/r/gnome/comments/td8irt/touchpad_gestures_in_chromechromium/](https://www.reddit.com/r/gnome/comments/td8irt/touchpad_gestures_in_chromechromium/)
-[https://askubuntu.com/questions/1503214/how-to-make-flag-enable-features-vaapivideoencoder-persistent-in-google-chrome?utm_source=chatgpt.com](https://askubuntu.com/questions/1503214/how-to-make-flag-enable-features-vaapivideoencoder-persistent-in-google-chrome?utm_source=chatgpt.com)
+[^1]: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/HandlingTouchEvents/HandlingTouchEvents.html <https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/HandlingTouchEvents/HandlingTouchEvents.html>
+[^2]: https://medium.com/@nikitavoloboev/take-control-of-your-trackpad-on-macos-45c581f542e0 <https://medium.com/@nikitavoloboev/take-control-of-your-trackpad-on-macos-45c581f542e0>
+[^3]: https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743 <https://chromium.googlesource.com/chromium/src/%2B/7eb8cf6bb4b6196119901213ac829ce60e540b14/content/public/common/content_features.cc?utm_source=chatgpt.com#743>
+[^4]: https://www.reddit.com/r/gnome/comments/td8irt/touchpad_gestures_in_chromechromium/ <https://www.reddit.com/r/gnome/comments/td8irt/touchpad_gestures_in_chromechromium/>
+[^5]: https://askubuntu.com/questions/1503214/how-to-make-flag-enable-features-vaapivideoencoder-persistent-in-google-chrome?utm_source=chatgpt.com <https://askubuntu.com/questions/1503214/how-to-make-flag-enable-features-vaapivideoencoder-persistent-in-google-chrome?utm_source=chatgpt.com>

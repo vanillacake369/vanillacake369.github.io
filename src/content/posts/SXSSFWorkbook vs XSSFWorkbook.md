@@ -3,24 +3,31 @@ title: "SXSSFWorkbook vs XSSFWorkbook"
 description: "The three *Workbook* classes available in Apache POI are *HSSFWorkbook*, *XSSFWorkbook*, and *SXSSFWorkbook."
 date: 2025-04-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
 
 ---
 
+---
 
+# What?
 
-# What? 뭘 배움?
+뭘 배움?
+
+---
 
 ---
 
 > 부가적인 설명이 의미가 없는 거 같아 그냥 baeldung 에 있는 내용 가져왔다.
 
-The three *Workbook* classes available in Apache POI are *HSSFWorkbook*, *XSSFWorkbook*, and *SXSSFWorkbook. *They share similarities yet offer distinct functionalities catering to different file formats and use cases. Here’s a quick summary of their main characteristics:
+The three *Workbook* classes available in Apache POI are *HSSFWorkbook*, *XSSFWorkbook*, and *SXSSFWorkbook. *They share similarities yet offer distinct functionalities catering to different file formats and use cases.
+
+Here’s a quick summary of their main characteristics:
 
 |  | HSSFWorkbook | XSSFWorkbook | SXSSFWorkbook |
 | --- | --- | --- | --- |
@@ -30,14 +37,16 @@ The three *Workbook* classes available in Apache POI are *HSSFWorkbook*, *XS
 | Streaming Workbook | No | No | Yes |
 | Memory Usage | High | High | Low |
 
+In short, *HSSFWorkbook* produces Excel files in the older *.xls* format.
 
-In short, *HSSFWorkbook* produces Excel files in the older *.xls* format. The *XSSFWorkbook* and *SXSSFWorkbook* create files in the XML-based *.xlsx* format used by Excel 2007 and later.
+The *XSSFWorkbook* and *SXSSFWorkbook* create files in the XML-based *.xlsx* format used by Excel 2007 and later.
 **Both *****HSSFWorbook***** and *****XSSFWorkbook***** are non-streaming workbooks that keep all rows of data in memory, whereas *****SXSSFWorkbook***** is a streaming workbook that only retains a certain number of rows in memory.** Hence, it’s much more memory-efficient if the dataset is huge.
 
 ,,,,
 
+# **5.2.
 
-# **5.2. Execution Time**
+Execution Time**
 
 | Number of Rows | HSSFWorkbook | XSSFWorkbook | SXSSFWorkbook |
 | --- | --- | --- | --- |
@@ -47,11 +56,18 @@ In short, *HSSFWorkbook* produces Excel files in the older *.xls* format. Th
 | 20,000 | 754 | 21,733 | 3,751 |
 | 40,000 | 1,455 | 42,331 | 7,342 |
 
+Among the three classes, the *HSSFWorkbook* is always faster compared to the *XSSFWorkbook* and the *SXSSFWorkbook*.
 
-Among the three classes, the *HSSFWorkbook* is always faster compared to the *XSSFWorkbook* and the *SXSSFWorkbook*. The *XSSFWorkbook* shows the highest execution time, which is around 30 times slower than the *HSSFWorkbook*. The *SXSSFWorkbook* class provides a compromise between the two.
-**The reason for such results could be that the binary *****.xls***** format is less complex to handle. It’s evident that the XML-based *****.xlsx***** format requires more processing, and such slowdown will be more significant with larger datasets.**
+The *XSSFWorkbook* shows the highest execution time, which is around 30 times slower than the *HSSFWorkbook*.
 
-# **5.3. Memory Consumption**
+The *SXSSFWorkbook* class provides a compromise between the two.
+**The reason for such results could be that the binary *****.xls***** format is less complex to handle.
+
+It’s evident that the XML-based *****.xlsx***** format requires more processing, and such slowdown will be more significant with larger datasets.**
+
+# **5.3.
+
+Memory Consumption**
 
 | Number of Rows | HSSFWorkbook | XSSFWorkbook | SXSSFWorkbook |
 | --- | --- | --- | --- |
@@ -61,12 +77,21 @@ Among the three classes, the *HSSFWorkbook* is always faster compared to the 
 | 20,000 | 1,766 | 7,443 | 209 |
 | 40,000 | 1,475 | 10,119 | 210 |
 
+For both the *HSSFWorkbook* and the *XSSFWorkbook*, the memory consumption grows with the number of rows.
 
-For both the *HSSFWorkbook* and the *XSSFWorkbook*, the memory consumption grows with the number of rows. That’s because these *Workbook* classes store all data in memory. However, the *XSSFWorkbook* grows significantly more than the *HSSFWorkbook*.
-***SXSSFWorkbook***** is the clear winner in terms of memory efficiency. Its memory consumption remains almost constant, regardless of the number of rows, at around 210MB.**
-This is due to its streaming behavior, where only a small portion of rows is kept in memory at any given time. This makes *SXSSFWorkbook* ideal for handling large datasets without running out of memory.
+That’s because these *Workbook* classes store all data in memory.
 
-# How? 어떻게 씀?
+However, the *XSSFWorkbook* grows significantly more than the *HSSFWorkbook*.
+***SXSSFWorkbook***** is the clear winner in terms of memory efficiency.
+
+Its memory consumption remains almost constant, regardless of the number of rows, at around 210MB.**
+This is due to its streaming behavior, where only a small portion of rows is kept in memory at any given time.
+
+This makes *SXSSFWorkbook* ideal for handling large datasets without running out of memory.
+
+# How?
+
+어떻게 씀?
 
 ---
 
@@ -82,8 +107,4 @@ Workbook workbook = new XSSFWorkbook(inputStream);
 Workbook workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream));
 ```
 
-# Reference
-
----
-
-[https://www.baeldung.com/java-apache-poi-workbook-evaluation](https://www.baeldung.com/java-apache-poi-workbook-evaluation)
+[^1]: https://www.baeldung.com/java-apache-poi-workbook-evaluation <https://www.baeldung.com/java-apache-poi-workbook-evaluation>

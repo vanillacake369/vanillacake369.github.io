@@ -1,22 +1,17 @@
 ---
 title: "JDBC ↔ MyBatis ↔ JPA"
-description: ""
+description: "- [ ] JDBC 와 Persistence Framework 의 차이점 ? - [ ] JDBC Template 과 MyBatis 의 차이점 ?"
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Why(What For?) 🤷‍♂️
 
----
-
-
 
 # What(What should I know?) 👇
 
----
 
 - [ ] JDBC 와 Persistence Framework 의 차이점 ??
 - [ ] JDBC Template 과 MyBatis 의 차이점 ??
@@ -35,5 +30,3 @@ draft: false
 - [ ] SpringDataJpa 에서 제공하는 여러 고급 기능들의 사용방법은 ??
 
 # How(How to apply to code?) ✍️
-
----

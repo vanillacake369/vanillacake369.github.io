@@ -3,7 +3,6 @@ title: "Basics of Docker"
 description: "컨테이너를 위한 리눅스 기능: cgroup, namespace, union mount"
 date: 2024-04-20
 tags: [system-design]
-category: uncategorized
 lang: ko
 draft: false
 ---
@@ -71,11 +70,14 @@ and any system libraries or configuration files
 ***running instance of a Docker image.***
 Containers are isolated environments that run an application and its dependencies,
 but with their own isolated file system, network, and resources.
+
 Containers are created from Docker images, and multiple containers can run from the same image.
 - Docker Volume
 ***persistent data storage area*** that can be used by one or more containers.
+
 Volumes are used to store data that needs to persist beyond the life of a container,
 such as application configuration files or user data.
+
 Volumes can be created and managed independently of containers
 and can be shared between containers.
 

@@ -2,13 +2,16 @@
 title: "About OpenTelemetry / Grafana Alloy"
 description: "관찰대상에 대한 데이터 수집 표준인 OpenTelemetry 에 대해 알아보자"
 date: 2025-12-22
-tags: []
-category: uncategorized
+tags: [journal]
 lang: ko
 draft: false
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
+
+---
 
 ---
 
@@ -30,22 +33,26 @@ draft: false
 
 이에 대해 예시 구현 전에 개념학습 차원에서
 
-1. 어떤 컴포넌트들이 있고 
-2. 어떤 역할을 하고
-3. 이를 어떻게 구성하는지
+1.
+
+어떤 컴포넌트들이 있고 
+2.
+
+어떤 역할을 하고
+3.
+
+이를 어떻게 구성하는지
 
 학습해보았다.
 
 # Open Telemetry 🔭
 
----
 
 ### 전체 처리과정
 
 open telemetry 처리과정을 순서도를 그려보자면 아래와 같이 처리된다.
 
 ![](/images/velog/6269802e2e9ef425.png)
-
 
 1. **앱에서 SDK 호출**
     
@@ -61,9 +68,13 @@ open telemetry 처리과정을 순서도를 그려보자면 아래와 같이 처
     
 3. **Receiver 수신**
     
-    Collector의 **OTLP Receiver**가 수신한다. 공개 도메인은 **Gateway를 외부에 노출할 때만** 필요하고, 보통은 **동일 호스트/내부 네트워크/VPC**로 통신한다.
+    Collector의 **OTLP Receiver**가 수신한다.
+
+공개 도메인은 **Gateway를 외부에 노출할 때만** 필요하고, 보통은 **동일 호스트/내부 네트워크/VPC**로 통신한다.
     
-    **이에 대한 여러 패턴이 존재한다. 공식문서 상에선 배치 구조는 **Agent(로컬) → Gateway(중앙)**가 권장된다. 
+    **이에 대한 여러 패턴이 존재한다.
+
+공식문서 상에선 배치 구조는 **Agent(로컬) → Gateway(중앙)**가 권장된다. 
     
     https://opentelemetry.io/docs/collector/deployment/
     
@@ -88,7 +99,6 @@ open telemetry 처리과정을 순서도를 그려보자면 아래와 같이 처
 
 - 보다 보면 Collector 라는 개념이 나오는데 이것이 사실상 Open Telemetry 라고 할 수 있다.
 
-
 > 💡
 >
 > **Why “collector” over “direct backend call” ?** 
@@ -107,12 +117,13 @@ open telemetry 처리과정을 순서도를 그려보자면 아래와 같이 처
 > 
 https://www.elastic.co/kr/what-is/opentelemetry#:~:text=%EC%84%A4%EB%AA%85%EC%84%9C%EB%A5%BC%20%EC%B0%B8%EC%A1%B0%ED%95%98%EC%84%B8%EC%9A%94.-,OpenTelemetry%EC%9D%98%20%EA%B0%84%EB%9E%B5%ED%95%9C%20%EC%97%AD%EC%82%AC,-OpenTelemetry%20%EC%9D%B4%EC%A0%84%EC%97%90%EB%8A%94%20%EC%97%85%EA%B3%84%EA%B0%80
 
-
 ### [수집한 데이터를 Collector 로 보내는 여러 패턴](https://opentelemetry.io/docs/collector/deployment/)
 
 수집한 데이터를 Collector 로 보내는 패턴은 공식문서 상 세 가지 방법으로 소개된다.
 
-( Collector 의 하위 컴포넌트인 Receiver 가 이를 처리한다. Receiver 는 이따 알아보도록 하자. ) 
+( Collector 의 하위 컴포넌트인 Receiver 가 이를 처리한다.
+
+Receiver 는 이따 알아보도록 하자. ) 
 
 - 백엔드툴에 직접 전송
     
@@ -127,13 +138,13 @@ https://www.elastic.co/kr/what-is/opentelemetry#:~:text=%EC%84%A4%EB%AA%85%EC%84
     ![](/images/velog/33047be93e8af802.png)
     
 
-우선은 실습을 진행해봐야 알 거 같다. 대부분의 데모는 2번안으로 진행하니 2번안으로 실습을 진행해보자
+우선은 실습을 진행해봐야 알 거 같다.
+
+대부분의 데모는 2번안으로 진행하니 2번안으로 실습을 진행해보자
 
 (3번은 k8s 와 같이 open telemetry 를 클러스터링 했을 때의 이야기이다)
 
 ## Open Telemetry 실습
-
----
 
 
 > 💡
@@ -391,11 +402,10 @@ service:
 
 # Grafana Alloy ☀️
 
----
 
 ## What Alloy ?
 
-Alloy는 Grafana Labs에서 제공하는 오픈소스(또는 오픈소스 기반) 텔레메트리 수집기(collector)입니다. 
+Alloy는 Grafana Labs에서 제공하는 오픈소스(또는 오픈소스 기반) 텔레메트리 수집기(collector)입니다.
 
 공식 문서에 따르면 다음과 같은 특징이 있습니다. ([Grafana Labs](https://grafana.com/docs/grafana-cloud/send-data/alloy/) 참고)
 
@@ -958,7 +968,3 @@ otelcol.exporter.otlp "to_tempo" {
 }
 
 ```
-
-# Reference
-
----

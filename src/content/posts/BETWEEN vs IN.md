@@ -1,16 +1,19 @@
 ---
 title: "BETWEEN vs IN ??"
-description: "아래와 같은 의문점을 해결해보고자 한다.\n\n- 언제 `BETWEEN` 을 쓰는 게 적합하고,\n- 언제 `IN` 을 쓰는 게 적합한지\n- 각각의 Operation Plan 이 무엇인지\n- 어떤 것이 더 성능이 좋은지"
+description: "아래와 같은 의문점을 해결해보고자 한다.
+
+- 언제 `BETWEEN` 을 쓰는 게 적합하고,
+- 언제 `IN` 을 쓰는 게 적합한지
+- 각각의 Operation Plan 이 무엇인지
+- 어떤 것이 더 성능이 좋은지"
 date: 2024-05-17
-tags: [dml, between, in, mysql, predicate]
-category: uncategorized
+tags: [journal, database]
 lang: ko
 draft: false
 ---
 
 # Intro : 언제 무엇을 쓰는지 ??
 
----
 
 리트코드 SQL 문제들을 푸는 도중 값에 대한 범위에 대한 조건을 처리해야 했다.
 
@@ -27,19 +30,21 @@ draft: false
 
 # TL;DR
 
----
 
 > 웬만하면 순차데이터는 `BETWEEN` , 특정데이터셋은 `IN`이 좋다.
 > 
 > 
-> 일반적으로 `BETWEEN` 이 `IN` 보다 빠르다. 이는 내부동작과정 때문이다.
+> 일반적으로 `BETWEEN` 이 `IN` 보다 빠르다.
+
+이는 내부동작과정 때문이다.
 > 
-> `IN`은 여러 `OR`보다 빠르다. 내부적으로 인덱스를 사용할 수 있기 때문이다.
+> `IN`은 여러 `OR`보다 빠르다.
+
+내부적으로 인덱스를 사용할 수 있기 때문이다.
 > 
 
 # `BETWEEN` , `IN` 사용 기준
 
----
 
 > The `BETWEEN` operator is utilized to compare **two values inside a range**, whereas the `IN` operator is utilized to compare **a value with a set of values.**
 > 
@@ -65,7 +70,6 @@ WHERE CustomerName IN ('IBM', 'Microsoft', 'Apple');
 
 # `BETWEEN`,`IN` Operation Plan in MySQL
 
----
 
 ## 사실 내부적으로 이렇게 변경되어 처리된다.
 
@@ -119,9 +123,10 @@ select * from person where age = 1 or age = 2 or age 3;
 
 # For Date, Use `BETWEEN` / For Specific Set, Use `IN`
 
----
 
-- Date 는 보통 순차적인 데이터이다. 따라서 이에 대한 필터링을 하고자한다면 BETWEEN 을 사용하자.
+- Date 는 보통 순차적인 데이터이다.
+
+따라서 이에 대한 필터링을 하고자한다면 BETWEEN 을 사용하자.
     
     ```sql
     SELECT
@@ -133,7 +138,9 @@ select * from person where age = 1 or age = 2 or age 3;
     	BETWEEN '1980-01-01' AND '2000-12-31';
     ```
     
-- 특정 집합에 대한 필터링은 순차적이지 않다. 따라서 이에 대한 필터링을 하고자한다면 IN 을 사용하자.
+- 특정 집합에 대한 필터링은 순차적이지 않다.
+
+따라서 이에 대한 필터링을 하고자한다면 IN 을 사용하자.
     
     ```sql
     SELECT
@@ -147,9 +154,12 @@ select * from person where age = 1 or age = 2 or age 3;
 
 # Favor `IN` than multiple `OR`
 
----
 
-> **IN clause queries outperforms the multiple OR clauses variants. The difference is much larger than the queries on the indexed attribute above and the gap widens even more with an increase in the number of predicates. With 5000 predicates, PostgreSQL executes the IN clause query approximately 288x faster than the OR clause (1.8 seconds vs. 518.2 seconds).**
+> **IN clause queries outperforms the multiple OR clauses variants.
+
+The difference is much larger than the queries on the indexed attribute above and the gap widens even more with an increase in the number of predicates.
+
+With 5000 predicates, PostgreSQL executes the IN clause query approximately 288x faster than the OR clause (1.8 seconds vs. 518.2 seconds).**
 > 
 > 
 > 
@@ -161,17 +171,20 @@ select * from person where age = 1 or age = 2 or age 3;
 > ![](/images/velog/d48d8a46594f99ce.png)
 > 
 
-`IN` 은 내부적으로 인덱스를 탈 수 있다. 따라서 여러 `OR` 보다 `IN` 을 사용하는 것이 조금 더 빠르다.
+`IN` 은 내부적으로 인덱스를 탈 수 있다.
+
+따라서 여러 `OR` 보다 `IN` 을 사용하는 것이 조금 더 빠르다.
 
 위 그림과 같이 조건절(Predicates)의 개수가 늘어날 수록 OR 가 수행속도가 더 오래 걸린다는 것을 볼 수 있다.
 
 # Reference 📚
 
----
 
 [Is there a performance difference between BETWEEN and IN with MySQL or in SQL in general?](https://stackoverflow.com/questions/3308280/is-there-a-performance-difference-between-between-and-in-with-mysql-or-in-sql-in)
 
-[AGE [1, 2, 3] vs. AGE BETWEEN 1 AND 3](https://stackoverflow.com/questions/5769703/age-1-2-3-vs-age-between-1-and-3)
+[AGE [1, 2, 3] vs.
+
+AGE BETWEEN 1 AND 3](https://stackoverflow.com/questions/5769703/age-1-2-3-vs-age-between-1-and-3)
 
 [MySQL OR vs IN performance](https://stackoverflow.com/questions/782915/mysql-or-vs-in-performance)
 
