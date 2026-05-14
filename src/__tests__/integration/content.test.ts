@@ -9,7 +9,7 @@ const postSchema = z.object({
   date: z.date(),
   updatedDate: z.date().optional(),
   tags: z.array(z.string()).default([]),
-  category: z.string().default('uncategorized'),
+  series: z.object({ id: z.string(), order: z.number() }).optional(),
   lang: z.enum(['ko', 'en']).default('ko'),
   draft: z.boolean().default(false),
   heroImage: z.string().optional(),
@@ -23,7 +23,6 @@ function makeValidFrontmatter(overrides: Partial<PostFrontmatter> = {}): PostFro
     description: 'A test post.',
     date: new Date('2026-05-01'),
     tags: ['blog', 'astro'],
-    category: 'dev',
     lang: 'ko',
     draft: false,
     ...overrides,
@@ -41,7 +40,6 @@ describe('Content Collections schema', () => {
         expect(result.data.lang).toBe('ko');
         expect(result.data.draft).toBe(false);
         expect(result.data.tags).toEqual(['blog', 'astro']);
-        expect(result.data.category).toBe('dev');
       }
     });
 
@@ -65,7 +63,6 @@ describe('Content Collections schema', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.tags).toEqual([]);
-        expect(result.data.category).toBe('uncategorized');
         expect(result.data.lang).toBe('ko');
         expect(result.data.draft).toBe(false);
       }

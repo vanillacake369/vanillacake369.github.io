@@ -4,7 +4,6 @@ import {
   filterPublished,
   filterByLang,
   filterByTag,
-  filterByCategory,
   extractTags,
   groupByCalendarDay,
   slugifyTag,
@@ -18,7 +17,6 @@ function makePost(overrides: Partial<Post> = {}): Post {
     description: 'desc',
     date: new Date('2025-01-15'),
     tags: ['go', 'k8s'],
-    category: 'dev',
     lang: 'ko',
     draft: false,
     ...overrides,
@@ -73,16 +71,6 @@ describe('filterByTag', () => {
       makePost({ slug: 'b', tags: ['nix', 'ai'] }),
     ];
     expect(filterByTag(posts, 'k8s').map((p) => p.slug)).toEqual(['a']);
-  });
-});
-
-describe('filterByCategory', () => {
-  it('filters by category', () => {
-    const posts = [
-      makePost({ slug: 'a', category: 'dev' }),
-      makePost({ slug: 'b', category: 'books' }),
-    ];
-    expect(filterByCategory(posts, 'books').map((p) => p.slug)).toEqual(['b']);
   });
 });
 

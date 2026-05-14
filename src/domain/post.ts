@@ -24,10 +24,10 @@ export function entryToPost(entry: {
     date: Date;
     updatedDate?: Date;
     tags?: string[];
-    category?: string;
     lang?: 'ko' | 'en';
     draft?: boolean;
     heroImage?: string;
+    series?: { id: string; order: number };
   };
 }): Post {
   return {
@@ -37,10 +37,10 @@ export function entryToPost(entry: {
     date: entry.data.date,
     updatedDate: entry.data.updatedDate,
     tags: entry.data.tags ?? [],
-    category: entry.data.category ?? 'uncategorized',
     lang: entry.data.lang ?? 'ko',
     draft: entry.data.draft ?? false,
     heroImage: entry.data.heroImage,
+    series: entry.data.series,
   };
 }
 
@@ -58,10 +58,6 @@ export function filterByLang(posts: Post[], lang: Post['lang']): Post[] {
 
 export function filterByTag(posts: Post[], tag: string): Post[] {
   return posts.filter((p) => p.tags.includes(tag));
-}
-
-export function filterByCategory(posts: Post[], category: string): Post[] {
-  return posts.filter((p) => p.category === category);
 }
 
 export function extractTags(posts: Post[]): TagInfo[] {

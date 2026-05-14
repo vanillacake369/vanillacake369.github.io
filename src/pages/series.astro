@@ -6,12 +6,7 @@ import { extractSeries } from '../domain/series';
 import { translations } from '../i18n/translations';
 
 const rawEntries = await getCollection('posts');
-const publishedPosts = filterPublished(
-  rawEntries.map((entry) => ({
-    ...entryToPost(entry),
-    series: entry.data.series,
-  })),
-);
+const publishedPosts = filterPublished(rawEntries.map(entryToPost));
 const seriesList = extractSeries(publishedPosts);
 
 function formatDate(date: Date): string {

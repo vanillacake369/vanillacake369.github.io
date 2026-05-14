@@ -5,6 +5,7 @@ import CodeCopyButton from '../components/CodeCopyButton.astro';
 import Comments from '../components/Comments.astro';
 import RelatedPosts from '../components/RelatedPosts.astro';
 import { getCollection } from 'astro:content';
+import { entryToPost } from '../domain/post';
 import { extractSeries } from '../domain/series';
 import { translations } from '../i18n/translations';
 
@@ -37,21 +38,7 @@ let seriesPosts: ReturnType<typeof extractSeries>[number]['posts'] = [];
 let seriesSlug = '';
 if (series) {
   const allPosts = await getCollection('posts');
-  const allSeries = extractSeries(
-    allPosts.map((entry) => ({
-      slug: entry.id,
-      title: entry.data.title ?? entry.id,
-      description: entry.data.description ?? '',
-      date: entry.data.date,
-      updatedDate: entry.data.updatedDate,
-      tags: entry.data.tags ?? [],
-      category: 'uncategorized',
-      lang: entry.data.lang ?? 'ko',
-      draft: entry.data.draft ?? false,
-      heroImage: entry.data.heroImage,
-      series: entry.data.series,
-    })),
-  );
+  const allSeries = extractSeries(allPosts.map(entryToPost));
   const currentSeries = allSeries.find((item) => item.id === series.id);
   seriesPosts = currentSeries?.posts ?? [];
   seriesSlug = currentSeries?.slug ?? '';
@@ -252,9 +239,9 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
 
   .post-title {
     font-family: var(--font-serif);
-    font-size: 2rem;
+    font-size: clamp(1.6rem, 1vw + 1.35rem, 2.125rem);
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.2;
     color: var(--color-text);
     letter-spacing: -0.02em;
     margin-bottom: var(--spacing-md);
@@ -499,9 +486,9 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   .prose {
     font-family: var(--font-serif);
     font-size: 1rem;
-    line-height: 1.65;
+    line-height: 1.7;
     color: var(--color-text);
-    max-width: 70ch;
+    max-width: var(--max-width);
     margin: 0 auto;
   }
 
@@ -513,22 +500,22 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   .prose :global(h6) {
     font-family: var(--font-sans);
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.25;
     color: var(--color-text);
-    margin-top: 2em;
-    margin-bottom: 0.75em;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
     letter-spacing: -0.01em;
     scroll-margin-top: 5rem;
   }
 
   .prose :global(h2) {
-    font-size: 1.5rem;
+    font-size: clamp(1.3rem, 0.5vw + 1.15rem, 1.5rem);
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 0.3em;
   }
 
   .prose :global(h3) {
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 0.25vw + 1rem, 1.2rem);
   }
 
   .prose :global(h4) {
@@ -549,7 +536,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   .prose :global(blockquote) {
     border-left: 3px solid var(--color-accent);
     background-color: var(--color-blockquote-bg);
-    margin: 1.5em 0;
+    margin: 1.75rem 0;
     padding: var(--spacing-md) var(--spacing-lg);
     border-radius: 0 4px 4px 0;
     color: var(--color-text-secondary);
@@ -579,7 +566,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   .prose :global(ul),
   .prose :global(ol) {
     padding-left: 1.75em;
-    margin-bottom: 1.5em;
+    margin-bottom: 1.5rem;
   }
 
   .prose :global(li) {
@@ -667,11 +654,6 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     }
   }
 
-  @media (max-width: 640px) {
-    .post-title {
-      font-size: 1.4rem;
-    }
-  }
 </style>
 
 <script>

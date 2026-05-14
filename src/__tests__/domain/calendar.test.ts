@@ -9,7 +9,7 @@ function makePost(overrides: Partial<Post> = {}): Post {
     description: 'desc',
     date: new Date('2025-01-15'),
     tags: [],
-    category: 'dev',
+
     lang: 'ko',
     draft: false,
     ...overrides,

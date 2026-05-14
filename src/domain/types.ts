@@ -5,10 +5,10 @@ export interface Post {
   date: Date;
   updatedDate?: Date;
   tags: string[];
-  category: string;
   lang: 'ko' | 'en';
   draft: boolean;
   heroImage?: string;
+  series?: { id: string; order: number };
 }
 
 export interface TagInfo {
