@@ -1,5 +1,4 @@
 ---
-title: "Subquery의 함정과 LEFT JOIN의 이점"
 description: "HAVING 절에서 Subquery를 잘못 사용하는 함정을 짚고, LEFT JOIN으로 미매칭 행을 더 명확하게 처리하는 방법을 비교 설명한다."
 date: 2024-05-31
 tags: [database]
@@ -9,11 +8,9 @@ draft: false
 
 # Problem
 
-
 [https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50](https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50)
 
 # Solution
-
 
 ## 1.
 
@@ -25,10 +22,10 @@ WITH t_visit_group AS (
 	from Transactions
 	group by visit_id
 )
-select 
+select
 	customer_id
 	, count(customer_id)
-from 
+from
 	Visits
 group by
 	customer_id
@@ -52,12 +49,12 @@ WITH t_visit_group AS (
     GROUP BY visit_id
 )
 
-SELECT 
+SELECT
     customer_id,
     COUNT(customer_id) as count_no_trans
-FROM 
+FROM
     Visits
-WHERE 
+WHERE
     visit_id NOT IN (SELECT visit_id FROM t_visit_group)
 GROUP BY
     customer_id;
@@ -80,27 +77,26 @@ Datagrip 을 통해 Execute Plan 확인해보자.
 
 1.
 
-WHERE 절에 대한 Subquery가 실행되어서.
-2.
+WHERE 절에 대한 Subquery가 실행되어서. 2.
 
 Index 가 존재하지 않아서.
 
 ```sql
-SELECT (select)					
-		SEQ_SCAN (Table scan)	 table: <temporary>;				
-		UNKNOWN (Aggregate using temporary table)					
+SELECT (select)
+		SEQ_SCAN (Table scan)	 table: <temporary>;
+		UNKNOWN (Aggregate using temporary table)
 		FILTER (filter)		7	0.95		<in_optimizer>(Visits.visit_id,Visits.visit_id in (select #2) is false)
-				SEQ_SCAN (Table scan)	 table: Visits;	7	0.95		
+				SEQ_SCAN (Table scan)	 table: Visits;	7	0.95
 				SUBQUERY (Select)					#2 (subquery in condition; run only once)
 				FILTER (filter)		1	7.47	7.47	((Visits.visit_id = `<materialized_subquery>`.visit_id))
 				UNKNOWN (Limit)		1	7.38	7.38	1 row(s)
 				UNIQUE_INDEX_SCAN (Index lookup)	 table: <materialized_subquery>; index: <auto_distinct_key>;				(visit_id=Visits.visit_id)
-				UNKNOWN (Materialize with deduplication)		5	7.38	7.38	
-						SEQ_SCAN (Table scan)	 table: t_visit_group;	5	6.88	4.83	
-						UNKNOWN (Materialize CTE t_visit_group)		5	4.31	4.31	
-								SEQ_SCAN (Table scan)	 table: <temporary>;	5	3.81	1.76	
-								TEMPORARY (Temporary table with deduplication)		5	1.25	1.25	
-										SEQ_SCAN (Table scan)	 table: Transactions;	5	0.75		
+				UNKNOWN (Materialize with deduplication)		5	7.38	7.38
+						SEQ_SCAN (Table scan)	 table: t_visit_group;	5	6.88	4.83
+						UNKNOWN (Materialize CTE t_visit_group)		5	4.31	4.31
+								SEQ_SCAN (Table scan)	 table: <temporary>;	5	3.81	1.76
+								TEMPORARY (Temporary table with deduplication)		5	1.25	1.25
+										SEQ_SCAN (Table scan)	 table: Transactions;	5	0.75
 ```
 
 ![](/images/notion/aab43ea497ec33b2.png)
@@ -124,12 +120,12 @@ WITH t_visit_group AS (
     GROUP BY visit_id
 )
 
-SELECT 
+SELECT
     customer_id,
     COUNT(customer_id) as count_no_trans
-FROM 
+FROM
     Visits
-WHERE 
+WHERE
     visit_id NOT IN (SELECT **DISTINCT** visit_id FROM t_visit_group)
 GROUP BY
     customer_id;
@@ -140,21 +136,21 @@ GROUP BY
 Datagrip 에서 Explain 을 처리해보자
 
 ```sql
-SELECT (select)					
-		SEQ_SCAN (Table scan)	 table: <temporary>;				
-		UNKNOWN (Aggregate using temporary table)					
+SELECT (select)
+		SEQ_SCAN (Table scan)	 table: <temporary>;
+		UNKNOWN (Aggregate using temporary table)
 		FILTER (filter)		7	0.95		<in_optimizer>(Visits.visit_id,Visits.visit_id in (select #2) is false)
-				SEQ_SCAN (Table scan)	 table: Visits;	7	0.95		
+				SEQ_SCAN (Table scan)	 table: Visits;	7	0.95
 				SUBQUERY (Select)					#2 (subquery in condition; run only once)
 				FILTER (filter)		1	7.47	7.47	((Visits.visit_id = `<materialized_subquery>`.visit_id))
 				UNKNOWN (Limit)		1	7.38	7.38	1 row(s)
 				UNIQUE_INDEX_SCAN (Index lookup)	 table: <materialized_subquery>; index: <auto_distinct_key>;				(visit_id=Visits.visit_id)
-				UNKNOWN (Materialize with deduplication)		5	7.38	7.38	
-						SEQ_SCAN (Table scan)	 table: t_visit_group;	5	6.88	4.83	
-						UNKNOWN (Materialize CTE t_visit_group)		5	4.31	4.31	
-								SEQ_SCAN (Table scan)	 table: <temporary>;	5	3.81	1.76	
-								TEMPORARY (Temporary table with deduplication)		5	1.25	1.25	
-										SEQ_SCAN (Table scan)	 table: Transactions;	5	0.75		
+				UNKNOWN (Materialize with deduplication)		5	7.38	7.38
+						SEQ_SCAN (Table scan)	 table: t_visit_group;	5	6.88	4.83
+						UNKNOWN (Materialize CTE t_visit_group)		5	4.31	4.31
+								SEQ_SCAN (Table scan)	 table: <temporary>;	5	3.81	1.76
+								TEMPORARY (Temporary table with deduplication)		5	1.25	1.25
+										SEQ_SCAN (Table scan)	 table: Transactions;	5	0.75
 ```
 
 아예 바뀐 게 없었다.
@@ -170,6 +166,7 @@ Stackoverflow 에서는 SubQuery 의 IN 절 에서 DISTINCT 를 쓰는 것은 �
 Nothing at all.
 
 The `IN` implicitly does a `SELECT DISTINCT` because if something is in `(1, 2, 3)`, then that something is in `(1, 1, 1, 2, 2, 3)`.
+
 > [https://stackoverflow.com/questions/47379281/sql-distinct-subquery](https://stackoverflow.com/questions/47379281/sql-distinct-subquery[^3])
 
 ## 2.
@@ -189,14 +186,14 @@ GROUP BY V.customer_id;
 ![](/images/notion/d6038ce9f445ef26.png)
 
 ```sql
-SELECT (select)					
-		SEQ_SCAN (Table scan)	 table: <temporary>;				
-		UNKNOWN (Aggregate using temporary table)					
+SELECT (select)
+		SEQ_SCAN (Table scan)	 table: <temporary>;
+		UNKNOWN (Aggregate using temporary table)
 		FILTER (filter)		7	4.26		(T.transaction_id is null)
 				UNKNOWN (Left hash join)		7	4.26		(T.visit_id = V.visit_id)
-						SEQ_SCAN (Table scan)	 table: V;	7	0.95		
-						HASH_UNIQUE (Hash)					
-						SEQ_SCAN (Table scan)	 table: T;	5	0.107		
+						SEQ_SCAN (Table scan)	 table: V;	7	0.95
+						HASH_UNIQUE (Hash)
+						SEQ_SCAN (Table scan)	 table: T;	5	0.107
 ```
 
 LEFT hash join 을 함으로써 Full Scan 횟수를 줄일 수 있었다.
@@ -204,5 +201,7 @@ LEFT hash join 을 함으로써 Full Scan 횟수를 줄일 수 있었다.
 이로써 SubQuery 는 Join 보다 일반적인 성능이 좋지 않다는 것을 또 다시금 느낄 수 있었다.
 
 [^1]: https://mariadb.com/kb/en/optimizing-group-by/ <https://mariadb.com/kb/en/optimizing-group-by/>
+
 [^2]: https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN <https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN>
+
 [^3]: https://stackoverflow.com/questions/47379281/sql-distinct-subquery <https://stackoverflow.com/questions/47379281/sql-distinct-subquery>

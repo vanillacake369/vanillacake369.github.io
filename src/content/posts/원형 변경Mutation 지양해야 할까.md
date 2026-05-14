@@ -1,5 +1,4 @@
 ---
-title: "원형 변경(Mutation). 지양해야 할까?? "
 description: "원본 데이터를 직접 변경하는 Mutation이 동시성 문제와 디버깅을 어렵게 만드는 이유와 불변 처리 기법을 설명한다."
 date: 2026-02-25
 tags: [java]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 ## 무엇을 공부하였는가 🤔
-
 
 ### Mutation이란??
 
@@ -60,11 +58,9 @@ return Arrays.sort(list,Collections.reverseOrder());
 
 ## 어떻게 쓰는가 ☝️
 
-
-- java 
+- java
 
 ## 왜 쓰는가 ❓
-
 
 아래 경우를 피하기 위해 Mutation 피하기!!
 
@@ -72,7 +68,6 @@ return Arrays.sort(list,Collections.reverseOrder());
 - 트러블 슈팅 이후 백 트래킹 시 발생하는 이슈
 
 ## 레퍼런스 🔍
-
 
 사실… 노마드코더 보다가 떠올랐음 ㅋㅋㅋ
 

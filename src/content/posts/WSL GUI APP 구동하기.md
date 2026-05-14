@@ -1,5 +1,4 @@
 ---
-title: "WSL GUI APP 구동하기"
 description: "모든 환경을 nix 에서 관리하는 편이다."
 date: 2025-11-27
 tags: [tools]
@@ -9,12 +8,6 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 모든 환경을 nix 에서 관리하는 편이다.
 jdk, nvim, env 등등을 말이다.
 
@@ -23,12 +16,6 @@ jdk, nvim, env 등등을 말이다.
 너무 답답한 나머지 그냥 wsl 에서 gui 를 구동하기로 하였다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ### VcXsrv (XServer) 설치
 
@@ -104,4 +91,5 @@ idea-ultimate &
 ```
 
 [^1]: https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd <https://medium.com/actived/how-to-start-gui-on-wsl-1-2-on-windows-11-10-8-7-62f1ae1c00fd>
+
 [^2]: https://kimchki.blogspot.com/2017/11/vcxsrv-windows-x-server.html <https://kimchki.blogspot.com/2017/11/vcxsrv-windows-x-server.html>

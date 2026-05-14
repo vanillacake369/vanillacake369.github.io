@@ -1,5 +1,4 @@
 ---
-title: "Port , Adapter 패턴을 통한 레이어드 아키텍처 개선하기"
 description: "Ports & Adapters 패턴을 통해 DIP 를 강제하여 핵심 로직 명세 레이어를 강조시키자!"
 date: 2024-09-02
 tags: [journal]
@@ -13,7 +12,6 @@ draft: false
 
 # Port & Adapter 패턴이란??
 
-
 아래는 Port & Adapter 패턴을 적용한 예시이다.
 
 ![](/images/velog/3f81e092a3bd1229.png)
@@ -21,16 +19,16 @@ draft: false
 각각의 package 는 다음과 같은 역할을 구성한다.
 
 - application - 외부 세계가 애플리케이션과 상호작용하는 방식을 정의하며, 애플리케이션 코어로 가는 게이트웨이
-    - REST API 일 수도 있고, 메시지 서비스(예: Kafka, RabbitMQ 등), 명령줄 클라이언트 또는 다른 종류일 수도 있다.
+  - REST API 일 수도 있고, 메시지 서비스(예: Kafka, RabbitMQ 등), 명령줄 클라이언트 또는 다른 종류일 수도 있다.
 - core - 애플리케이션의 비즈니스 로직이 여기에 있다.
-    - 분석가나 비전문가도 이해할 수 있도록 평이한 언어로 작성하는 것이 목표.
-    - 그 안에는 비즈니스 담당자가 쉽게 이해할 수 있는 도메인별 언어를 사용.
-    - 어떤 Java 프레임워크(예: Spring, Jakarta EE, Quarkus, Micronaut)에도 구애받지 않아야 한다.
-    - 코어는 애플리케이션의 핵심이며 로직을 캡슐화하는 부분.
+  - 분석가나 비전문가도 이해할 수 있도록 평이한 언어로 작성하는 것이 목표.
+  - 그 안에는 비즈니스 담당자가 쉽게 이해할 수 있는 도메인별 언어를 사용.
+  - 어떤 Java 프레임워크(예: Spring, Jakarta EE, Quarkus, Micronaut)에도 구애받지 않아야 한다.
+  - 코어는 애플리케이션의 핵심이며 로직을 캡슐화하는 부분.
 - infra - 외부 시스템과의 통신 구현
-    - 대부분의 애플리케이션은 비즈니스 로직을 포함할 뿐만 아니라 일반적으로 데이터베이스, 큐, sFTP 서버, 기타 애플리케이션 등과 같은 외부 시스템도 사용
-    - 이 부분에서는 이러한 통신이 어떻게 구현될지 처리한다. (핵심적으로 필요한 것만 처리한다.)
-    - 예를 들어 DB 의 data 를 persist 처리하기 위해 Hibernate, 일반 Jdbc, jOOQ 또는 원하는 프레임워크와 같은 여러 가지 접근 방식을 사용할 수 있다.
+  - 대부분의 애플리케이션은 비즈니스 로직을 포함할 뿐만 아니라 일반적으로 데이터베이스, 큐, sFTP 서버, 기타 애플리케이션 등과 같은 외부 시스템도 사용
+  - 이 부분에서는 이러한 통신이 어떻게 구현될지 처리한다. (핵심적으로 필요한 것만 처리한다.)
+  - 예를 들어 DB 의 data 를 persist 처리하기 위해 Hibernate, 일반 Jdbc, jOOQ 또는 원하는 프레임워크와 같은 여러 가지 접근 방식을 사용할 수 있다.
 
 그렇다면 ports 안의 Facade 는 무슨 역할이고 Adapter 는 무슨 역할일까??
 
@@ -62,9 +60,9 @@ UserFacade 는 AddNewUser 의 구현체인 걸 볼 수 있다.
 
 UserDatabase 는 인터페이스로서 유저 저장이라는 act 를 처리하고 있다.
 
-이 act 에 대한 구현체로서 UserDatabaseAdapter 가  그 역할을 한다.
+이 act 에 대한 구현체로서 UserDatabaseAdapter 가 그 역할을 한다.
 
-UserDatabaseAdapter 는 [*Spring CrudRepository*](https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/CrudRepository.html)  을 통해 User 를 저장하는 역할을 수행한다.
+UserDatabaseAdapter 는 [_Spring CrudRepository_](https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/CrudRepository.html)  을 통해 User 를 저장하는 역할을 수행한다.
 
 # 이렇게 구성하면 무엇이 좋을까?
 
@@ -76,7 +74,7 @@ UserDatabaseAdapter 는 [*Spring CrudRepository*](https://docs.spring.io/spring-
 
 영속성 계층을 기반으로 비즈니스 계층을 구성하게 되면 결국 영속성 계층이 변경됨에 따라 비즈니스 계층 또한 변경되게 된다.
 
-(*[문제점 1 : 데이터베이스 주도 설계를 유도한다.](https://blog.naver.com/fbfbf1/222762059059) 를 참고해보자.*)
+(_[문제점 1 : 데이터베이스 주도 설계를 유도한다.](https://blog.naver.com/fbfbf1/222762059059) 를 참고해보자._)
 
 또한 현대의 애플리케이션의 로직은 복잡해도 너무 복잡하다.
 
@@ -88,7 +86,7 @@ UserDatabaseAdapter 는 [*Spring CrudRepository*](https://docs.spring.io/spring-
 
 ,,,
 
-이러한 복잡한 유스케이스에 따라 계층식 아키텍처는 
+이러한 복잡한 유스케이스에 따라 계층식 아키텍처는
 
 "비즈니스 로직"이라는 명목 하에 비즈니스 계층이 중구난방으로 늘어나게 된다.
 
@@ -114,10 +112,10 @@ UserDatabaseAdapter 는 [*Spring CrudRepository*](https://docs.spring.io/spring-
 │  │  ├─OrderProductServiceImpl implements OrderProductService
 │  ├─persistence
 │  │  ├─NewOrderRepository <I>
-│  │  ├─NewOrderRepositoryImpl implements NewOrderRepository 
+│  │  ├─NewOrderRepositoryImpl implements NewOrderRepository
 │  │  ├─MySQL JPA
 │  │  ├─OrderProductRepository <I>
-│  │  ├─OrderProductRepositoryImpl implements OrderProductRepository 
+│  │  ├─OrderProductRepositoryImpl implements OrderProductRepository
 │  │  └─Mongo JPA
 ```
 
@@ -129,7 +127,7 @@ UserDatabaseAdapter 는 [*Spring CrudRepository*](https://docs.spring.io/spring-
 
 더군다나 영속성 또한 외부시스템이다.
 
-이 외부시스템 간 의존성을 낮추고, 최대한 비즈니스 로직만을 갇혀두게 만들어 
+이 외부시스템 간 의존성을 낮추고, 최대한 비즈니스 로직만을 갇혀두게 만들어
 
 변경사항에 대한 영향도를 낮추어야 한다.
 
@@ -170,16 +168,11 @@ Adapter 는 이러한 Port 에 대한 Implement 이다.
 - 포트는 코어가 외부와 맺는 모든 상호작용을 정의
 - 두 가지 그룹으로 나눠질 수 있는데 각각 **incoming** (primary) 과 **outgoing** (secondary) 으로 나눠질 수 있다.
 - **incoming** (primary)는 비즈니스 코어와 상호 작용하는 방법(코어에서 사용할 수 있는 명령어)을 처리한다.
-    
-    ![](/images/velog/b65766a550c8ea42.png)
-    
+  ![](/images/velog/b65766a550c8ea42.png)
 - **outgoing** (secondary)는 코어가 외부 세계와 대화하는 데 처리된다.
-    
-    ![](/images/velog/75f6931e80d5baa3.png)
-    
+  ![](/images/velog/75f6931e80d5baa3.png)
 - 위와 같이 구성된 incoming, outgoing 을 통해 core 는 아래 로직을 수행한다.
-    
-    ![](/images/velog/a93c230f21351039.png)
+  ![](/images/velog/a93c230f21351039.png)
 
 위와 같이 Port는 우리가 하고자 하는 일에 대한 정의일 뿐이다.
 
@@ -211,9 +204,9 @@ Adapter 는 이러한 Port 에 대한 Implement 이다.
 
 즉, 두 개의 outgoing ports 인 *database* & *eventPublisher 가 사용 중이다.*
 
-**이 Interface에 대해 구현체가 필요하다.
+\*\*이 Interface에 대해 구현체가 필요하다.
 
-이 구현체를 Adapter 라고 한다.**
+이 구현체를 Adapter 라고 한다.\*\*
 
 이러한 Adapter 를 사용하여 각기 다른 방법 — JDBC 를 사용하거나, MongoDB 를 사용하거나 — 으로 구현체를 구현할 수 있다.
 
@@ -221,7 +214,7 @@ Adapter 는 이러한 Port 에 대한 Implement 이다.
 
 ![](/images/velog/d63a068e747af85f.png)
 
-하나의 Port 에 대해 여러 Adapter 를 사용함으로써 
+하나의 Port 에 대해 여러 Adapter 를 사용함으로써
 
 최종적으로 우리가 원하는 시스템에 맞추어 구색, 처리할 수 있게 할 수 있다.
 
@@ -229,7 +222,7 @@ Adapter 는 이러한 Port 에 대한 Implement 이다.
 
 ![](/images/velog/68bceb053c946237.png)
 
-여기서의 핵심은 Interface(Port) 와 Implement(Adapter) 를 강제하여 
+여기서의 핵심은 Interface(Port) 와 Implement(Adapter) 를 강제하여
 
 외부세상과 비즈니스 로직을 떨어뜨리는 것이다.
 
@@ -242,6 +235,9 @@ Core 는 DB 가 어떤 것이 쓰이는지, 누가 본인을 호출하는지 이
 이것이 바로 Port 와 Adapter 패턴의 지향점이다.
 
 [^1]: Ports & Adapters architecture on example <https://wkrzywiec.medium.com/ports-adapters-architecture-on-example-19cab9e93be7>
+
 [^2]: GitHub - wkrzywiec/library-hexagonal: An example application written in Hexagonal (Ports and Adapter) architecture <https://github.com/wkrzywiec/library-hexagonal/tree/master>
+
 [^3]: Hexagonal Architecture/Ports And Adapters: Clarifying Key Concepts Using Go <https://dev.to/buarki/hexagonal-architectureports-and-adapters-clarifying-key-concepts-using-go-14oo>
+
 [^4]: 지속 가능한 소프트웨어 설계 패턴: 포트와 어댑터 아키텍처 적용하기 <https://engineering.linecorp.com/ko/blog/port-and-adapter-architecture>

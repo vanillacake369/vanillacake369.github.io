@@ -1,5 +1,4 @@
 ---
-title: "Proxmox 설치하기"
 description: "proxmox iso 를 설치하여 proxmox 서버 운영해보고자 한다."
 date: 2025-12-29
 tags: [homelab]
@@ -10,22 +9,9 @@ series: { id: "Proxmox Homelab", order: 4 }
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 proxmox iso 를 설치하여 proxmox 서버 운영해보고자 한다.
- 
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## proxmox iso 설치
 
@@ -58,7 +44,7 @@ Proxmox 는 기본적으로 enterprise repo 로 설정되어있고, enterprise s
 
 ### 1) GUI 로 하는 법
 
-1. **Updates > Repositories 로 간다.** 
+1. **Updates > Repositories 로 간다.**
 
 ### 2) CLI 로 하는법
 
@@ -71,6 +57,7 @@ Proxmox 는 기본적으로 enterprise repo 로 설정되어있고, enterprise s
 # (이후)
 deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
 ```
+
 ```bash
 #/etc/apt/sources.list.d/ceph.list
 
@@ -82,8 +69,6 @@ deb http://download.proxmox.com/debian/ceph-quincy bookworm no-subscription
 # How?
 
 어떻게 씀?
-
----
 
 x
 

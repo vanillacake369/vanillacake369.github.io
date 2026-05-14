@@ -1,5 +1,4 @@
 ---
-title: "Proxmox 로컬 접속이 안 되는 경우 해결법"
 description: "**목적**: Proxmox와 ngrok 서비스가 정상 작동하는지 확인"
 date: 2025-12-15
 tags: [system-design, homelab, network]
@@ -10,13 +9,11 @@ series: { id: "Proxmox Homelab", order: 2 }
 
 # Issue : 로컬 연결이 안 됨
 
-
 - **증상**: Proxmox VE 로컬 접속(localhost:8006)은 정상 작동하지만, 외부 접속 시 아무것도 표시되지 않음
 - **환경**: Proxmox VE 9.1, ngrok을 통한 HTTPS 터널링
 - **초기 가설**: 방화벽 또는 네트워크 정책 문제
 
 # Debug : 가설 & 확인
-
 
 > 💁‍♂️ 총 8 단계에 나눠서 추론을 해보았다.
 
@@ -43,7 +40,7 @@ systemctl status pveproxy
 
 - ✅ ngrok 프로세스 정상 실행 중
 - ✅ ngrok 터널 생성됨 ([https://a17a837976dd.ngrok-free.app](https://a17a837976dd.ngrok-free.app/))
-- ✅ pveproxy가 *:8006에서 IPv6로 리스닝 중
+- ✅ pveproxy가 \*:8006에서 IPv6로 리스닝 중
 - ✅ pveproxy 서비스 정상 작동
 
 ### 2단계: 방화벽 및 네트워크 정책 확인 ✅
@@ -237,12 +234,11 @@ systemctl restart pveproxy
 
 # Solution
 
-
 두 개의 독립적인 문제가 연쇄적으로 발생한 경우였습니다:
 
 1. **ngrok 설정 문제** (HTTP vs HTTPS)
 2. **Proxmox 패키지 무결성 문제** (웹 리소스 누락)
-예방책으로 동일한 이슈 발생 시 아래와 같이 진단을 하면 된다.
+   예방책으로 동일한 이슈 발생 시 아래와 같이 진단을 하면 된다.
 
 ```bash
 # 정기적인 시스템 점검
@@ -258,7 +254,6 @@ chmod +x ~/ngrok-pve.sh
 
 # Proxmox Setup Tutorial
 
-
 [https://www.youtube.com/watch?v=qmSizZUbCOA&t=205s](https://www.youtube.com/watch?v=qmSizZUbCOA&t=205s)
 [https://github.com/TechHutTV/homelab/blob/main/storage/README.md](https://github.com/TechHutTV/homelab/blob/main/storage/README.md)
 위 영상을 참고하여 아래 항목들을 설정하여 Proxmox Setup 을 한다.
@@ -267,11 +262,10 @@ chmod +x ~/ngrok-pve.sh
 - [x] IOMMU 활성화
 - [x] ZFS Pools
 - [x] ZFS Pool 를 활용하여 LXC Container 생성
-- [ ] 생성된  LXC Container 에 Mount Points 추가
-- [ ] 생성된  LXC Container 에 SMB Shares 선언
+- [ ] 생성된 LXC Container 에 Mount Points 추가
+- [ ] 생성된 LXC Container 에 SMB Shares 선언
 
 # Milestone
-
 
 - [ ] Proxmox iso → Ventoy
 - [ ] Proxmox 설치
@@ -283,61 +277,61 @@ graph TB
     Internet([Internet])
     Router[Router with Firewall]
     Switch[Managed Switch]
-    
+
     WorkPC[Work PC<br/>VLAN 10<br/>192.168.10.10]
-    
+
     ProxmoxHost[Proxmox Physical Server<br/>Trunk Port - All VLANs]
-    
+
     HomeLab[Homelab VMs<br/>VLAN 20<br/>192.168.20.x]
     TestVM[Testing VMs<br/>VLAN 30<br/>192.168.30.x]
     WebServers[Web Servers<br/>VLAN 40<br/>192.168.40.x]
-    
+
     Mac[Mac Air<br/>VLAN 50<br/>192.168.50.20]
-    
+
     Internet <--> Router
     Router <--> Switch
-    
+
     Switch <-->|VLAN 10| WorkPC
     Switch <-->|Trunk<br/>VLANs 20,30,40| ProxmoxHost
     Switch <-->|VLAN 50| Mac
-    
+
     ProxmoxHost --- HomeLab
     ProxmoxHost --- TestVM
     ProxmoxHost --- WebServers
-    
+
     WorkPC -->|Internet Only| Internet
-    
+
     Mac <--> Internet
     Mac <--> HomeLab
     Mac <--> TestVM
     Mac <--> WebServers
-    
+
     HomeLab <--> Internet
     TestVM -.->|Isolated| TestVM
     WebServers <--> Internet
-    
+
     subgraph Work["VLAN 10 - Work"]
         WorkPC
     end
-    
+
     subgraph HomeWorkspace["Home Workspace Trunk"]
         subgraph VLAN20["VLAN 20 - Homelab"]
             HomeLab
         end
-        
+
         subgraph VLAN30["VLAN 30 - Testing"]
             TestVM
         end
-        
+
         subgraph VLAN40["VLAN 40 - Web Servers"]
             WebServers
         end
-        
+
         subgraph VLAN50["VLAN 50 - Mac Air"]
             Mac
         end
     end
-    
+
     style WorkPC fill:#ffcccc
     style HomeLab fill:#ccffcc
     style TestVM fill:#ffccff
@@ -352,7 +346,6 @@ graph TB
 # Blueprint of home-lab
 
 # Reference 📚
-
 
 1. [https://www.youtube.com/watch?v=yUyxJr2xboI&t=1s](https://www.youtube.com/watch?v=yUyxJr2xboI&t=1s)
 2. [https://www.youtube.com/watch?v=f-x5cB6qCzA&t=553s](https://www.youtube.com/watch?v=f-x5cB6qCzA&t=553s)

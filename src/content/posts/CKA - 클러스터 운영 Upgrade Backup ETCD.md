@@ -1,5 +1,4 @@
 ---
-title: "CKA - 클러스터 운영 (Upgrade, Backup, ETCD)"
 description: "Kubernetes 클러스터 운영: 업그레이드, ETCD 백업/복구, 노드 관리"
 date: 2025-12-25
 tags: [kubernetes, journal]
@@ -109,10 +108,12 @@ etcd cluster 에 클러스터의 상태 정보와 모든 데이터가 여기에 
 
 # How ?
 
-
 Mock exam for each
 
 [^29]: https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster <https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster>
+
 [^30]: https://velog.io/@khyup0629/K8S-%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%84%A4%EC%A0%95 <https://velog.io/@khyup0629/K8S-%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%84%A4%EC%A0%95>
+
 [^66]: https://127.0.0.1:2379 <https://127.0.0.1:2379/>
+
 [^75]: https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options <https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options>

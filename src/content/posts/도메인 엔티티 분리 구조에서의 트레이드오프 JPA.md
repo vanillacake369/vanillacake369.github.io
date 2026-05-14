@@ -1,5 +1,4 @@
 ---
-title: "도메인 엔티티 분리 구조에서의 트레이드오프 : JPA"
 description: "도메인과 엔티티를 분리했을 때 JPA 에서의 트레이드오프는 무엇이 있을까?"
 date: 2025-06-01
 tags: [journal]
@@ -10,12 +9,6 @@ draft: false
 ![](/images/velog/763f1c6b49bfe746.png)
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 최근에 사내에 코드 아키텍처를 새로 도입하였다.
 
@@ -32,12 +25,6 @@ draft: false
 이러한 의심을 해소하고자 아래 내용들을 공부해보았다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## JPA 의 엔티티 저장
 
@@ -71,27 +58,26 @@ public class SimpleJpaRepository<T, ID> implements JpaRepositoryImplementation<T
 
 ## JPA 는 어떻게 새로운 객체인지 아닌지 구분할 수 있을까?
 
-> 
 > ☝
-> 
+>
 > **TL;DR;**
-> 
+>
 > 요컨데 JPA 에서는 새로운 객체 판별을 아래와 같이 처리할 수 있다.
-> 
+>
 > 본인의 상황에 따라 (엔티티 생성/수정 전략) 알맞게 사용하자
-> 
+>
 > 1. **Version-Property와 Id-Property 검사 (디폴트값)**:
->     - Version-property가 있는지 검사
->     - 만약 Version-property가 있고 그 값이 null이라면, 해당 엔티티는 새로운 것으로 간주
->     - 만약 Version-property가 없다면, 엔티티의 식별자(Id-property)를 검사하여 그 값이 null이면 새로운 엔티티로 간주하고, 그렇지 않으면 기존 엔티티로 간주
+>    - Version-property가 있는지 검사
+>    - 만약 Version-property가 있고 그 값이 null이라면, 해당 엔티티는 새로운 것으로 간주
+>    - 만약 Version-property가 없다면, 엔티티의 식별자(Id-property)를 검사하여 그 값이 null이면 새로운 엔티티로 간주하고, 그렇지 않으면 기존 엔티티로 간주
 > 2. **Persistable 인터페이스 구현**:
->     - 엔티티가 `Persistable` 인터페이스를 구현
->     - Spring Data JPA는 엔티티가 새로운지 아닌지 감지하는 작업을 `isNew(…)` 메서드에 위임
+>    - 엔티티가 `Persistable` 인터페이스를 구현
+>    - Spring Data JPA는 엔티티가 새로운지 아닌지 감지하는 작업을 `isNew(…)` 메서드에 위임
 > 3. **EntityInformation 구현**:
->     - `EntityInformation` 추상화를 사용자 정의
->     - `JpaRepositoryFactory`의 서브 클래스를 생성하고 `getEntityInformation(…)` 메서드를 오버라이드하는 방식으로 구현 가능
->     - 커스텀한 `JpaRepositoryFactory`를 Spring 빈으로 등록
->     - 이 방법은 일반적으로 거의 사용되지 않음
+>    - `EntityInformation` 추상화를 사용자 정의
+>    - `JpaRepositoryFactory`의 서브 클래스를 생성하고 `getEntityInformation(…)` 메서드를 오버라이드하는 방식으로 구현 가능
+>    - 커스텀한 `JpaRepositoryFactory`를 Spring 빈으로 등록
+>    - 이 방법은 일반적으로 거의 사용되지 않음
 
 먼저 `entityInformation.isNew(entity)` 에서의 `entityInformation` 가 무슨 클래스인지를 살펴보아야한다.
 
@@ -116,9 +102,9 @@ Persistable 은 새로운 객체인지를 판별하는 isNew() 를 override 할 
 따라서 아래와 같이 경우의 수가 나뉘어지는 것이다.
 
 - 도메인 엔티티가 Persistable 를 구현 O
-    - JpaPersistableEntityInformation 의 isNew() 호출
+  - JpaPersistableEntityInformation 의 isNew() 호출
 - 도메인 엔티티가 Persistable 를 구현 X
-    - JpaMetamodelEntityInformation 의 isNew() 호출
+  - JpaMetamodelEntityInformation 의 isNew() 호출
 
 그렇다면 각각의 클래스는 isNew() 를 어떻게 구현하고 있을까?
 
@@ -127,8 +113,8 @@ Persistable 은 새로운 객체인지를 판별하는 isNew() 를 override 할 
 ### JpaPersistableEntityInformation
 
 - Persistable 의 추상클래스 구현체(AbstractPersistable) 에게 위임
-    - id 가 null O → 새로운 객체
-    - id 가 null X → 이미 있는 객체
+  - id 가 null O → 새로운 객체
+  - id 가 null X → 이미 있는 객체
 
 ```java
 /**
@@ -195,20 +181,16 @@ public abstract class AbstractPersistable<PK extends Serializable> implements Pe
 
 1.
 
-버저닝 필드에 대한 검증을 시도한다.
-    - 만약 Version-property가 있고 그 값이 null이라면, 해당 엔티티는 새로운 것으로 간주
-    - 만약 Version-property가 없다면, 엔티티의 식별자(Id-property)를 검사하여 그 값이 null이면 새로운 엔티티로 간주하고, 그렇지 않으면 기존 엔티티로 간주
-2.
+버저닝 필드에 대한 검증을 시도한다. - 만약 Version-property가 있고 그 값이 null이라면, 해당 엔티티는 새로운 것으로 간주 - 만약 Version-property가 없다면, 엔티티의 식별자(Id-property)를 검사하여 그 값이 null이면 새로운 엔티티로 간주하고, 그렇지 않으면 기존 엔티티로 간주 2.
 
 만약 버저닝에서 검증이 성공했다면 super.isNew() 를 호출하여 `AbstractEntityInformation` 클래스의 isNew() 를 호출한다.
-    
+
     `AbstractEntityInformation.isNew()` 는 아래와 같은 케이스에 따라 새로운 객체인지를 판단한다.
-    
+
     - `Id`의 타입이 `Object` 타입이고 `null` → 새로운 객체 !
     - `Id`의 타입이 `Primitive` 타입이고 `0` → 새로운 객체 !
-    
+
     <span style="color:grey">// `Id` 의 타입이 `Primitive` 가 아니라면 예외 발생.</span>
-    
 
 ```java
 /**
@@ -226,7 +208,7 @@ public class JpaMetamodelEntityInformation<T, ID> extends JpaEntityInformationSu
 
 	private final Optional<SingularAttribute<? super T, ?>> versionAttribute;
 	,,,
-	
+
 	@Override
 	public boolean isNew(T entity) {
 
@@ -277,29 +259,32 @@ public abstract class AbstractEntityInformation<T, ID> implements EntityInformat
 ## 어떻게 merge() 가 처리되는가?
 
 > ☝
-> 
+>
 > TL;DR;
-> 
+>
 > `EntityManager` 의 `merge()` 는 Event-Driven 구조를 통해 아래와 같이 처리된다.
-> 
+>
 > 1.
 
 세션 검증 및 MergeEvent 발행
+
 > 2.
 
 중복 병합 방지
+
 > 3.
 
 식별자를 통해 영속성 컨텍스트 내 존재 여부 검증
+
 > 4.
 
 영속상태에 따라 영속화 진행
 
-새로운 객체가 아니라면 비영속, 준영속 상태의 객체를 영속 상태로 처리하기 위해 
+새로운 객체가 아니라면 비영속, 준영속 상태의 객체를 영속 상태로 처리하기 위해
 
 EntityManager 의 merge() 를 호출한다.
 
-이 때 EntityManager 의 자식 인터페이스인 Session 을 호출하게 되고, 
+이 때 EntityManager 의 자식 인터페이스인 Session 을 호출하게 되고,
 
 그에 대한 구현체 SessionImpl 이 호출된다.
 
@@ -329,7 +314,7 @@ public class SessionImpl
 		extends AbstractSharedSessionContract
 		implements Serializable, SharedSessionContractImplementor, JdbcSessionOwner, SessionImplementor, EventSource,
 				TransactionCoordinatorBuilder.Options, WrapperOptions, LoadAccessContext {
-				
+
 	,,,
 	@Override @SuppressWarnings("unchecked")
 	public <T> T merge(T object) throws HibernateException {
@@ -422,7 +407,7 @@ private Object fireMerge(MergeEvent event) {
 	}
 ```
 
-### 중복 병합 방지  ( DefaultMergeEventListener.doMerge() )
+### 중복 병합 방지 ( DefaultMergeEventListener.doMerge() )
 
 - 이미 병합 처리 중인 엔티티인지 검사
 - 캐시에만 존재하고 아직 병합 플래그가 설정되지 않았다면 플래그 설정
@@ -449,13 +434,13 @@ private Object fireMerge(MergeEvent event) {
 
 - 영속성 컨텍스트에서 해당 엔티티를 관리 중인지 검사하기 위해 `EntityEntry`를 가져옴
 - 식별자를 통해 “영속성 컨텍스트 내 존재 여부”를 판단
-    - 없으면: 새로 식별자를 획득하고, 동일 식별자를 가진 관리 객체가 있는지 확인하여 DETACHED/TRANSIENT 판정
-    - 있으면: 이미 `PERSISTENT` 상태로 판정
+  - 없으면: 새로 식별자를 획득하고, 동일 식별자를 가진 관리 객체가 있는지 확인하여 DETACHED/TRANSIENT 판정
+  - 있으면: 이미 `PERSISTENT` 상태로 판정
 - `getEntityState(...)` 결과(DETACHED, TRANSIENT, PERSISTENT, DELETED)에 따라 각기 다른 처리 메서드로 분기
-    - `DETACHED` → 기존 DB 레코드와 비교해 “값 복사” 후 새로운 관리 엔티티로 등록
-    - `TRANSIENT` → 단순히 `persist()` 호출
-    - `PERSISTENT` → 이미 세션에 있으므로 특별한 동기화 없이 반환
-    - `DELETED` → 삭제 예약 해제 및 DETACHED 로직 혹은 예외 처리
+  - `DETACHED` → 기존 DB 레코드와 비교해 “값 복사” 후 새로운 관리 엔티티로 등록
+  - `TRANSIENT` → 단순히 `persist()` 호출
+  - `PERSISTENT` → 이미 세션에 있으므로 특별한 동기화 없이 반환
+  - `DELETED` → 삭제 예약 해제 및 DETACHED 로직 혹은 예외 처리
 
 ```java
 	private void merge(MergeEvent event, MergeContext copiedAlready, Object entity) {
@@ -565,18 +550,18 @@ private Object fireMerge(MergeEvent event) {
 실제로 아래와 같이 처리된다.
 
 - 분리된(detached) 엔티티가 병합 요청을 받으면
-    - `originalId`와 `copiedId`(필요 시)를 구해서, DB 조회에 사용할 수 있는 “복사된 식별자(clonedIdentifier)”를 준비
+  - `originalId`와 `copiedId`(필요 시)를 구해서, DB 조회에 사용할 수 있는 “복사된 식별자(clonedIdentifier)”를 준비
 - DB에서 동일 ID의 엔티티가 존재하는지 확인(`source.get(…)`)
-    - 존재하지 않으면
-        - 해당 객체가 실제로 DB에 저장된 적이 있는지(`isTransient`)를 검사
-        - 이미 DB에 있다가 삭제된 경우 → `StaleObjectStateException` 예외
-        - 아예 새로운 객체(transient)라면 → `entityIsTransient` 호출하여 새로 저장
-    - 존재하면(result != null)
-        - “분리된 엔티티 → 세션에서 로드된 엔티티” 매핑을 `copyCache` 에 기록
-        - 연관 엔티티를 cascade 처리하여 미리 병합
-        - 실제 속성 값을 “세션 관리 대상 엔티티(result)”에 복사
-        - 복사된 엔티티를 더티(Dirty) 상태로 표시
-        - `event.setResult(result)`로 병합 결과 반환
+  - 존재하지 않으면
+    - 해당 객체가 실제로 DB에 저장된 적이 있는지(`isTransient`)를 검사
+    - 이미 DB에 있다가 삭제된 경우 → `StaleObjectStateException` 예외
+    - 아예 새로운 객체(transient)라면 → `entityIsTransient` 호출하여 새로 저장
+  - 존재하면(result != null)
+    - “분리된 엔티티 → 세션에서 로드된 엔티티” 매핑을 `copyCache` 에 기록
+    - 연관 엔티티를 cascade 처리하여 미리 병합
+    - 실제 속성 값을 “세션 관리 대상 엔티티(result)”에 복사
+    - 복사된 엔티티를 더티(Dirty) 상태로 표시
+    - `event.setResult(result)`로 병합 결과 반환
 
 ```java
 switch ( entityState ) {
@@ -665,11 +650,11 @@ protected void entityIsDetached(MergeEvent event, Object copiedId, Object origin
 
 **이 때 id 가 이미 있으므로 isNew() 는 통과된다.**
 
-**하지만 merge() 를 호출하게 되고, 영속성 컨텍스트에 데이터가 없으므로** 
+**하지만 merge() 를 호출하게 되고, 영속성 컨텍스트에 데이터가 없으므로**
 
 **결과적으로 SELECT 쿼리가 부가적으로 호출되게 된다.**
 
-실제로 아래와 같이 데이터 변경 유스케이스에 대한 테스트코드를 실행하게 되면 
+실제로 아래와 같이 데이터 변경 유스케이스에 대한 테스트코드를 실행하게 되면
 
 UPDATE 쿼리를 수행하기 위해 SELECT → UPDATE 가 처리되는 것을 볼 수 있다.
 
@@ -723,8 +708,13 @@ class UserInfraImplTest {
 DynamicUpdate 를 활용하던, 모든 컬럼에 대한 UPDATE 를 그대로 처리하던지 둘 중 선택해서 말이다
 
 [^1]: https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity <https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity>
+
 [^2]: https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html <https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html>
+
 [^3]: https://velog.io/@yglee8048/JPA-Persistable <https://velog.io/@yglee8048/JPA-Persistable>
+
 [^4]: https://ttl-blog.tistory.com/852 <https://ttl-blog.tistory.com/852>
+
 [^5]: https://bjwan-career.tistory.com/221 <https://bjwan-career.tistory.com/221>
+
 [^6]: https://devs0n.tistory.com/113 <https://devs0n.tistory.com/113>

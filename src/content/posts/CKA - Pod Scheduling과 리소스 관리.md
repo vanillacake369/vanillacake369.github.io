@@ -1,5 +1,4 @@
 ---
-title: "CKA - Pod Scheduling과 리소스 관리"
 description: "Kubernetes 스케줄링, Taint/Toleration, Affinity, PriorityClass, Static Pod"
 date: 2025-12-25
 tags: [kubernetes, journal]
@@ -12,15 +11,16 @@ series: { id: "Kubernetes CKA", order: 3 }
 
 ## (2025 Updates) Custom Resource Definition (CRD)
 
-## 여기서 resources 에 해당하는 리소스명을 찾으려면 ##
+## 여기서 resources 에 해당하는 리소스명을 찾으려면
 
-## kubectl api-resources 를 명령하고 확인한다 ##
+## kubectl api-resources 를 명령하고 확인한다
 
 ## Taints & Tolerations
 
 ### Taints 란 ??
 
 ### Tolerations 란 ??
+
 ### 문제 1 :
 
 ## PriorityClass & Static Pod
@@ -36,14 +36,11 @@ series: { id: "Kubernetes CKA", order: 3 }
 
 1.
 
-등록
-2.
+등록 2.
 
-매핑(Admission Control)
-3.
+매핑(Admission Control) 3.
 
-큐잉 단계(Scheduling Queueing)
-4.
+큐잉 단계(Scheduling Queueing) 4.
 
 선점(Preemption)
 
@@ -53,8 +50,7 @@ series: { id: "Kubernetes CKA", order: 3 }
 
 1.
 
-스케줄러는 낮은 우선순위의 Pod를 찾아 **강제 종료(Eviction)** 시킵니다.
-2.
+스케줄러는 낮은 우선순위의 Pod를 찾아 **강제 종료(Eviction)** 시킵니다. 2.
 
 확보된 자원에 높은 우선순위의 Pod를 배치합니다.
 
@@ -85,6 +81,7 @@ spec:
       containers:
         ,,
 ```
+
 ```bash
 # rollout 을 통해 deployment 에 적용
 kubectl rollout status ${deploy-이름} -n ${namespace-이름}
@@ -166,11 +163,9 @@ API 서버를 거치지 않고, **특정 노드의 kubelet이 직접 관리**하
 
 1.
 
-Monitoring
-2.
+Monitoring 2.
 
-Static Pod 실행
-3.
+Static Pod 실행 3.
 
 Mirroring
 
@@ -188,12 +183,12 @@ graph TD
         direction TB
         Kubelet[<b>kubelet</b><br/>Node Agent]
         CRI[<b>CRI</b><br/>Container Runtime]
-        
+
         subgraph "Local File System"
             ManifestDir[<b>Manifest Directory</b><br/>/etc/kubernetes/manifests]
             PodYAML[pod-name.yaml<br/>Static Pod Spec]
         end
-        
+
         subgraph "Pod Runtime"
             StaticPodContainer([<b>Static Pod Container</b><br/>e.g., etcd, api-server])
         end
@@ -207,7 +202,7 @@ graph TD
     CRI --> StaticPodContainer
     Kubelet -.->|Mirroring| APIServer
     APIServer -.-> ETCD
-    
+
     User((사용자/kubectl)) -.-> APIServer
     Scheduler -.-> APIServer
     APIServer -.-> Kubelet
@@ -224,7 +219,7 @@ graph TD
 
 ### 어떤 컴포넌트들이 Static Pod 로 작동하는가?
 
-1. 
+1.
 
 ### StaticPod 삭제방법
 

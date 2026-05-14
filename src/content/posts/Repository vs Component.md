@@ -1,5 +1,4 @@
 ---
-title: "@Repository vs @Component"
 description: "둘 다 DI를 위한 어노테이션이지만 쓰임새와 역할이 다르다."
 date: 2026-02-25
 tags: [java]
@@ -9,13 +8,12 @@ draft: false
 
 ## 무엇을 공부하였는가 🤔
 
-
 ### @Component vs @Repository.
 
 둘의 공통점/차이점??
 
 둘 다 DI를 위한 어노테이션이지만 쓰임새와 역할이 다르다.
-@Component는 인터페이스의 구현체 혹은 지정한 클래스에 대해 DI를 하기 위해 
+@Component는 인터페이스의 구현체 혹은 지정한 클래스에 대해 DI를 하기 위해
 싱글톤 패턴의 빈을 컨테이너에 등록해달라고 스프링에게 note해주기 위한 용도이다.
 
 반면 @Repository은 특수한 @Component의 일종이다.
@@ -25,11 +23,9 @@ draft: false
 
 ## 어떻게 쓰는가 ☝️
 
-
 1.
 
-DTO 생성
-2.
+DTO 생성 2.
 
 DTO 에 대한 Repository 인터페이스 생성 :: `JpaRepository`
 
@@ -76,14 +72,13 @@ public interface ClientRepository extends JpaRepository<Client,Long> {
 
 하지만 사용하지 않도록 권고하고 있다.
 
-의존성 주입을 하는 방법은 필드 주입  이외에 크게 4가지가 있다.
+의존성 주입을 하는 방법은 필드 주입 이외에 크게 4가지가 있다.
 
 Constructor Injection / Setter Injection / Field Injection / Method Injection
 모르겠다면 의존성 주입 방법을 모르는 것이니 이곳을 참고하자.
 [https://bangu4.tistory.com/297](https://bangu4.tistory.com/297)
 
 ## 왜 쓰는가 ❓
-
 
 엔티티에 대한 레포지토리 인스턴스를 컨테이너에서 생성/관리
 

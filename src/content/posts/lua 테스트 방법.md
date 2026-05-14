@@ -1,5 +1,4 @@
 ---
-title: "lua 테스트 방법"
 description: "nvim 에서 플러그인 설치나 설정 시에는 lua 언어를 사용한다."
 date: 2025-11-11
 tags: [neovim]
@@ -8,12 +7,6 @@ draft: false
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 nvim 에서 플러그인 설치나 설정 시에는 lua 언어를 사용한다.
 
@@ -26,8 +19,6 @@ nvim 에서 플러그인 설치나 설정 시에는 lua 언어를 사용한다.
 # What ?
 
 무엇을 배움?
-
----
 
 ## LuaUnit 사용
 
@@ -60,6 +51,7 @@ end
 os.exit( luaunit.LuaUnit.run() )
 
 ```
+
 ```bash
 $$ lua ./lua-test.lua
 ..

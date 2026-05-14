@@ -1,5 +1,4 @@
 ---
-title: "About Github Actions"
 description: "코드를 관리하다보면 다음과 같은 CI 문제에 직면한다."
 date: 2026-01-16
 tags: [infra]
@@ -8,12 +7,6 @@ draft: false
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 코드를 관리하다보면 다음과 같은 CI 문제에 직면한다.
 
@@ -27,12 +20,6 @@ draft: false
 
 # What?
 
-뭘 배움?
-
----
-
----
-
 ## 어떤 기능들을 자동화할 수 있는가?
 
 Github Actions 는 다음과 같은 기능들을 자동화 할 수 있다.
@@ -40,9 +27,7 @@ Github Actions 는 다음과 같은 기능들을 자동화 할 수 있다.
 1. **CI (Continuous Integration)**: 실제 서버 접속 없이도 설정 파일이 정상적으로 빌드되는지 검증
 2.
 
-의존성 업데이트: 지정한 주기 별로 의존성을 업데이트하고 PR을 생성
-3. **Security & Quality**:
-4. **Dependabot**: GitHub Actions 자체의 버전을 최신으로 유지
+의존성 업데이트: 지정한 주기 별로 의존성을 업데이트하고 PR을 생성 3. **Security & Quality**: 4. **Dependabot**: GitHub Actions 자체의 버전을 최신으로 유지
 
 ## Github Actions 핵심 개념
 
@@ -62,8 +47,7 @@ workflow 선언 프로세스는 다음과 같다.
 
 안에 steps 를 통해 작업들을 선언하여 형성한다.
 
-여러 개를 나열할 수 있다.
-4. runner : 어느 시스템에서 jobs 를 호출할 건지 선언
+여러 개를 나열할 수 있다. 4. runner : 어느 시스템에서 jobs 를 호출할 건지 선언
 
 ```yaml
 name: Deadnix
@@ -87,13 +71,13 @@ jobs:
       - name: Run deadnix
         run: |
           nix-shell -p deadnix --run "deadnix --fail"
-
 ```
 
-- **Event (****`on`****)**: 워크플로우를 실행시키는 트리거입니다. (예: `push`, `pull_request`, `schedule`).
+- **Event (\*\***`on`\***\*)**: 워크플로우를 실행시키는 트리거입니다. (예: `push`, `pull_request`, `schedule`).
 - **Job**: 동일한 Runner에서 실행되는 일련의 Step 집합입니다.
 
 기본적으로 Job들은 병렬로 실행됩니다.
+
 - **Step**: 명령을 실행하는 최소 단위입니다. `uses`(액션 사용)나 `run`(쉘 명령어 실행)으로 구성됩니다.
 - **Runner**: 워크플로우가 실행되는 서버입니다. `ubuntu-latest` 같은 GitHub 호스팅 서버나 직접 구축한 서버를 사용할 수 있습니다.
 
@@ -153,15 +137,11 @@ error: failed to push some refs to 'https://github.com/vanillacake369/tonys-home
 
 1.
 
-GitHub Settings → Developer settings → Personal access tokens
-2.
+GitHub Settings → Developer settings → Personal access tokens 2.
 
-전체 repo 혹은 특정 repo 선택
-3. workflow 의 permission 을 read/write 부여
-4.
+전체 repo 혹은 특정 repo 선택 3. workflow 의 permission 을 read/write 부여 4.
 
-토큰 생성
-5. 1) push 시 비밀번호 입력하거나 2) 아래 방법을 통해 push
+토큰 생성 5. 1) push 시 비밀번호 입력하거나 2) 아래 방법을 통해 push
 
 ```shell
 ~/,,
@@ -191,13 +171,16 @@ GitHub Actions is not permitted to create or approve pull request
 
 어떻게 씀?
 
----
-
 [https://github.com/vanillacake369/tonys-homelab/tree/main/.github](https://github.com/vanillacake369/tonys-homelab/tree/main/.github)
 
 [^2]: https://docs.github.com/en/actions <https://docs.github.com/en/actions>
+
 [^3]: https://docs.github.com/ko/actions/how-tos/write-workflows/choose-when-workflows-run <https://docs.github.com/ko/actions/how-tos/write-workflows/choose-when-workflows-run>
+
 [^4]: https://docs.github.com/ko/actions/concepts/security/github_token#about-the-github_token <https://docs.github.com/ko/actions/concepts/security/github_token#about-the-github_token>
+
 [^5]: https://jwonelife.tistory.com/entry/Github-Actions-%EA%B9%83%ED%97%88%EB%B8%8C-%EC%95%A1%EC%85%98%EB%9E%80 <https://jwonelife.tistory.com/entry/Github-Actions-%EA%B9%83%ED%97%88%EB%B8%8C-%EC%95%A1%EC%85%98%EB%9E%80>
+
 [^6]: https://www.freecodecamp.org/news/learn-to-use-github-actions-step-by-step-guide/ <https://www.freecodecamp.org/news/learn-to-use-github-actions-step-by-step-guide/>
+
 [^7]: https://danawalab.github.io/common/2022/08/24/Self-Hosted-Runner.html <https://danawalab.github.io/common/2022/08/24/Self-Hosted-Runner.html>

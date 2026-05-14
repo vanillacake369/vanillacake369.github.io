@@ -1,5 +1,4 @@
 ---
-title: "Nix Disko 설정"
 description: "무슨 파일시스템을 구성할지 고민되었다."
 date: 2026-01-14
 tags: [homelab, nix]
@@ -10,21 +9,7 @@ series: { id: "NixOS Ecosystem", order: 1 }
 
 # Why?
 
-왜 배움?
-
----
-
----
-
- 
-
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## Why ZFS, BTRFS are overkill ?
 
@@ -61,24 +46,22 @@ RAID 구성을 할 수 없어 의미가 없기 때문이다.
 
 이후 계층 별로 파티셔닝 구성도를 그려보았다.
 
-| **계층 (Layer)** | **구분 (LV/Pool)** | **물리적 크기 (Real)** | **논리적 크기 (Virtual)** | **상세 용도** | **마운트 포인트 (Mount)** |
-| --- | --- | --- | --- | --- | --- |
-| **Boot** | `ESP` (Partition) | 1 GB | 1 GB | UEFI 부팅 및 커널 커널 저장 | `/boot` |
-| **Memory** | `swap` (Partition) | 16 GB | 16 GB | RAM 부족 시 보험 (암호화) | `-` |
-| **Tier 1: OS** | `root` (Thick LV) | **200 GB** | 200 GB | NixOS 시스템 + `/nix/store` | `/` |
-| **Tier 2: VM** | `vm_thinpool` | **400 GB** | **800 GB** | 가상 머신 이미지 전용 풀 | `/var/lib/libvirt/images` |
-| └ *Sub-VMs* | *(qcow2 files)* | *(공유 사용)* | *(오버커밋)* | OPNsense, K8s Nodes, Jenkins VM | (디렉터리 관리) |
-| **Tier 3: Data** | `data_thinpool` | **300 GB** | **600 GB** | 서비스 데이터 및 저장소 풀 | `/data` |
-| └ *Sub-Data* | *(Directories)* | *(공유 사용)* | *(오버커밋)* | Registry, Jenkins Home, K8s PV | `/data/{service}` |
-| **Security** | `vault` (Thick LV) | 20 GB | 20 GB | 보안 격리가 필요한 비밀 관리 | `/var/lib/vault` |
-| **Reserve** | `Free Space` | **~83 GB** | - | **긴급 확장용 (LVM VG 여유)** | `-` |
-| **합계** | **Physical Disk** | **~1,020 GB** | **~1,637 GB** | **약 160% 효율 달성** | - |
+| **계층 (Layer)** | **구분 (LV/Pool)** | **물리적 크기 (Real)** | **논리적 크기 (Virtual)** | **상세 용도**                   | **마운트 포인트 (Mount)** |
+| ---------------- | ------------------ | ---------------------- | ------------------------- | ------------------------------- | ------------------------- |
+| **Boot**         | `ESP` (Partition)  | 1 GB                   | 1 GB                      | UEFI 부팅 및 커널 커널 저장     | `/boot`                   |
+| **Memory**       | `swap` (Partition) | 16 GB                  | 16 GB                     | RAM 부족 시 보험 (암호화)       | `-`                       |
+| **Tier 1: OS**   | `root` (Thick LV)  | **200 GB**             | 200 GB                    | NixOS 시스템 + `/nix/store`     | `/`                       |
+| **Tier 2: VM**   | `vm_thinpool`      | **400 GB**             | **800 GB**                | 가상 머신 이미지 전용 풀        | `/var/lib/libvirt/images` |
+| └ _Sub-VMs_      | _(qcow2 files)_    | _(공유 사용)_          | _(오버커밋)_              | OPNsense, K8s Nodes, Jenkins VM | (디렉터리 관리)           |
+| **Tier 3: Data** | `data_thinpool`    | **300 GB**             | **600 GB**                | 서비스 데이터 및 저장소 풀      | `/data`                   |
+| └ _Sub-Data_     | _(Directories)_    | _(공유 사용)_          | _(오버커밋)_              | Registry, Jenkins Home, K8s PV  | `/data/{service}`         |
+| **Security**     | `vault` (Thick LV) | 20 GB                  | 20 GB                     | 보안 격리가 필요한 비밀 관리    | `/var/lib/vault`          |
+| **Reserve**      | `Free Space`       | **~83 GB**             | -                         | **긴급 확장용 (LVM VG 여유)**   | `-`                       |
+| **합계**         | **Physical Disk**  | **~1,020 GB**          | **~1,637 GB**             | **약 160% 효율 달성**           | -                         |
 
 # How?
 
 어떻게 씀?
-
----
 
 위 파티셔닝 구성도에 따라 아래와 같이 [disko](https://github.com/nix-community/disko) 를 구성하였다.
 (해당 파일은 nixos-anywhere 을 통해 파일시스템 구축을 한다)
@@ -233,9 +216,9 @@ disko.devices = {
 
 ### LVM Volume Group 선언
 
-1. **시스템 (****`root`****)**
-2. **VM Thin Pool & LV (****`vms`****)**
-3. **Data Thin Pool & LV (****`data`****)**
+1. **시스템 (\*\***`root`\***\*)**
+2. **VM Thin Pool & LV (\*\***`vms`\***\*)**
+3. **Data Thin Pool & LV (\*\***`data`\***\*)**
 4.
 
 Vault 전용 구역 (`vault`)
@@ -381,7 +364,7 @@ Thin Provisioning 의 최대 단점은 실제 물리 공간이 꽉 차면 파일
 또한 systemd 의 lvm2-monitor 서비스를 활성화하였는데 이 서비스는 thin pool 사용량을 모니터링하여 자동확장을 수행하는 dmeventd 에 매핑시킨다
 만약 이 서비스가 꺼져 있으면 80%가 넘어도 자동 확장이 일어나지 않기 때문에 중요하다
 [https://docs.redhat.com/ko/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/ref_a-guide-to-selecting-services-that-can-be-safely-disabled_optimizing-systemd-to-shorten-the-boot-time#:~:text=%EC%84%A4%EC%B9%98%EC%97%90%EC%84%9C%20%EC%8B%9C%EC%9E%91%EB%90%98%EC%A7%80%20%EC%95%8A%EC%8A%B5%EB%8B%88%EB%8B%A4.-,lvm2%2Dmonitor.service,-%EC%A0%9C%EA%B3%B5%EB%90%A8](https://docs.redhat.com/ko/documentation/red_hat_enterprise_linux/9/html/using_systemd_unit_files_to_customize_and_optimize_your_system/ref_a-guide-to-selecting-services-that-can-be-safely-disabled_optimizing-systemd-to-shorten-the-boot-time#:~:text=%EC%84%A4%EC%B9%98%EC%97%90%EC%84%9C%20%EC%8B%9C%EC%9E%91%EB%90%98%EC%A7%80%20%EC%95%8A%EC%8A%B5%EB%8B%88%EB%8B%A4.-,lvm2%2Dmonitor.service,-%EC%A0%9C%EA%B3%B5%EB%90%A8)
-[https://man.archlinux.org/man/core/device-mapper/dmeventd.8.en#:~:text=Monitors%20how%20full%20a%20VDO,tools%20like%20lvs(8)](https://man.archlinux.org/man/core/device-mapper/dmeventd.8.en#:~:text=Monitors%20how%20full%20a%20VDO,tools%20like%20lvs(8))
+[https://man.archlinux.org/man/core/device-mapper/dmeventd.8.en#:~:text=Monitors%20how%20full%20a%20VDO,tools%20like%20lvs(8)](<https://man.archlinux.org/man/core/device-mapper/dmeventd.8.en#:~:text=Monitors%20how%20full%20a%20VDO,tools%20like%20lvs(8)>)
 [https://man7.org/linux/man-pages/man8/dmeventd.8.html](https://man7.org/linux/man-pages/man8/dmeventd.8.html)
 
 ```nix

@@ -1,5 +1,4 @@
 ---
-title: "왜 직렬화를 지양하라할까? 그렇담 JPA에서는 어떤 경우 직렬화를 처리해줘야 할까?(feat. 아이템 86)"
 description: "Object ↔ Byte Stream"
 date: 2026-02-25
 tags: [java]
@@ -8,13 +7,11 @@ draft: false
 series: { id: "Effective Java", order: 7 }
 ---
 
-# Why? 
-
+# Why?
 
 > 왜 그토록 저자가 직렬화 구현을 주의하라고 하는지, 또 JPA를 사용할 때 어떤 경우 직렬화를 처리해주어야하는지 알아보자.
 
-# What? 
-
+# What?
 
 ### 직렬화란?
 
@@ -22,7 +19,7 @@ Object ↔ Byte Stream
 
 > **Object serialization is the process of converting Java objects into byte streams**.
 
-**Usage
+\*\*Usage
 
 - write POJO to,,,
 
@@ -63,12 +60,12 @@ A 형태의 직렬화를 의존하던 이전 API 사용자들은 A`형태의 직
 
 - 상속용으로 설계되었다면 확장 시 재정의 오버헤드가 발생
 
-상속용 클래스라면 
+상속용 클래스라면
 지정한 직렬화메서드가 **잘 돌아가는지** 확인해야한다.
 
 재정의하게 된다면 재정의한 직렬화가 **다음 상속에 영향을 끼치지 않는지 **확인해야한다.
 
-상속용 인터페이스라면 
+상속용 인터페이스라면
 이를 implements하는 클래스가 **모두 동일한 직렬화 메서드를 사용하게 되므로 유지보수가 어려워진다.**
 
 ### JPA에서 Serializable을 구현해야할 때 : 복합키 사용
@@ -82,7 +79,7 @@ The specification requires that fields of an entity may be Java primitives, Java
 public class User {
     @EmbeddedId UserId userId;
     String email;
-    
+
     // constructors, getters and setters
 }
 
@@ -90,14 +87,14 @@ public class User {
 public class UserId implements Serializable{
     private String name;
     private String lastName;
-    
+
     // getters and setters
 }
 ```
 
-### JPA에서 Serializable을 구현해야할 때 : id가 아닌 값을 ***JoinColumn*** 으로서 사용
+### JPA에서 Serializable을 구현해야할 때 : id가 아닌 값을 **_JoinColumn_** 으로서 사용
 
-> [Hibernate official documentation](https://hibernate.org/orm/documentation/), when describing mapping in Hibernate, notes that the** referenced field must be serializable when we use *****referencedColumnName *****from the **[***@JoinColumn ***](https://www.baeldung.com/jpa-join-column)annotation.
+> [Hibernate official documentation](https://hibernate.org/orm/documentation/), when describing mapping in Hibernate, notes that the** referenced field must be serializable when we use \*\*\***referencedColumnName **\***from the **[\***@JoinColumn \*\*\*](https://www.baeldung.com/jpa-join-column)annotation.
 
 Usually, this field is a primary key in another entity.
 
@@ -137,7 +134,7 @@ By creating DTOs, we decouple internal domain objects from external services. *
 
 ### POJO ↔ JSON 직렬화 시, 내부 필드들이 Serializable을 지원하는지 주의하자!
 
-POJO ↔ JSON 직렬화 시,  Serializable을 지원하는지 주의해야한다.
+POJO ↔ JSON 직렬화 시, Serializable을 지원하는지 주의해야한다.
 
 JPA에서 JSON으로 직렬화/역직렬화를 할 때, 보통 Jackson을 통해 이를 지원하게 된다.
 
@@ -190,7 +187,6 @@ try {
 > **DTO를 사용해야 하는 이유.**
 
 # Reference 📚
-
 
 [https://github.com/clxering/Effective-Java-3rd-edition-Chinese-English-bilingual/blob/dev/Chapter-12/Chapter-12-Item-86-Implement-Serializable-with-great-caution.md](https://github.com/clxering/Effective-Java-3rd-edition-Chinese-English-bilingual/blob/dev/Chapter-12/Chapter-12-Item-86-Implement-Serializable-with-great-caution.md)
 [https://www.baeldung.com/jpa-entities-serializable](https://www.baeldung.com/jpa-entities-serializable)

@@ -1,5 +1,4 @@
 ---
-title: "언제 EventListener 를 쓰고 언제 TransactionalEventListener 를 쓸까?"
 description: "스프링 애플리케이션에서 이벤트를 발행하고 처리할 때, 두 가지 타입의 어노테이션을 사용할 수 있다."
 date: 2025-05-21
 tags: [java]
@@ -9,26 +8,14 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 스프링 애플리케이션에서 이벤트를 발행하고 처리할 때, 두 가지 타입의 어노테이션을 사용할 수 있다.
 
 - `@EventListener`
-- `@TransactionalEventListener` 
+- `@TransactionalEventListener`
 
 다만 어떤 유스케이스와 어떤 목적에 따라 어떻게 써야하는지 매 번 헷갈려서 정리해보았다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## @EventListener 란 ?
 
@@ -76,6 +63,7 @@ classDiagram
     SimpleApplicationEventMulticaster -->extends AbstractApplicationEventMulticaster
 
 ```
+
 ```java
 public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
 	ResolvableType type = (eventType != null ? eventType : ResolvableType.forInstance(event));
@@ -106,7 +94,7 @@ public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType even
 
 ### 예외 전파 확인
 
-> ☝ TL;DR; 
+> ☝ TL;DR;
 
 비즈니스 로직 코드가 아래와 같다고 해보자.
 
@@ -120,12 +108,11 @@ public CreateOrderResponse createOrder(Long userIdx, CreatOrderRequest creatOrde
     return createOrderUsecaseMapper.toCreateOrderResponse(order);
 }
 
-
 ```
 
 이 때 예외를 일부러 터트리는 테스트 코드를 짜보았다.
 
-- 리스너에서 `RuntimeException("boom")` 을 던지면 
+- 리스너에서 `RuntimeException("boom")` 을 던지면
 - 발행자 쪽 `createOrder` 메서드에도 예외가 발생하는 것 확인
 
 ```java
@@ -144,7 +131,7 @@ class CreateOrderUsecaseImplTest {
         Long userId = 1L;
         Long productId = 10L;
         long quantity = 1L;
-        CreatOrderRequest creatOrderRequest 
+        CreatOrderRequest creatOrderRequest
 		        = new CreatOrderRequest(productId, quantity);
         // 이벤트 수신자가 예외를 던짐
         BDDMockito.doThrow(new RuntimeException("boom"))
@@ -159,7 +146,6 @@ class CreateOrderUsecaseImplTest {
         );
     }
 }
-
 
 ```
 
@@ -179,11 +165,9 @@ class CreateOrderUsecaseImplTest {
 
 1.
 
-애플리케이션 코드에서 `ApplicationEventPublisher.publishEvent(...)` 호출
-2.
+애플리케이션 코드에서 `ApplicationEventPublisher.publishEvent(...)` 호출 2.
 
-스프링은 이벤트와 함께 현재 트랜잭션 동기화에 `TransactionSynchronization` 을 등록
-3.
+스프링은 이벤트와 함께 현재 트랜잭션 동기화에 `TransactionSynchronization` 을 등록 3.
 
 트랜잭션 커밋 또는 롤백 시점에, `phase` 에 맞는 리스너만 호출
 
@@ -202,8 +186,6 @@ class CreateOrderUsecaseImplTest {
 
 어떻게 씀?
 
----
-
 ### @EventListener
 
 ```java
@@ -216,7 +198,6 @@ public class SimpleListener {
         log.info("OrderCreatedEvent 처리: {}", event.getOrder().getId());
     }
 }
-
 
 ```
 
@@ -246,8 +227,8 @@ public class TxListener {
     }
 }
 
-
 ```
 
 [^1]: Spring Framework 공식 레퍼런스 – 이벤트 모델 <https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#context-functionality-events>
+
 [^2]: Spring 공식 javadoc – TransactionalEventListener <https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/event/TransactionalEventListener.html>

@@ -1,5 +1,4 @@
 ---
-title: "언제 Join 을 써야하고 언제 SubQuery 를 사용해야할까?"
 description: "A subquery is a query that is **nested inside another query**."
 date: 2024-05-20
 tags: [database]
@@ -47,13 +46,14 @@ subquery 와 main query의 연결을 위한 **유사 join query문**
 
 ```sql
 select distinct food.*
-from food left outer join food_flavor 
+from food left outer join food_flavor
     on food.food_id = food_flavor.food_id
 where food.category_id = 1 and food_flavor.flavor_id in (1,2);
 ```
+
 ```sql
 select food.*
-from food left outer join food_flavor 
+from food left outer join food_flavor
     on food.food_id = food_flavor.food_id
     where food.category_id = 1
     group by food.food_id;
@@ -62,14 +62,14 @@ from food left outer join food_flavor
 아래 semi join 으로 변경가능
 
 ```sql
-select food.* 
-from food 
-where food.food_id in ( 
-    select foodflavor1_.food_id 
-    from food_flavor foodflavor1_ 
-        where foodflavor1_.food_id=food.food_id 
-            and food.category_id=1 
-            and foodflavor1_.flavor_id in (1,2) 
+select food.*
+from food
+where food.food_id in (
+    select foodflavor1_.food_id
+    from food_flavor foodflavor1_
+        where foodflavor1_.food_id=food.food_id
+            and food.category_id=1
+            and foodflavor1_.flavor_id in (1,2)
 );
 ```
 
@@ -78,7 +78,7 @@ where food.food_id in (
 > pullout
 > **FirstMatch**
 
-** first match 방식을 사용할지 in-to-exist방식을 사용할지 optimizer 가 환경에 따라 선택
+\*\* first match 방식을 사용할지 in-to-exist방식을 사용할지 optimizer 가 환경에 따라 선택
 
 > Materializaion 최적화
 
@@ -140,6 +140,7 @@ explain extended 실제쿼리 를 통해 실제로 옵티마이저가 해석한 
 > Optimizer Changes: MySQL 8.0 includes improvements in the optimizer which may change the performance characteristics of your queries.
 
 Run thorough tests to check the performance implications.
+
 > https://www.rapydo.io/blog/mysql-5-7-vs-mysql-8-0-new-features-migration-planning-and-pre-migration-checks
 > https://myvelop.tistory.com/m/208
 
@@ -149,5 +150,5 @@ Run thorough tests to check the performance implications.
 [https://jojoldu.tistory.com/520](https://jojoldu.tistory.com/520)
 
 —-
-아니,,, 왜 `SQL 레벨업` 책에서는 결합 사용 시 n*m 이라면서,,, 왜 말이 다른데,,,
+아니,,, 왜 `SQL 레벨업` 책에서는 결합 사용 시 n\*m 이라면서,,, 왜 말이 다른데,,,
 꼭 개발자 단톡방이랑 커뮤니티에 물어봐야겠다,,,

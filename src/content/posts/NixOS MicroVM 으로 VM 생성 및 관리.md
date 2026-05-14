@@ -1,5 +1,4 @@
 ---
-title: "NixOS MicroVM 으로 VM 생성 및 관리"
 description: "1. **인프라 선언 구조**: `flake.nix`에서 `specialArgs`를 통한 설정 주입 원리. 2. **네트워크 설계**: 브리지(`vmbr`)와 VLAN을 이용한 L2 격리 구조."
 date: 2026-01-16
 tags: [homelab, nix]
@@ -10,19 +9,7 @@ series: { id: "NixOS Ecosystem", order: 8 }
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## 개념
 
@@ -39,7 +26,7 @@ series: { id: "NixOS Ecosystem", order: 8 }
 
 가장 먼저 정리할 개념은 **"Single Source of Truth (단일 진실 공급원)"** 전략입니다.
 
-- **`homelabConstants`**** & ****`homelabConfig`**: IP 주소, VLAN ID, CPU/메모리 할당량 등을 한 곳에서 관리하고 이를 `specialArgs`를 통해 모든 VM에 주입합니다.
+- **`homelabConstants`\*\*** & \***\*`homelabConfig`**: IP 주소, VLAN ID, CPU/메모리 할당량 등을 한 곳에서 관리하고 이를 `specialArgs`를 통해 모든 VM에 주입합니다.
 - **추상화**: `vms/k8s-master.nix` 코드를 보면 하드웨어 스펙은 `vmInfo`에서 가져오고, 실제 로직(Kubernetes 설정)만 선언되어 있습니다.
 - **정리할 점**: 환경 변수와 상수를 분리했을 때의 유지보수 이점.
 
@@ -49,7 +36,7 @@ series: { id: "NixOS Ecosystem", order: 8 }
 
 작성하신 `network.nix`와 `microvm-network.nix`의 관계를 도식화해서 정리하세요.
 
-- **Bridge (****`vmbr1`****)**: 물리적인 랜선 없이 호스트 내부에서 VM들을 연결하는 가상 스위치 역할.
+- **Bridge (\*\***`vmbr1`\***\*)**: 물리적인 랜선 없이 호스트 내부에서 VM들을 연결하는 가상 스위치 역할.
 - **VLAN Tagging**: 하나의 브리지 위에서 `vlan10`(관리용), `vlan20`(서비스용)으로 트래픽을 격리하는 방식.
 - **TAP Interface**: 호스트의 브리지와 MicroVM의 가상 NIC를 연결하는 "가상 케이블" 개념.
 - **정리할 점**: 왜 `systemd-networkd`를 사용하여 TAP을 브리지에 수동으로 붙이는 방식을 선택했는지(MicroVM의 유연성).
@@ -77,8 +64,6 @@ series: { id: "NixOS Ecosystem", order: 8 }
 # How?
 
 어떻게 씀?
-
----
 
 ## 구현
 
@@ -156,8 +141,6 @@ MicroVM 관리 도구 활용
 # 현재 호스트에서 실행 중인 VM 목록과 제어 소켓 확인
 microvm -l
 ```
-
----
 
 ### 💡 팁: 만약 네트워크가 안 된다면?
 

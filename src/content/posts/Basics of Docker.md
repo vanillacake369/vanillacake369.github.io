@@ -1,5 +1,4 @@
 ---
-title: "Basics of Docker"
 description: "컨테이너를 위한 리눅스 기능: cgroup, namespace, union mount"
 date: 2024-04-20
 tags: [system-design]
@@ -63,17 +62,18 @@ Linux 의 C Group 과 Namespace 를 사용
 # Docker Container vs Docker Image vs Docker Volume
 
 - Docker image
-***pre-packaged, read-only template that contains everything needed to run an application,***
-including the application code, dependencies,
-and any system libraries or configuration files
+  **_pre-packaged, read-only template that contains everything needed to run an application,_**
+  including the application code, dependencies,
+  and any system libraries or configuration files
 - Docker Container
-***running instance of a Docker image.***
-Containers are isolated environments that run an application and its dependencies,
-but with their own isolated file system, network, and resources.
+  **_running instance of a Docker image._**
+  Containers are isolated environments that run an application and its dependencies,
+  but with their own isolated file system, network, and resources.
 
 Containers are created from Docker images, and multiple containers can run from the same image.
+
 - Docker Volume
-***persistent data storage area*** that can be used by one or more containers.
+  **_persistent data storage area_** that can be used by one or more containers.
 
 Volumes are used to store data that needs to persist beyond the life of a container,
 such as application configuration files or user data.

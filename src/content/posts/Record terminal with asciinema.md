@@ -1,5 +1,4 @@
 ---
-title: "Record terminal with asciinema"
 description: "k6 테스트 결과에 대한 녹화본을 생성하기 위해 Terminal 녹화를 도와주는 asciinema 활용에 대해 정리"
 date: 2025-05-12
 tags: [linux]
@@ -9,21 +8,9 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 k6 테스트 결과에 대한 녹화본을 생성하기 위해 Terminal 녹화를 도와주는 asciinema 활용에 대해 정리
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## Install
 
@@ -123,6 +110,9 @@ agg --cols 80 --rows 20 --theme solarized-dark --speed 1.35 ./route-thosand-user
 > 💡 Q : 왜 mp4 로 변환하지 않나요?
 
 [^1]: https://nixdaily.com/how-to/record-your-terminal-session-and-convert-it-to-a-gif-image-asciinema/ <https://nixdaily.com/how-to/record-your-terminal-session-and-convert-it-to-a-gif-image-asciinema/>
+
 [^2]: https://docs.asciinema.org/manual/agg/ <https://docs.asciinema.org/manual/agg/>
+
 [^3]: https://asciinema.org/ <https://asciinema.org/>
+
 [^4]: https://discourse.asciinema.org/t/whats-the-best-way-to-convert-to-a-video-file/200 <https://discourse.asciinema.org/t/whats-the-best-way-to-convert-to-a-video-file/200>

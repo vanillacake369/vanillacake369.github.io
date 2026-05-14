@@ -1,5 +1,4 @@
 ---
-title: "왜 Master - Slave 구조는 분산시스템에 적합하지 않은가 (feat. CAP Theorem)"
 description: "현재 진행되고 있는 기프티콘 중고입찰 시스템 프로젝트에서는 RDB 를 사용한다.우리는 시스템 확장과 SPOF 를 목적으로 함으로써 AWS RDS 의 Read-Replication 을 통해 파티셔닝을 하기로 하였다.아래와 같이 구성해주었다.진행하고 있던 와중, 이러한 피"
 date: 2024-03-03
 tags: [journal]
@@ -7,8 +6,7 @@ lang: ko
 draft: false
 ---
 
-# Intro 
-
+# Intro
 
 현재 진행되고 있는 기프티콘 중고입찰 시스템 프로젝트에서는 RDB 를 사용한다.
 
@@ -40,7 +38,7 @@ CAP Theorem 은 2000년 Eric Brewer에 의해 처음 소개되었다.
 
 모든 정보는 최신 상태로 유지되어야 한다.
 
-- Availability 
+- Availability
   : 가용성은 분산 시스템이 항상 사용 가능함을 나타내는 속성이다.
 
 시스템의 하나 이상의 노드가 죽더라도, 다른 노드를 통해 계속 액세스할 수 있어야 한다.
@@ -49,7 +47,7 @@ CAP Theorem 은 2000년 Eric Brewer에 의해 처음 소개되었다.
   : 파티션 허용 오차는 시스템이 분할될 수 있는 능력을 말한다.
 
 따라서 모든 노드가 다른 노드와 독립적으로 작동할 수 있다.
-  
+
 ## Features of CAP Theorem
 
 CAP 정리에 따르면 분산 시스템은 3가지 속성 중 2가지 속성만 충족할 수 있다.
@@ -58,10 +56,9 @@ CAP 정리에 따르면 분산 시스템은 3가지 속성 중 2가지 속성만
 
 다른 두 속성이 이미 보장되어 있는 동안 세 번째 속성이 달성될 것이라고 보장할 수 없다.
 
-결과적으로 CAP 분산 시스템은 존재하지 않는다. 
+결과적으로 CAP 분산 시스템은 존재하지 않는다.
 
 # What is Master - Slave (feat.Replication)
-
 
 Replication, 즉 복제는 데이터베이스 확장 기술 중 하나이다.
 
@@ -91,16 +88,14 @@ Replication, 즉 복제는 데이터베이스 확장 기술 중 하나이다.
 
 위 그림과 같이 동작한다고 볼 수 있다.
 
-1. master 에 데이터를 write 
+1. master 에 데이터를 write
 2.
 
-이에 따른 데이터를 Replication 노드에 동기화
-3. client 는 Replication 노드로부터 read 함으로써 일관된 데이터를 읽을 수 있다. -- consitency
+이에 따른 데이터를 Replication 노드에 동기화 3. client 는 Replication 노드로부터 read 함으로써 일관된 데이터를 읽을 수 있다. -- consitency
 
 이로써 consitency 를 챙길 수 있다.
 
 # Database & CAP
-
 
 ![](/images/velog/895041e0f9c731d9.png)
 
@@ -152,7 +147,6 @@ CP 시스템은 일관성이 있고 파티션을 허용하는 시스템이다.
 
 # Defect of Master - Slave in Distributed System
 
-
 분산 시스템에서의 Master-Slave 구조는 CA 지향적이다.
 
 Master-Slave 간 동기화를 통해 일관성을 지향하고, 복제본을 통해 계속된 읽기작업을 지원하여 가용성을 지향한다.
@@ -178,26 +172,29 @@ Master-Slave 간 동기화를 통해 일관성을 지향하고, 복제본을 통
 
 만약 Master 와 Slave의 연결이 끊겼다고 가정해보자.
 
-여러 Slave 중 하나가 잃게 되더라도 가용성(Availability) 은 확보할 수 있지만, Master 와 다른 데이터를 제공하기에  동일한 데이터를 읽기를 지원하기에 일관성(Consistency)은 지원할 수 없다.
+여러 Slave 중 하나가 잃게 되더라도 가용성(Availability) 은 확보할 수 있지만, Master 와 다른 데이터를 제공하기에 동일한 데이터를 읽기를 지원하기에 일관성(Consistency)은 지원할 수 없다.
 
 따라서 CA 중 C 만을 제공하게 된다.
 
 # How to Overcome
 
-
 - 스케일 업
 
 - NoSQL로 이전
 
-- Galera Clustering 
-
+- Galera Clustering
   - P 에 대한 지원을 할 수 없지만, Master 와 Slave 간 Latency 를 최소화함으로서 A를 극강으로 올릴 수 있다.
-  
+
 - 데이터 샤딩
 
 [^1]: https://www.baeldung.com/cs/brewers-cap-theorem <https://www.baeldung.com/cs/brewers-cap-theorem>
+
 [^2]: https://mwhittaker.github.io/blog/an_illustrated_proof_of_the_cap_theorem/ <https://mwhittaker.github.io/blog/an_illustrated_proof_of_the_cap_theorem/>
+
 [^3]: https://medium.com/nerd-for-tech/cap-theorem-with-focus-on-partition-tolerance-1af4403cb35a <https://medium.com/nerd-for-tech/cap-theorem-with-focus-on-partition-tolerance-1af4403cb35a>
+
 [^4]: https://www.rupeshtiwari.com/introduction-to-cap-theorem/#:~:text=The%20CAP%20theorem%20states%20that,%2C%20available%2C%20and%20partition%20tolerant. <https://www.rupeshtiwari.com/introduction-to-cap-theorem/#:~:text=The%20CAP%20theorem%20states%20that,%2C%20available%2C%20and%20partition%20tolerant.>
+
 [^5]: https://onduway.tistory.com/106#:~:text=%EC%97%90%EC%84%9C%20%ED%95%84%EC%88%98%EC%A0%81%EC%9D%B4%EB%8B%A4.-,CAP%20%EC%9D%B4%EB%A1%A0%EC%9D%B4%EB%9E%80%3F,%EC%9E%A5%EC%95%A0%EA%B0%80%20%EB%B0%9C%EC%83%9D%ED%95%A0%20%EC%88%98%20%EB%B0%96%EC%97%90%20%EC%97%86%EB%8B%A4. <https://onduway.tistory.com/106#:~:text=%EC%97%90%EC%84%9C%20%ED%95%84%EC%88%98%EC%A0%81%EC%9D%B4%EB%8B%A4.-,CAP%20%EC%9D%B4%EB%A1%A0%EC%9D%B4%EB%9E%80%3F,%EC%9E%A5%EC%95%A0%EA%B0%80%20%EB%B0%9C%EC%83%9D%ED%95%A0%20%EC%88%98%20%EB%B0%96%EC%97%90%20%EC%97%86%EB%8B%A4.>
+
 [^6]: https://dongwooklee96.github.io/post/2021/03/26/cap-%EC%9D%B4%EB%A1%A0%EC%9D%B4%EB%9E%80/ <https://dongwooklee96.github.io/post/2021/03/26/cap-%EC%9D%B4%EB%A1%A0%EC%9D%B4%EB%9E%80/>

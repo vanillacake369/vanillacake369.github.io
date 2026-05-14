@@ -1,5 +1,4 @@
 ---
-title: "JSON Serialize with Jackson 과정 "
 description: "Jackson can be used to automatically serialize this class to JSON so that it can, for example, be sent over the network to another service that may..."
 date: 2026-02-25
 tags: [java]
@@ -9,11 +8,9 @@ draft: false
 
 # Why(What For?) 🤷‍♂️
 
-
 > JSON Serialize 에 대해 알아보고, 이에 대한 주의점을 살펴보자.
 
 # What(What should I know?) 👇
-
 
 > 사실상 제일 하단에 적어둔 레퍼런스를 옮겨놓은 것 밖에 없다.
 
@@ -82,6 +79,5 @@ This class has two minor wrinkles that you should know about.
 따라서 Serialize 대상 엔티티나 다른 도메인 엔티티 내부의 필드값들이 어떤 것들이 있는지 주의해야한다.
 
 # Reference 📖
-
 
 [https://blogs.oracle.com/javamagazine/post/java-json-serialization-jackson](https://blogs.oracle.com/javamagazine/post/java-json-serialization-jackson)

@@ -1,5 +1,4 @@
 ---
-title: "About ZFS"
 description: "홈랩을 구축하면서 파일시스템을 구축할 일이 있었다."
 date: 2025-12-30
 tags: [linux, infra]
@@ -9,23 +8,11 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 홈랩을 구축하면서 파일시스템을 구축할 일이 있었다.
 
 파일시스템은 무엇이 있고, 동작원리와 실제 어떻게 구축할 수 있는지를 알아보고자 한다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## ext4 란?
 
@@ -74,25 +61,25 @@ flowchart TB
         A3[LVM<br/>Logical Volume Manager]
         A4[mdadm<br/>Software RAID]
         A5[(Physical Disks)]
-        
+
         A1 --> A2
         A2 --> A3
         A3 --> A4
         A4 --> A5
-        
+
         A3 -.-|스냅샷| N1[ ]
         A4 -.-|RAID| N2[ ]
     end
-    
+
     subgraph ZFS["ZFS"]
         direction TB
         B1[Application]
         B2[ZFS<br/>Filesystem + Volume Manager + RAID]
         B5[(Physical Disks)]
-        
+
         B1 --> B2
         B2 --> B5
-        
+
         B2 -.-|스냅샷 + RAID + 압축| N3[ ]
     end
 ```
@@ -194,17 +181,13 @@ graph TB
 
 1.
 
-Dataset & POSIX Layer
-2.
+Dataset & POSIX Layer 2.
 
-DMU - Data Management Unit
-3.
+DMU - Data Management Unit 3.
 
-Cache Layer (ARC & L2ARC)
-4.
+Cache Layer (ARC & L2ARC) 4.
 
-SPA - Storage Pool Allocator (입출력 제어)
-5.
+SPA - Storage Pool Allocator (입출력 제어) 5.
 
 Vdev Layer & Physical Disks (가상화 및 저장)
 
@@ -236,13 +219,13 @@ ZFS에서 **Dataset**은 데이터를 저장하는 논리적 단위이다.
 
 ### Dataset 유형
 
-| 유형 | 설명 | 예시 |
-| --- | --- | --- |
-| **Filesystem** | 일반 파일시스템, 마운트 가능 | `tank/home`, `tank/data` |
-| **Volume (Zvol)** | 블록 디바이스로 내보내기 | `/dev/zvol/tank/vm-disk` |
-| **Snapshot** | 읽기 전용 특정 시점 복사본 | `tank/data@backup` |
-| **Clone** | 스냅샷 기반 쓰기 가능 복사본 | `tank/data-clone` |
-| **Bookmark** | 스냅샷과 유사하나 공간 미사용 | `tank/data#mark1` |
+| 유형              | 설명                          | 예시                     |
+| ----------------- | ----------------------------- | ------------------------ |
+| **Filesystem**    | 일반 파일시스템, 마운트 가능  | `tank/home`, `tank/data` |
+| **Volume (Zvol)** | 블록 디바이스로 내보내기      | `/dev/zvol/tank/vm-disk` |
+| **Snapshot**      | 읽기 전용 특정 시점 복사본    | `tank/data@backup`       |
+| **Clone**         | 스냅샷 기반 쓰기 가능 복사본  | `tank/data-clone`        |
+| **Bookmark**      | 스냅샷과 유사하나 공간 미사용 | `tank/data#mark1`        |
 
 ### Filesystem
 
@@ -346,7 +329,7 @@ stateDiagram-v2
     Open --> Quiescing: 시간 초과 or 더티 데이터 임계치
     Quiescing --> Syncing: 모든 트랜잭션 완료
     Syncing --> [*]: 디스크 기록 완료
-    
+
     note right of Open: 새 트랜잭션 수락
     note right of Quiescing: 진행 중인 트랜잭션 완료 대기
     note right of Syncing: 디스크에 원자적 기록
@@ -472,12 +455,12 @@ ARC에서 밀려난 데이터를 저장한다.
 
 ### 3.2.1 L2ARC 특징
 
-| 항목 | 설명 |
-| --- | --- |
-| **위치** | SSD/NVMe 디바이스 |
-| **구조** | Ring Buffer (FIFO) |
+| 항목            | 설명                                 |
+| --------------- | ------------------------------------ |
+| **위치**        | SSD/NVMe 디바이스                    |
+| **구조**        | Ring Buffer (FIFO)                   |
 | **Persistence** | OpenZFS 2.0+에서 리부팅 후 복원 가능 |
-| **대상** | ARC에서 퇴출되는 "따뜻한" 데이터 |
+| **대상**        | ARC에서 퇴출되는 "따뜻한" 데이터     |
 
 > ⚠️ 주의: L2ARC는 ARC가 아니다!
 
@@ -558,14 +541,14 @@ flowchart LR
 
 ZIO 유형
 
-| 유형 | 설명 |
-| --- | --- |
-| `ZIO_TYPE_READ` | 데이터 읽기 |
+| 유형             | 설명        |
+| ---------------- | ----------- |
+| `ZIO_TYPE_READ`  | 데이터 읽기 |
 | `ZIO_TYPE_WRITE` | 데이터 쓰기 |
-| `ZIO_TYPE_FREE` | 블록 해제 |
+| `ZIO_TYPE_FREE`  | 블록 해제   |
 | `ZIO_TYPE_CLAIM` | 블록 클레임 |
 | `ZIO_TYPE_FLUSH` | 캐시 플러시 |
-| `ZIO_TYPE_TRIM` | SSD TRIM |
+| `ZIO_TYPE_TRIM`  | SSD TRIM    |
 
 ### **4.1.3 Vdev Manager**
 
@@ -576,7 +559,7 @@ Vdev Manager는 가상 디바이스 계층을 관리하고 I/O를 분산한다.
 ```bash
 # I/O 클래스 우선순위 (높음 → 낮음)
 # 1. Sync Read
-# 2. Sync Write  
+# 2. Sync Write
 # 3. Async Read
 # 4. Async Write
 # 5. Scrub/Resilver
@@ -650,11 +633,11 @@ zpool create tank raidz3 /dev/sd{a,b,c,d,e,f,g}
 
 **RAIDZ 비교:**
 
-| 유형 | 최소 디스크 | 장애 허용 | 용량 효율 | 권장 디스크 수 |
-| --- | --- | --- | --- | --- |
-| RAIDZ1 | 2 | 1 | (N-1)/N | 3-5 |
-| RAIDZ2 | 3 | 2 | (N-2)/N | 5-9 |
-| RAIDZ3 | 4 | 3 | (N-3)/N | 7+ |
+| 유형   | 최소 디스크 | 장애 허용 | 용량 효율 | 권장 디스크 수 |
+| ------ | ----------- | --------- | --------- | -------------- |
+| RAIDZ1 | 2           | 1         | (N-1)/N   | 3-5            |
+| RAIDZ2 | 3           | 2         | (N-2)/N   | 5-9            |
+| RAIDZ3 | 4           | 3         | (N-3)/N   | 7+             |
 
 **RAIDZ vs 전통 RAID-5/6:**
 
@@ -699,14 +682,14 @@ zpool set autoreplace=on tank
 
 [https://pve.proxmox.com/wiki/ZFS_on_Linux#:~:text=at%20installation%20time%3A-,RAID0,variation%20on%20RAID%2D5%2C%20triple%20parity.%20Requires%20at%20least%205%20disks.,-The%20installer%20automatically](https://pve.proxmox.com/wiki/ZFS_on_Linux#:~:text=at%20installation%20time%3A-,RAID0,variation%20on%20RAID%2D5%2C%20triple%20parity.%20Requires%20at%20least%205%20disks.,-The%20installer%20automatically)
 
-| **RAID 레벨** | **최소 디스크** | **장애 허용** | **용량 효율** | **읽기 성능** | **쓰기 성능** | **추천 용도** |
-| --- | --- | --- | --- | --- | --- | --- |
-| **RAID 0 (Stripe)** | 1 | **0** | 100% | 매우 높음 | 매우 높음 | 임시 데이터, 캐시 영역 |
-| **RAID 1 (Mirror)** | 2 | N-1 | 1/N | 높음 | 보통 | **OS 부트, DB, 가상화** |
-| **RAID 10 (1+0)** | 4 | Vdev당 1 | 50% | 최고 | 높음 | **고성능 가상화, 대용량 DB** |
-| **RAIDZ-1** | 3 | 1 | (N-1)/N | 보통 | 낮음 | 일반 저장소, 미디어 서버 |
-| **RAIDZ-2** | 4 | 2 | (N-2)/N | 보통 | 낮음 | **중요 데이터, 백업 서버** |
-| **RAIDZ-3** | 5 | 3 | (N-3)/N | 보통 | 낮음 | 초고용량 아카이브 |
+| **RAID 레벨**       | **최소 디스크** | **장애 허용** | **용량 효율** | **읽기 성능** | **쓰기 성능** | **추천 용도**                |
+| ------------------- | --------------- | ------------- | ------------- | ------------- | ------------- | ---------------------------- |
+| **RAID 0 (Stripe)** | 1               | **0**         | 100%          | 매우 높음     | 매우 높음     | 임시 데이터, 캐시 영역       |
+| **RAID 1 (Mirror)** | 2               | N-1           | 1/N           | 높음          | 보통          | **OS 부트, DB, 가상화**      |
+| **RAID 10 (1+0)**   | 4               | Vdev당 1      | 50%           | 최고          | 높음          | **고성능 가상화, 대용량 DB** |
+| **RAIDZ-1**         | 3               | 1             | (N-1)/N       | 보통          | 낮음          | 일반 저장소, 미디어 서버     |
+| **RAIDZ-2**         | 4               | 2             | (N-2)/N       | 보통          | 낮음          | **중요 데이터, 백업 서버**   |
+| **RAIDZ-3**         | 5               | 3             | (N-3)/N       | 보통          | 낮음          | 초고용량 아카이브            |
 
 ## 왜 단일 SSD 에서 ZFS 구성은 오버엔지니어링인가?
 
@@ -728,21 +711,21 @@ ZFS는 하드웨어(SSD)의 쓰기 단위인 '페이지'를 넘어 CoW, ZIL 와 
 
 ## 언제 뭘 쓸까?
 
-| **선택** | **추천 상황 (Use Case)** | **핵심 이유** |
-| --- | --- | --- |
-| **ZFS** | **데이터 무결성, RAID 구성, 압축/중복제거가 필요할 때** | 자가 수복(Self-healing), Copy-on-Write 기반의 강력한 스냅샷, 관리 편의성 |
-| **XFS** | **대용량 파일, 고성능 병렬 I/O가 필요할 때** | 64비트 주소 체계, 확장성(Scalability), 멀티 스레드 환경에서의 뛰어난 동시 처리 |
-| **ext4** | **범용적인 서비스, 단일 디스크, 안정성이 최우선일 때** | 가볍고 빠름, 커널 지원의 성숙도, 파일시스템 손상 시 복구 도구가 가장 풍부함 |
+| **선택** | **추천 상황 (Use Case)**                                | **핵심 이유**                                                                  |
+| -------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **ZFS**  | **데이터 무결성, RAID 구성, 압축/중복제거가 필요할 때** | 자가 수복(Self-healing), Copy-on-Write 기반의 강력한 스냅샷, 관리 편의성       |
+| **XFS**  | **대용량 파일, 고성능 병렬 I/O가 필요할 때**            | 64비트 주소 체계, 확장성(Scalability), 멀티 스레드 환경에서의 뛰어난 동시 처리 |
+| **ext4** | **범용적인 서비스, 단일 디스크, 안정성이 최우선일 때**  | 가볍고 빠름, 커널 지원의 성숙도, 파일시스템 손상 시 복구 도구가 가장 풍부함    |
 
 ```mermaid
 flowchart TD
     DiskCount{물리 디스크 개수}
-    
+
     %% 단일 디스크 경로
     DiskCount -->|단일 SSD/HDD| Single[성능 및 수명 중시?]
     Single -->|Yes: 범용/가벼움| EXT4[ext4]
     Single -->|No: 데이터 무결성 우선| ZFS_Single[ZFS <br/><i>*쓰기 증폭 감수 필요</i>]
-    
+
     %% 다중 디스크 경로
     DiskCount -->|복수 디스크| Purpose{주요 데이터 형태}
     Purpose -->|VM/백업/안전성| ZFS[ZFS <br/><i>RAIDZ / Mirror</i>]
@@ -759,18 +742,22 @@ flowchart TD
 
 어떻게 씀?
 
----
-
 > 💡 본인 linux distrot 에 맞춰 [https://openzfs.github.io/openzfs-docs/Getting%20Started/index.html](https://openzfs.github.io/openzfs-docs/[^1]Getting%20Started/index.html) 를 참고하는 게 최고이다.
 
 ## ZFS 설치
 
 ## ZFS 이중화
+
 ## ZFS 백업 전략
 
 [^1]: https://openzfs.github.io/openzfs-docs/ <https://openzfs.github.io/openzfs-docs/>
+
 [^2]: https://github.com/openzfs/zfs <https://github.com/openzfs/zfs>
+
 [^3]: https://ubuntu.com/tutorials/setup-zfs-storage-pool#1-overview <https://ubuntu.com/tutorials/setup-zfs-storage-pool#1-overview>
+
 [^4]: https://docs.oracle.com/cd/E26505_01/html/E37384/zfsover-1.html#scrolltoc <https://docs.oracle.com/cd/E26505_01/html/E37384/zfsover-1.html#scrolltoc>
+
 [^5]: https://klarasystems.com/articles/openzfs-all-about-l2arc/ <https://klarasystems.com/articles/openzfs-all-about-l2arc/>
+
 [^6]: https://klarasystems.com/articles/openzfs-native-encryption/ <https://klarasystems.com/articles/openzfs-native-encryption/>

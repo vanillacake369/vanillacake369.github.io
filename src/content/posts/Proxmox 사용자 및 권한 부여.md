@@ -1,5 +1,4 @@
 ---
-title: "Proxmox 사용자 및 권한 부여"
 description: "Proxmox VE stores user attributes in /etc/pve/user.cfg."
 date: 2026-01-06
 tags: [homelab]
@@ -10,27 +9,11 @@ series: { id: "Proxmox Homelab", order: 3 }
 
 # Why?
 
-왜 배움?
-
----
-
----
-
- 
-
 # What?
-
-뭘 배움?
-
----
-
----
 
 # How?
 
 어떻게 씀?
-
----
 
 # [https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_users](https://pve.proxmox.com/pve-docs/chapter-pveum.html[^1]#pveum_users)
 
@@ -210,7 +193,7 @@ Some examples are:
 - /access/groups: Group administration
 - /access/realms/{realmid}: Administrative access to realms
 
-# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool](https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool[^3])
+# [https://pve.proxmox.com/pve-docs/chapter-pveum.html#\_command_line_tool](https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool[^3])
 
 ## Command-line Tool
 
@@ -249,5 +232,7 @@ Finally, you can add users to the new *admin* group:
 ` pveum user modify testuser@pve -group admin`
 
 [^1]: https://pve.proxmox.com/pve-docs/chapter-pveum.html <https://pve.proxmox.com/pve-docs/chapter-pveum.html>
+
 [^2]: https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management <https://pve.proxmox.com/pve-docs/chapter-pveum.html#pveum_permission_management>
+
 [^3]: https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool <https://pve.proxmox.com/pve-docs/chapter-pveum.html#_command_line_tool>

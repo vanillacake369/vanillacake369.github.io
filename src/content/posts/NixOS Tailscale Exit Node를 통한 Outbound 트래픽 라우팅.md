@@ -1,5 +1,4 @@
 ---
-title: "NixOS Tailscale Exit Node를 통한 Outbound 트래픽 라우팅"
 description: "공공 WiFi(카페, 공항, 호텔 등)는 다음과 같은 보안 위협에 노출됩니다:"
 date: 2026-01-27
 tags: [homelab, nix]
@@ -9,7 +8,6 @@ series: { id: "NixOS Ecosystem", order: 11 }
 ---
 
 # WHY
-
 
 ### 공공 WiFi의 위험성
 
@@ -31,15 +29,14 @@ series: { id: "NixOS Ecosystem", order: 11 }
 
 ### 왜 상용 VPN이 아닌 홈랩인가?
 
-| 항목 | 상용 VPN | 홈랩 Exit Node |
-| --- | --- | --- |
-| 신뢰 | VPN 업체에 트래픽 위임 | 자체 서버, 완전한 통제 |
-| 비용 | 월 구독료 | 이미 운영 중인 홈랩 활용 |
-| 로그 | 업체의 no-log 정책 신뢰 필요 | 직접 로그 정책 결정 |
-| 속도 | 서버 위치에 따라 변동 | 홈 인터넷 대역폭 직접 사용 |
+| 항목 | 상용 VPN                     | 홈랩 Exit Node             |
+| ---- | ---------------------------- | -------------------------- |
+| 신뢰 | VPN 업체에 트래픽 위임       | 자체 서버, 완전한 통제     |
+| 비용 | 월 구독료                    | 이미 운영 중인 홈랩 활용   |
+| 로그 | 업체의 no-log 정책 신뢰 필요 | 직접 로그 정책 결정        |
+| 속도 | 서버 위치에 따라 변동        | 홈 인터넷 대역폭 직접 사용 |
 
 # WHAT
-
 
 ### Tailscale Exit Node란?
 
@@ -90,7 +87,6 @@ Tailscale의 기본 `divert` 모드는 **netfilter/iptables를 우회**합니다
 Exit Node에 필요한 MASQUERADE 규칙만 수동으로 추가합니다.
 
 # HOW
-
 
 ### 트래픽 흐름
 
@@ -245,12 +241,21 @@ sudo iptables -t nat -L POSTROUTING -v -n | grep MASQ
 ```
 
 [^4]: `modules/nixos/tailscale.nix` <https://www.notion.so/modules/nixos/tailscale.nix>
+
 [^5]: `lib/domains/network.nix` <https://www.notion.so/lib/domains/network.nix>
+
 [^6]: `modules/nixos/network.nix` <https://www.notion.so/modules/nixos/network.nix>
+
 [^7]: `justfile` <https://www.notion.so/justfile>
+
 [^9]: Exit Nodes <https://tailscale.com/kb/1103/exit-nodes>
+
 [^10]: Netfilter Mode <https://tailscale.com/kb/1snip/netfilter>
+
 [^11]: Linux Router <https://tailscale.com/kb/1snip/linux-router>
+
 [^13]: WireGuard <https://www.wireguard.com/>
+
 [^14]: CGNAT (RFC 6598) <https://datatracker.ietf.org/doc/html/rfc6598>
+
 [^15]: iptables MASQUERADE <https://www.netfilter.org/documentation/>

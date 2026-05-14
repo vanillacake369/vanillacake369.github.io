@@ -1,5 +1,4 @@
 ---
-title: "Make Exception Message internationalized using MessageSource "
 description: "모든 소스코드는 해당 깃허브를 참고하면 된다."
 date: 2026-02-25
 tags: [java]
@@ -9,12 +8,10 @@ draft: false
 
 # Why(What For?) 🤷‍♂️
 
-
 > 만약 내 서비스를 세계 어디서든 사용한다고 생각해보자.
 > 알고보니,,, 메세지 국제화는 보통 Front 단에서 처리한다고 한다,,,
 
 # What(What should I know?) 👇
-
 
 모든 소스코드는 [해당 깃허브](https://github.com/sparta-nullnull/otil)를 참고하면 된다.
 
@@ -149,6 +146,7 @@ inappropriateCategory:
   msg: "The category is inappropriate."
   status: "400"
 ```
+
 </details>
 <details>
 <summary>`exception_ko.yml`</summary>
@@ -273,14 +271,14 @@ inappropriateCategory:
   msg: "부적절한 카테고리입니다."
   status: "400"
 ```
+
 </details>
 
 application.yml을 통해 국제화 저장경로를 지정해주자.
 
 ```yaml
 spring:
-  messages:
-    basename:message/messages
+  messages: basename:message/messages
     encoding:UTF-8
     fallbackToSystemLocale:false
     alwaysUseMessageFormat:true
@@ -359,7 +357,7 @@ public class MessageSourceConfig implements WebMvcConfigurer {
 
 사실 이러한 행위는 DI를 역행하는 행위이다.
 
-하지만 이렇게 해야만 하는 이유가 있었는데, 
+하지만 이렇게 해야만 하는 이유가 있었는데,
 그것은 바로 MessageSource 인스턴스 자체는 동적으로 변경되고 주입되지만, 예외처리는 static 한 상황에서 처리하게끔 하고자 하기 때문이다.
 
 MessageSource 인스턴스가 지역에 따라 다르게 변경되는 반면, 예외처리는 정적으로 처리하게끔해야한다.
@@ -493,7 +491,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-혹시 몰라 테스트 코드 또한 작성해주었다. 
+혹시 몰라 테스트 코드 또한 작성해주었다.
 
 ```java
 @ExtendWith(SpringExtension.class)
@@ -548,7 +546,6 @@ class ErrorCaseResolverTest {
 ```
 
 # Reference 📚
-
 
 [https://blog.hkwon.me/spring-boot-spring-i18n-configuration/](https://blog.hkwon.me/spring-boot-spring-i18n-configuration/)
 [https://velog.io/@maketheworldwise/다국어-처리의-모든-것](https://velog.io/@maketheworldwise/다국어-처리의-모든-것)

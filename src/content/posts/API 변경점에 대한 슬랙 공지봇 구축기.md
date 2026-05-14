@@ -1,5 +1,4 @@
 ---
-title: "API 변경점에 대한 슬랙 공지봇 구축기"
 description: "API 변경점이 생기면 개발팀에게 변경점 요약을 해줄 수 있게끔 해보자"
 date: 2025-03-02
 tags: [journal]
@@ -10,7 +9,6 @@ draft: false
 ![](/images/velog/0b1979820c49e838.png)
 
 # Episode 📜
-
 
 BE API 는 수정이 잦을 수밖에 없다.
 
@@ -48,7 +46,6 @@ API 스펙 변경 시 swagger diff 오픈소스들을 활용하여 배포 파이
 
 # About 💁‍♂️
 
-
 아래와 같은 설계로 접근해보고자 한다.
 
 > 💡
@@ -56,29 +53,35 @@ API 스펙 변경 시 swagger diff 오픈소스들을 활용하여 배포 파이
 > 1.
 
 기존 서버의 swagger json(혹은 yaml) 을 다운로드
-    a. curl 명령어를 사용하여 다운
->        
+a. curl 명령어를 사용하여 다운
+
 >        ```bash
 >        curl -o swagger.json ${api-path}
->        
+>
 >        ```
->        
+>
+>
 > 2.
 
 배포할 코드의 swagger json(혹은 yaml) 을 다운로드
->    a.
+
+> a.
 
 서버 실행 후 localhost 내의 swagger.json 을 다운로드
+
 > 3.
 
 파이프라인에서 diff 지원 오픈소스 실행
->    b. diff 지원 오픈소스 다운로드
->    c.
+
+> b. diff 지원 오픈소스 다운로드
+> c.
 
 변경점 분석결과 가져오기
->    d.
+
+> d.
 
 만약 변경점 분석결과 존재 시 슬랙에 dm 전송
+
 >
 
 ### swagger diff 를 지원하는 오픈소스들
@@ -100,10 +103,11 @@ API 스펙 변경 시 swagger diff 오픈소스들을 활용하여 배포 파이
   - npm / node 둘 다 필요함.
 
 특히 node 는 14 버전 이상이였어야 했음
-  - 이상하게 변수명 하나 바꿨음에도 장문의 diff 설명이 나오는 것을 확인
-   - 이는 내가 원하는 것이 아님,,,
-  - html, md 출력포맷 미지원
-  
+
+- 이상하게 변수명 하나 바꿨음에도 장문의 diff 설명이 나오는 것을 확인
+- 이는 내가 원하는 것이 아님,,,
+- html, md 출력포맷 미지원
+
 #### [OpenAPITools/openapi-diff](https://github.com/OpenAPITools/openapi-diff)
 
 - 아래를 통해 docker image pull 및 container 실행하여 명령어 실행
@@ -231,11 +235,11 @@ openapi-diff --help
 	--warn 경고 정보를 인쇄합니다.
 
 ```
-        
+
 #### [Tufin/oasdiff](https://github.com/Tufin/oasdiff)
 
 - go 로 작성되었으며 docker 가 따로 필요없이 binary 기반으로 돌아가서 빠름 !
-( 물론 docker 설치도 가능하다 )
+  ( 물론 docker 설치도 가능하다 )
 - curl 명령어를 통해 설치
 
 ```bash
@@ -285,7 +289,6 @@ jihoon@HAMA:~$ oasdiff changelog swagger-sample-01.yaml swagger-sample-02.yaml -
 ,,,,
 
 ```
-        
 
 ### 무엇을 쓰기로 결정했고 왜 그런 선택을 했는지?
 
@@ -295,36 +298,22 @@ jihoon@HAMA:~$ oasdiff changelog swagger-sample-01.yaml swagger-sample-02.yaml -
 
 1.
 
-변화점에 대해 비교나열을 해준다.
-    1. changelog 를 통해 `변경 전 값 → 변경 후 값` 으로 분석해줬다.
-    2.
+변화점에 대해 비교나열을 해준다. 1. changelog 를 통해 `변경 전 값 → 변경 후 값` 으로 분석해줬다. 2.
 
-다른 오픈소스들은 지원해주지 않는다.
-2.
+다른 오픈소스들은 지원해주지 않는다. 2.
 
-CLI 태그를 통해 다양한 format 을 지원한다.
-    1. md
-    2. html
-    3. text
-3.
+CLI 태그를 통해 다양한 format 을 지원한다. 1. md 2. html 3. text 3.
 
-다양한 기능을 지원한다.
-    1. changelog
-    2. diff
-    3. summary 등등
-4. java 로 구현되어있는 다른 친구들에 비해 go 로 구현되어 있어 가볍다.
-    1. docker 이미지 또한 지원된다.
-    2.
+다양한 기능을 지원한다. 1. changelog 2. diff 3. summary 등등 4. java 로 구현되어있는 다른 친구들에 비해 go 로 구현되어 있어 가볍다. 1. docker 이미지 또한 지원된다. 2.
 
 실행파일이 가볍고 커스텀이 쉽다. (document 에 예제가 없고 설명이 똥 같은게 단점,,)
 
 # Apply 🧑‍💻
 
-
 필자는 GitLab 의 파이프라인에 통합하여 CI/CD 과정에서 처리될 수 있게끔 하고자 하였다.
 
 대충 프로세스는 아래와 같다.
-    
+
 1.
 
 빌드 스테이지에서 자바애플리케이션을 컴파일(빌드) 하여 결과물 app.jar 를 얻는다.
@@ -334,7 +323,7 @@ CLI 태그를 통해 다양한 format 을 지원한다.
 배포 스테이지에서 app.jar 를 서버에 배포(앱 실행)한다.
 
 3. oas-diff 스테이지에서 배포된 버전의 oas(latest.json)를 얻고, oasdiff 로 옛날 버전의 origin.json 파일과 비교하여 변경점을 깃랩서버에 저장한다.
-(최초 실행시 origin.json 이 없다.
+   (최초 실행시 origin.json 이 없다.
 
 캐시되기 전이므로, 두번째 배포부터 비교되기 시작한다.)
 
@@ -473,7 +462,6 @@ GitLab 파이프라인에서 비교결과파일([changelog.md](http://changelog.
 
 # To Be Improved ,,, 🤔
 
-
 - 굳이 n8n & ML model 의 도움이 필요할까?
   - 요약결과값에 대해 번역 파일을 추가하여, 깃허브에 issue 를 올려보는 건 어떨까?
   - 아니면 직접 한글번역본을 추가하여 사내 프로젝트로 올려놓고, docker image 로 따로 빼두는 건 어떨까?
@@ -483,7 +471,6 @@ GitLab 파이프라인에서 비교결과파일([changelog.md](http://changelog.
   - 만약 개선이 가능하다면 커밋 히스토리와 묶일 수 있으면 좋겠다는 생각이 든다.
 
 # Reference 📚
-
 
 https://github.com/tinohager/swagger-diff
 

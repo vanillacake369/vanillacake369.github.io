@@ -1,5 +1,4 @@
 ---
-title: "계속 자라나는 정책,, 어떻게 설계하는 게 좋을까? (feat. 시덥지 않은 DDD ,,,)"
 description: "요구사항에 의해 자라나는 정책들,,, 과연 책임 분리는 어떻게 할 것이며 도메인 간 처리는 어떻게 하는 게 좋을까??"
 date: 2025-01-23
 tags: [journal]
@@ -11,7 +10,6 @@ draft: false
 
 # Episode 📜
 
-
 제품을 판매하는 상인이 되어보자.
 
 다나와에서 접속한 사용자에게 상품 판매를 하고자한다.
@@ -19,20 +17,20 @@ draft: false
 이 때 판매정책은 아래와 같다.
 
 > 🏷️
-> 
+>
 > - 상품은 상품명, 가격과 수량이 있다.
 > - 할인 정책을 적용한다.
->     - 무료 지급 상품이라면 적용 X
->     - 무할인 지급 상품이라면 적용 X
->     - 정률 할인이라면 정률을 통해 할인 (eg 10,000 에 대해 10% 인 경우 1,000 할인)
->     - 정액 할인이라면 정액 할인 (eg 10,000 에 대해 10% 인 경우 1,000 할인)
->     - 구독한 사람이라면 스페셜 할인
->     - 다나와 쿠폰 보유인이라면 쿠폰 할인
+>   - 무료 지급 상품이라면 적용 X
+>   - 무할인 지급 상품이라면 적용 X
+>   - 정률 할인이라면 정률을 통해 할인 (eg 10,000 에 대해 10% 인 경우 1,000 할인)
+>   - 정액 할인이라면 정액 할인 (eg 10,000 에 대해 10% 인 경우 1,000 할인)
+>   - 구독한 사람이라면 스페셜 할인
+>   - 다나와 쿠폰 보유인이라면 쿠폰 할인
 > - 할인 정책은 사업이 지속됨에 따라 추가/수정될 수 있다.
 > - 절사 정책을 적용한다.
->     - 1원 단위 → 12,518 원 상품이  12,500 원에 판매
->     - 10원 단위 → 12,518 원 상품이  12,510 원에 판매
->     - 100원 단위 → 12,518 원 상품이  12,500 원에 판매
+>   - 1원 단위 → 12,518 원 상품이 12,500 원에 판매
+>   - 10원 단위 → 12,518 원 상품이 12,510 원에 판매
+>   - 100원 단위 → 12,518 원 상품이 12,500 원에 판매
 > - 절사 정책은 사업이 지속됨에 따라 추가/수정될 수 있다.
 
 어떤 설계안을 가지고 접근할 것인가?
@@ -41,13 +39,12 @@ draft: false
 
 # About 💁‍♂️
 
-
 > ⚠️
-> 
-> 개발에는 정답이 없다. 
-> 
+>
+> 개발에는 정답이 없다.
+>
 > 앞으로 설명하는 설계안 또한 정답이 아니다.
-> 
+>
 > 더 좋은 해결안이 있다면 공유가 정답이다 ,,, !
 
 과연 이 요구사항에 대해 어떤 설계가 가장 합리적인 설계일까?
@@ -58,14 +55,11 @@ draft: false
 
 1.
 
-레이어 구성
-2.
+레이어 구성 2.
 
-책임 분리
-3.
+책임 분리 3.
 
-의존성 설계
-4.
+의존성 설계 4.
 
 구현
 
@@ -76,16 +70,19 @@ draft: false
 사내 컨벤션에 따라 아래와 같이 구성해보았다.
 
 > 💡
-> 
+>
 > 1.
 
 도메인 로직 오케스트레이션 — Facade
+
 > 2.
 
 도메인 응용 로직 처리 — Service
+
 > 3.
 
 외부 세계 처리 — Repository, WebClient, MessageQueue ,,,
+
 > 4.
 
 도메인 모델 — Entity (여기선 Product)
@@ -119,52 +116,67 @@ draft: false
 요컨대 책임 분리를 정리하자면 아래와 같이 구성된다.
 
 > 💡
-> 
+>
 > 1.
 
 도메인 로직 오케스트레이션 — Facade
+
 >     1.
 
 상품 도메인 호출 ← 할인, 절사 적용
+
 >     2.
 
 소비자 도메인 호출
+
 >     3.
 
 결제 도메인 호출 ← 상품, 소비자
+
 >     4.
 
 주문 도메인 호출 ← 상품, 소비자, 결제
+
 > 2.
 
 도메인 응용 로직 처리 — Service
+
 >     1.
 
 상품 서비스
+
 >     2.
 
 할인정책 서비스
+
 >     3.
 
 절사정책 서비스
+
 >     4.
 
 소비자 서비스
+
 >     5.
 
 결제 서비스
+
 >     6.
 
 주문 서비스
+
 > 3.
 
 외부 세계 처리 — Repository, WebClient, MessageQueue ,,,
+
 >     1.
 
 이하 생략
+
 > 4.
 
 도메인 모델 — Entity (여기선 Product)
+
 >     1.
 
 이하 생략
@@ -193,7 +205,7 @@ draft: false
 public class Product extends BaseTimeEntity {
 		private String name;
 		private LocalDateTime expiredAt;
-		
+
 		public extendExpirationDate(LocalDateTime date){
 				// 유효기간 연장 도메인 로직 구현
 		}
@@ -257,11 +269,11 @@ public class Product extends BaseTimeEntity {
 public class Product extends BaseTimeEntity {
 		private String name;
 		private LocalDateTime expiredAt;
-		
+
 		public extendExpirationDate(LocalDateTime date){
 				// 유효기간 연장 도메인 로직 구현
 		}
-		
+
     **public BigDecimal getDiscountedPrice(
         @NotNull DiscountPolicy discountPolicy
         ,,,
@@ -302,11 +314,11 @@ public class DiscountPolicyImpl implements DiscountPolicy {
 public class Product extends BaseTimeEntity {
 		private String name;
 		private LocalDateTime expiredAt;
-		
+
 		public extendExpirationDate(LocalDateTime date){
 				// 유효기간 연장 도메인 로직 구현
 		}
-		
+
     public BigDecimal getDiscountedPrice(
         @NotNull DiscountPolicy discountPolicy
         ,,,
@@ -342,49 +354,60 @@ public class DiscountPolicyImpl implements DiscountPolicy {
 아래 설계대로 코드를 구현하면 될 것이다.
 
 > 💡
-> 
+>
 > 1.
 
 도메인 로직 오케스트레이션 — Facade
+
 >     1.
 
 상품 도메인 호출 ← 할인, 절사 적용
+
 >         1.
 
 상품 서비스 ← 할인 서비스, 절사 서비스를 인자값으로 넘긴 뒤, 정책을 호출
+
 >         2.
 
 이후 상품 도메인 로직을 통해 상품 로직을 처리
+
 >     2.
 
 소비자 도메인 호출
+
 >     3.
 
 결제 도메인 호출 ← 상품, 소비자
+
 >     4.
 
 주문 도메인 호출 ← 상품, 소비자, 결제
+
 > 2.
 
 도메인 응용 로직 처리 — Service
+
 >     1.
 
 이하 생략
+
 > 3.
 
 외부 세계 처리 — Repository, WebClient, MessageQueue ,,,
+
 >     1.
 
 이하 생략
+
 > 4.
 
 도메인 모델 — Entity (여기선 Product)
+
 >     1.
 
 이하 생략
 
 # Apply 🧑‍💻
-
 
 사내에서 작성한 간단한 유스케이스 코드를 가져와봤다.
 
@@ -393,137 +416,128 @@ public class DiscountPolicyImpl implements DiscountPolicy {
 코드는 아래와 같다.
 
 - Facade Layer
-    
-    ```java
-    @Facade
-    @RequiredArgsConstructor
-    @Transactional(readOnly = true)
-    public class ChocoPremiumReadFacadeV2Impl implements ChocoPremiumReadFacadeV2, PaginationQueryV2 {
-	
-		,,,
-			
-    	@Override
-        public SingleResult<UrgentJobPostingAffordabilityResponseV2> canUserAffordUrgentJobPosting(
-            Long recruiterMeIdx,
-            UrgentJobPostingAffordabilityRequestV2 requestV2
-        ) {
-            BigDecimal urgentJobPostingPrice = chocoPremiumReadServiceV2.getPriceOf(
-                ChocoPremiumCodeV2.PS06,
-                requestV2.getNumberOfPeopleV2(),
-                chocoTruncatePolicyServiceV2,
-                chocoDiscountPolicyServiceV2
-            );
-            ,, 사내코드
-        }
-    }
-    ```
-    
+
+  ```java
+  @Facade
+  @RequiredArgsConstructor
+  @Transactional(readOnly = true)
+  public class ChocoPremiumReadFacadeV2Impl implements ChocoPremiumReadFacadeV2, PaginationQueryV2 {
+
+  	,,,
+
+  	@Override
+      public SingleResult<UrgentJobPostingAffordabilityResponseV2> canUserAffordUrgentJobPosting(
+          Long recruiterMeIdx,
+          UrgentJobPostingAffordabilityRequestV2 requestV2
+      ) {
+          BigDecimal urgentJobPostingPrice = chocoPremiumReadServiceV2.getPriceOf(
+              ChocoPremiumCodeV2.PS06,
+              requestV2.getNumberOfPeopleV2(),
+              chocoTruncatePolicyServiceV2,
+              chocoDiscountPolicyServiceV2
+          );
+          ,, 사내코드
+      }
+  }
+  ```
+
 - Service Layer
-    
-    ```java
-    // 절사 정책
-    @FunctionalInterface
-    public interface ChocoTruncatePolicyServiceV2 {
-        BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2);
-    }
-    ```
-    
-    ```java
-    // 절사 정책 구현체
-    @Slf4j
-    @Service
-    public class ChocoTruncatePolicyServiceV2Impl implements ChocoTruncatePolicyServiceV2 {
-    
-        @Override
-        public BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2) {
-			,, 사내코드
-        }
-    }
-    ```
-    
-    ```java
-    // 할인 정책
-    @FunctionalInterface
-    public interface ChocoDiscountPolicyServiceV2 {
-        BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount);
-    }
-    ```
-    
-    ```java
-    // 할인 정책 구현체
-    @Slf4j
-    @Service
-    public class ChocoDiscountPolicyServiceV2Impl implements ChocoDiscountPolicyServiceV2 {
-    
-        @Override
-        public BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount) {
-           ,, 사내코드
-        }
-    }
-    ```
-    
-    ```java
-    @Service
-    @RequiredArgsConstructor
-    @Transactional(readOnly = true)
-    public class ChocoPremiumReadServiceV2Impl implements ChocoPremiumReadServiceV2 {
-        @Override
-        public BigDecimal getPriceOf(
-            ChocoPremiumCodeV2 chocoPremiumCodeV2,
-            NumberOfPeopleV2 numberOfPeopleV2,
-            ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
-            ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
-        ) {
-    		,,, 사내코드
-    		    // 할인 적용된 가격 반환
-            return chocoPremiumV2.getDiscountedPrice(
-                chocoPremiumPriceV2,
-                chocoTruncatePolicyServiceV2,
-                chocoDiscountPolicyServiceV2
-            );
-        }
-    }
-    ```
-    
+  ```java
+  // 절사 정책
+  @FunctionalInterface
+  public interface ChocoTruncatePolicyServiceV2 {
+      BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2);
+  }
+  ```
+  ```java
+  // 절사 정책 구현체
+  @Slf4j
+  @Service
+  public class ChocoTruncatePolicyServiceV2Impl implements ChocoTruncatePolicyServiceV2 {
+
+      @Override
+      public BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2) {
+  		,, 사내코드
+      }
+  }
+  ```
+  ```java
+  // 할인 정책
+  @FunctionalInterface
+  public interface ChocoDiscountPolicyServiceV2 {
+      BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount);
+  }
+  ```
+  ```java
+  // 할인 정책 구현체
+  @Slf4j
+  @Service
+  public class ChocoDiscountPolicyServiceV2Impl implements ChocoDiscountPolicyServiceV2 {
+
+      @Override
+      public BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount) {
+         ,, 사내코드
+      }
+  }
+  ```
+  ```java
+  @Service
+  @RequiredArgsConstructor
+  @Transactional(readOnly = true)
+  public class ChocoPremiumReadServiceV2Impl implements ChocoPremiumReadServiceV2 {
+      @Override
+      public BigDecimal getPriceOf(
+          ChocoPremiumCodeV2 chocoPremiumCodeV2,
+          NumberOfPeopleV2 numberOfPeopleV2,
+          ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
+          ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
+      ) {
+  		,,, 사내코드
+  		    // 할인 적용된 가격 반환
+          return chocoPremiumV2.getDiscountedPrice(
+              chocoPremiumPriceV2,
+              chocoTruncatePolicyServiceV2,
+              chocoDiscountPolicyServiceV2
+          );
+      }
+  }
+  ```
 - Domain Layer
-    
-    ```java
-    @Entity
-    ,,,
-    @Table
-    public class Product extends BaseTimeEntity {
-    
-    	,, 사내 코드 ,,
-    
-        /**
-         * 할인가 계산
-         */
-        public BigDecimal getDiscountedPrice(
-            @NotNull ChocoPremiumPriceV2 chocoPremiumPriceV2,
-            @NotNull ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
-            @NotNull ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
-        ) {
-            if (cpUse == 0){
-                throw new RuntimeException("미사용 상품");
-            }
-    
-            BigDecimal cppPrice = chocoPremiumPriceV2.getCppPrice();
-    
-            // 할인 정책 적용
-            BigDecimal discountedPrice = chocoDiscountPolicyServiceV2.discount(cppPrice, cpDiscountTypeV2, cpDiscount);
-    
-            // 절사 정책 적용
-            return chocoTruncatePolicyServiceV2.truncate(discountedPrice, cpTruncV2);
-        }
-    	
-    }
-    ```
-    
+  ```java
+  @Entity
+  ,,,
+  @Table
+  public class Product extends BaseTimeEntity {
+
+  	,, 사내 코드 ,,
+
+      /**
+       * 할인가 계산
+       */
+      public BigDecimal getDiscountedPrice(
+          @NotNull ChocoPremiumPriceV2 chocoPremiumPriceV2,
+          @NotNull ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
+          @NotNull ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
+      ) {
+          if (cpUse == 0){
+              throw new RuntimeException("미사용 상품");
+          }
+
+          BigDecimal cppPrice = chocoPremiumPriceV2.getCppPrice();
+
+          // 할인 정책 적용
+          BigDecimal discountedPrice = chocoDiscountPolicyServiceV2.discount(cppPrice, cpDiscountTypeV2, cpDiscount);
+
+          // 절사 정책 적용
+          return chocoTruncatePolicyServiceV2.truncate(discountedPrice, cpTruncV2);
+      }
+
+  }
+  ```
 
 추후 시간이 되면 주문과 결제를 아우르는 예시 코드를 작성해서 올리겠다.
 
 # Reference 📚
-
 
 https://velog.io/@devnoyo0123/%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EC%84%9C%EB%B9%84%EC%8A%A4%EC%99%80-%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%84%9C%EB%B9%84%EC%8A%A4
 

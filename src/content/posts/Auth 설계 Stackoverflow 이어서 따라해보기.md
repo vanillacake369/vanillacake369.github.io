@@ -1,5 +1,4 @@
 ---
-title: "Auth 설계 :: Stackoverflow (이어서) 따라해보기"
 description: "발급한 토큰을 Header에 추가하고 성공했다는 메시지, 상태코드 와 함께 Client에 반환하기"
 date: 2026-02-25
 tags: [java]
@@ -10,6 +9,7 @@ draft: false
 # Last Review 🗨️
 
 # Episode 📜
+
 # Domain Design 🛠️
 
 ## 도메인
@@ -32,7 +32,7 @@ draft: false
 - [x] username, password를 Client에서 전달받기
 - [x] DB에서 username을 사용하여 저장된 회원의 유무를 확인하고 있다면 password 비교하기
 - [x] 로그인 성공 시, 로그인에 성공한 유저의 정보와 JWT를 활용하여 토큰을 발급하고,
-발급한 토큰을 Header에 추가하고 성공했다는 메시지, 상태코드 와 함께 Client에 반환하기
+      발급한 토큰을 Header에 추가하고 성공했다는 메시지, 상태코드 와 함께 Client에 반환하기
 
 ### 질문글
 
@@ -79,6 +79,6 @@ draft: false
 
 # Impl
 
-[Auth 구현 :: Stackoverflow (이어서) 따라해보기](https://www.notion.so/4c07c235678f47ada346778b4840573f) 
+[Auth 구현 :: Stackoverflow (이어서) 따라해보기](https://www.notion.so/4c07c235678f47ada346778b4840573f)
 
 # Q & A 🤔

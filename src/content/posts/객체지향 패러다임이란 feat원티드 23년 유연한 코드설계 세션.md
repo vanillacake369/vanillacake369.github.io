@@ -1,5 +1,4 @@
 ---
-title: "객체지향 패러다임이란 (feat.원티드 23년 유연한 코드설계 세션)"
 description: "패러다임이란 본디 과학분야에서 나온 용어로,"
 date: 2024-05-18
 tags: [system-design]
@@ -9,7 +8,6 @@ draft: false
 
 # 패러다임
 
-
 패러다임이란 본디 과학분야에서 나온 용어로,
 “이미 달성된 성취를 기반으로 새로운 발견을 누적시키거나, 기존의 오류를 수정하면서 **단계적으로 진보해나가는 과정**”을 의미한다.
 
@@ -18,7 +16,6 @@ draft: false
 그렇다면 프로그래밍 패러다임이라는 것은 “문제해결을 목적으로 하는 **진보적인 로직 설계에 대한 과정 및 방법론**” 쯤 된다는 말이다.
 
 ### 왜 프로그래밍 패러다임을 알아야하는가?
-
 
 > 프로그래밍 패러다임은 개발자 공동체가 동일한 프로그래밍 스타일과 모델을 공유할 수 있게 함으로써 불필요한 부분에 대한 의견 충돌을 방지한다.
 
@@ -35,7 +32,6 @@ draft: false
 여러 패러다임을 경험해보지 못 한다면, 상황에 적합한 패러다임이 무엇인지를 모를 것이다.
 
 ### 설계에 있어서 이론은 실무보다 중요치 않다.
-
 
 > 설계에 관해 설명할 때 가장 유용한 도구는 이론으로 덕지덕지 치장된 개념과 용어가 아니라 ‘코드’ 그 자체다.
 
@@ -57,11 +53,9 @@ draft: false
 
 # 설계를 제대로 했다면,,,
 
-
 설계를 제대로 했다면 아래 체크리스트를 만족해야한다.
 
 ### 모듈 설계 체크리스트
-
 
 - [ ] 모듈은 제대로 실행되어야 하고
 - [ ] 변경이 용이해야하고
@@ -69,12 +63,10 @@ draft: false
 
 ### 구현 체크리스트
 
-
 - [ ] 요구사항을 지켜야하고
 - [ ] 내일 쉽게 변경할 수 있는 코드
 
 # 객체지향 패러다임
-
 
 [https://incheol-jung.gitbook.io/docs/study/object/2020-03-10-object-chap3](https://incheol-jung.gitbook.io/docs/study/object/2020-03-10-object-chap3)
 
@@ -84,7 +76,7 @@ draft: false
 
 자율적인 객체란,,,
 
-- 자신의 상태를 직접 관리하고 
+- 자신의 상태를 직접 관리하고
 - 스스로의 결정에 따라 행동하는 객체이다.
 
 그렇다면 아래와 같은 의문점이 든다.
@@ -94,12 +86,10 @@ draft: false
 
 ### 각 객체에 자율성을 부여한다.
 
-
 - 여기서 **자신의 상태**라하면, 객체 자신의 내부 멤버를 말한다.
 - **스스로의 결정에 따른 어떤 행동**이라하면,
 
 ### 캡슐화를 지향한 클래스 설계
-
 
 클래스를 설계할 때는, 어디까지 외부 객체의 간섭이 들어갈 수 있는지에 대해 주의해야한다.
 
@@ -112,7 +102,7 @@ draft: false
 ```java
 public class Theater {
 	private final TicketSeller ticketSeller;
-	
+
 
 	public void enter(Audience audience){
 		// 잘못된 코드 Case#1
@@ -128,22 +118,21 @@ public class Theater {
 public class TicketSeller {
 	private TicketOffice ticketOffice;
 	...
-	
+
 	// 내부 구현을 노출하는 인터페이스(=METHOD)는 삭제
 	// 또는 접근 제한자를 public -> private or protected로 수정
 	private TicketOffice getTicketOffice(){
         return this.ticketOffice;
   }
-	
+
 	public void sellTo(Audience audience){
 		// 기존 티켓 구매하는 코드를 여기로 옮긴다.
-		
+
 	}
 }
 ```
 
 ### 객체의 의인화
-
 
 > 그런데 현실 세계의 객체가 가상 세계의 객체로 넘어오면 수동적 존재였던 객체들은 모두 능동적으로 바뀌게 되고 그 객체에 생명이 깃든다.
 
@@ -170,14 +159,11 @@ public class TicketSeller {
 
 1.
 
-매표소에 도착한다.
-2.
+매표소에 도착한다. 2.
 
-고객은 가방에서 티켓을 꺼낸다.
-3.
+고객은 가방에서 티켓을 꺼낸다. 3.
 
-고객은 꺼낸 티켓을 매표소에 건낸다.
-4.
+고객은 꺼낸 티켓을 매표소에 건낸다. 4.
 
 매표소에서는 티켓을 받아 이를 직원이 확인한다.
 
@@ -228,6 +214,7 @@ public class Theater {
     }
 }
 ```
+
 ```java
 public class TicketSeller {
     private TicketOffice ticketOffice;
@@ -242,6 +229,7 @@ public class TicketSeller {
     }
 }
 ```
+
 ```java
 public class Audience {
     private Bag bag;
@@ -255,6 +243,7 @@ public class Audience {
     }
 }
 ```
+
 ```java
 public class Bag {
     private Long amount;

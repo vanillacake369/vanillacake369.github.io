@@ -1,5 +1,4 @@
 ---
-title: "JPA & QueryDSL 기반 공간데이터 활용안(feat. PostGIS, Redis Geo)"
 description: "공간데이터란 무엇이고, 주의점은 무엇인지, 또한 이를 Spring 단에서 처리하며 맞닥드렸던 문제점과 해결방법에 대해 나열해보고자 한다."
 date: 2025-07-28
 tags: [journal]
@@ -9,21 +8,9 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 공간데이터란 무엇이고, 주의점은 무엇인지, 또한 이를 Spring 단에서 처리하며 맞닥드렸던 문제점과 해결방법에 대해 나열해보고자 한다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## 공간 데이터(Spatial Data)란?
 
@@ -122,33 +109,25 @@ Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 
 ### Redis Geo 명령어
 
 - **GEOADD**: 위치 데이터 추가
-    
-    ```jsx
-    GEOADD locations 127.0 37.5 "Seoul"
-    
-    ```
-    
+  ```jsx
+  GEOADD locations 127.0 37.5 "Seoul"
+
+  ```
 - **GEOPOS**: 객체의 위치 조회
-    
-    ```jsx
-    GEOPOS locations "Seoul"
-    
-    ```
-    
+  ```jsx
+  GEOPOS locations "Seoul"
+
+  ```
 - **GEODIST**: 두 위치 간 거리 계산
-    
-    ```jsx
-    GEODIST locations "Seoul" "Busan" km
-    
-    ```
-    
+  ```jsx
+  GEODIST locations "Seoul" "Busan" km
+
+  ```
 - **GEOSEARCH / GEORADIUS**: 특정 위치 중심의 객체 검색
-    
-    ```jsx
-    GEOSEARCH locations FROMMEMBER "Seoul" BYRADIUS 50 km
-    
-    ```
-    
+  ```jsx
+  GEOSEARCH locations FROMMEMBER "Seoul" BYRADIUS 50 km
+
+  ```
 
 ### Redis 공간 데이터 특징
 
@@ -162,30 +141,28 @@ Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 
 
 어떻게 씀?
 
----
-
 ## 전체적인 컴포넌트
 
-| 계층 | 컴포넌트 | 역할 |
-| --- | --- | --- |
-| **API Layer** | ContentEndpoint | 클라이언트로부터 지도 콘텐츠 검색 요청을 받아들이는 API 엔드포인트 |
-|  | ContentOnMapSearchReq | 지도 검색에 필요한 파라미터(좌표, 반경 등)를 담는 요청 DTO |
-|  | ContentOnMapSearchResp | 검색 결과(콘텐츠 리스트, 메타데이터 등)를 담아 반환하는 응답 DTO |
-| **Business Logic** | ContentUseCase | 비즈니스 로직을 수행하는 유스케이스 계층 |
-|  | ContentUseCaseMapper | 엔티티 ↔ DTO 간 변환을 담당하는 매퍼 |
-| **Infrastructure Layer** | ContentInfra | 인프라스트럭처 계층 추상화, 리포지토리 호출을 조율 |
-|  | ContentCustomRepository | PostgreSQL/PostGIS 기반의 커스텀 쿼리 실행 리포지토리 |
-| **Redis Cache Layer** | Redis | 빠른 공간 검색을 위한 인메모리 캐시 서버 |
-|  | ContentGeoCache | Redis에 저장되는 지리정보 캐시 엔티티 |
-|  | ContentGeoCacheRepository | Redis Geo 캐시의 읽기·쓰기 인터페이스 |
-|  | GeoOperations (GEOSEARCH commands) | Redis의 GEOSEARCH 등 지리공간 연산 명령 호출 |
-| **PostgreSQL + PostGIS** | PostgreSQL | 영구 저장소로서의 메인 RDBMS |
-|  | PostGIS Extension | PostgreSQL에서 공간 데이터를 다루기 위한 확장 기능 |
-|  | ContentEntity | DB 테이블 매핑 엔티티 (co_point: geometry(Point, 4326)) |
-|  | Spatial Index (GiST/SP‑GiST) | 공간 쿼리 성능 향상을 위한 인덱스 |
-| **PostGIS Functions** | ST_Distance / ST_DistanceSpheroid | 정확한 거리 계산을 위한 PostGIS 함수 |
-|  | ST_Within | 지정된 영역 내 포함 여부를 판단하는 PostGIS 함수 |
-|  | ST_MakePoint / ST_SetSRID | 점(포인트) 좌표 생성 및 SRID 설정 함수 |
+| 계층                     | 컴포넌트                           | 역할                                                               |
+| ------------------------ | ---------------------------------- | ------------------------------------------------------------------ |
+| **API Layer**            | ContentEndpoint                    | 클라이언트로부터 지도 콘텐츠 검색 요청을 받아들이는 API 엔드포인트 |
+|                          | ContentOnMapSearchReq              | 지도 검색에 필요한 파라미터(좌표, 반경 등)를 담는 요청 DTO         |
+|                          | ContentOnMapSearchResp             | 검색 결과(콘텐츠 리스트, 메타데이터 등)를 담아 반환하는 응답 DTO   |
+| **Business Logic**       | ContentUseCase                     | 비즈니스 로직을 수행하는 유스케이스 계층                           |
+|                          | ContentUseCaseMapper               | 엔티티 ↔ DTO 간 변환을 담당하는 매퍼                               |
+| **Infrastructure Layer** | ContentInfra                       | 인프라스트럭처 계층 추상화, 리포지토리 호출을 조율                 |
+|                          | ContentCustomRepository            | PostgreSQL/PostGIS 기반의 커스텀 쿼리 실행 리포지토리              |
+| **Redis Cache Layer**    | Redis                              | 빠른 공간 검색을 위한 인메모리 캐시 서버                           |
+|                          | ContentGeoCache                    | Redis에 저장되는 지리정보 캐시 엔티티                              |
+|                          | ContentGeoCacheRepository          | Redis Geo 캐시의 읽기·쓰기 인터페이스                              |
+|                          | GeoOperations (GEOSEARCH commands) | Redis의 GEOSEARCH 등 지리공간 연산 명령 호출                       |
+| **PostgreSQL + PostGIS** | PostgreSQL                         | 영구 저장소로서의 메인 RDBMS                                       |
+|                          | PostGIS Extension                  | PostgreSQL에서 공간 데이터를 다루기 위한 확장 기능                 |
+|                          | ContentEntity                      | DB 테이블 매핑 엔티티 (co_point: geometry(Point, 4326))            |
+|                          | Spatial Index (GiST/SP‑GiST)       | 공간 쿼리 성능 향상을 위한 인덱스                                  |
+| **PostGIS Functions**    | ST_Distance / ST_DistanceSpheroid  | 정확한 거리 계산을 위한 PostGIS 함수                               |
+|                          | ST_Within                          | 지정된 영역 내 포함 여부를 판단하는 PostGIS 함수                   |
+|                          | ST_MakePoint / ST_SetSRID          | 점(포인트) 좌표 생성 및 SRID 설정 함수                             |
 
 ![](/images/velog/dcbc1d40732bc8bb.png)
 
@@ -277,13 +254,9 @@ public void setEntityManager(EntityManager entityManager) {
 
 1.
 
-Dialect 를 직접 선언
-2. resoureces/META-INF 에 직접 선언한 Dialect 를 등록
-    1. `src/main/resources/META-INF/services/org.hibernate.boot.model.FunctionContributor`파일을 생성한다.
-    2.
+Dialect 를 직접 선언 2. resoureces/META-INF 에 직접 선언한 Dialect 를 등록 1. `src/main/resources/META-INF/services/org.hibernate.boot.model.FunctionContributor`파일을 생성한다. 2.
 
-해당 파일에 직접 구현한 CustomFunctionContributor를 등록한다.
-        1.
+해당 파일에 직접 구현한 CustomFunctionContributor를 등록한다. 1.
 
 패키지명.컨트리뷰터이름 형태로 등록
 
@@ -322,18 +295,16 @@ public class CustomPostGisDialect extends SpatialFunctionContributor {
 두 가지 주의사항이 있는데 하나는 좌표계이고, 하나는 ST_DistanceSpheroid 함수이다.
 
 > 좌표계
-> 
 
 필자는 4326 좌표계 & Geometry 를 사용하고 있어 실제 거리가 아닌 각도 체계 거리로 처리되는 문제가 있었다.
 
 이를 해결하기 위해서 ST_Transform 함수를 통해 3857 좌표계로 변환, ST_DWithin 함수를 사용하였다.
 
 > ST_DistanceSpheroid 함수
-> 
 
-필자는 실제 거리에 가까운 ST_DistanceSpheroid  함수 사용하지 않았다.
+필자는 실제 거리에 가까운 ST_DistanceSpheroid 함수 사용하지 않았다.
 
-엥 실제 거리에 가까우니까 좋은 거 아냐 하는 마음에 사용할 수 있지만, 
+엥 실제 거리에 가까우니까 좋은 거 아냐 하는 마음에 사용할 수 있지만,
 
 이는 Spatial Index 를 사용하지 않았고, 앞서 말했듯이 최대한 Spatial Indeex 를 사용하고자 하였다.
 
@@ -403,15 +374,13 @@ default <T> JPAQuery<T> orderByDistanceAsc(JPAQuery<T> query, Boolean isDistance
 
 다만 수정/삭제에 따라 캐싱과 DB 를 동기화해야하는 포인트가 어렵다.
 
-특히 Redis Geo 는 Sorted Set 으로 관리되므로 — ${KEY} ${MEMBER:위경도} ${VALUE} — 
+특히 Redis Geo 는 Sorted Set 으로 관리되므로 — ${KEY} ${MEMBER:위경도} ${VALUE} —
 
 수정/삭제 시에는 아래와 같이 처리해주어야 한다.
 
 > 수정
-> 
-> 
+>
 > : GEOADD 를 호출
-> 
 
 ```bash
 # 기존 위치 덮어쓰기
@@ -429,10 +398,8 @@ redisTemplate.opsForGeo().add(key, newPoint, member);
 ```
 
 > 삭제
-> 
-> 
+>
 > : ZREM 을 호출
-> 
 
 ```bash
 ZREM locations "loc1"
@@ -448,7 +415,6 @@ redisTemplate.opsForZSet().remove("locations", "loc1");
 
 # 총평
 
-
 예제가 없어서 그냥 SQL 로 짜면 될 것을 굳이굳이 Querydsl 로 하겠다고 몇 번의 삽질을 했는지 모른다.
 
 다만 이렇게 해두고 나니 하드코딩이 아닌 코드 단으로 로직을 처리할 수 있다는 장점이 있다.
@@ -460,6 +426,9 @@ redisTemplate.opsForZSet().remove("locations", "loc1");
 - SQL 에 대한 커스텀 Dialect 선언 시 Multi DB 사용 가능한지
 
 [^1]: https://postgis.net/workshops/postgis-intro/geography.html <https://postgis.net/workshops/postgis-intro/geography.html>
+
 [^2]: https://postgis.net/documentation/faq/spatial-indexes/ <https://postgis.net/documentation/faq/spatial-indexes/>
+
 [^3]: https://redis.io/docs/latest/develop/data-types/geospatial/ <https://redis.io/docs/latest/develop/data-types/geospatial/>
+
 [^4]: https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0 <https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0>

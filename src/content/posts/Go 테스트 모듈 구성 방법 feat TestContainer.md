@@ -1,5 +1,4 @@
 ---
-title: "Go 테스트 모듈 구성 방법 (feat. TestContainer)"
 description: "이후 아래와 같이 connection 확인하는 로직 구성함"
 date: 2025-04-25
 tags: [journal]
@@ -9,21 +8,9 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 - Go 로직을 짜던 도중 로직 작동 확인이 필요함
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 - Go Test 에는 [native test](https://go.dev/doc/tutorial/add-a-test[^1]), [testify library](https://20h.dev/post/golang/go-test/[^2]) 가 대표적으로 사용됨
 - BDD DSL 기반 test 구성을 한다면 [testify library](https://20h.dev/post/golang/go-test/) 사용
@@ -32,8 +19,6 @@ draft: false
 # How?
 
 어떻게 씀?
-
----
 
 > 필자는 아직 testify 를 사용해본 적이 없어 추후 활용하게 되면 업데이트하겠음
 > test 패키지에서 testcontainer 생성하는 모듈을 따로 구성함
@@ -104,4 +89,5 @@ func TestOnFile(t *testing.T) {
 ```
 
 [^1]: https://go.dev/doc/tutorial/add-a-test <https://go.dev/doc/tutorial/add-a-test>
+
 [^2]: https://20h.dev/post/golang/go-test/ <https://20h.dev/post/golang/go-test/>

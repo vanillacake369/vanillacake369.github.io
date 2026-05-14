@@ -1,5 +1,4 @@
 ---
-title: "CKA - Security (RBAC, TLS, ServiceAccount)"
 description: "Kubernetes 보안: RBAC, TLS 인증서, ServiceAccount, API Groups"
 date: 2025-12-25
 tags: [kubernetes, journal]
@@ -10,11 +9,9 @@ series: { id: "Kubernetes CKA", order: 4 }
 
 ## 3주차 : 섹션 7 Security
 
-# Why ? 
+# Why ?
 
-
-# What ? 
-
+# What ?
 
 ## Kubernetes Security Primitives
 
@@ -69,21 +66,15 @@ series: { id: "Kubernetes CKA", order: 4 }
 
 1.
 
-사용자는 개인키 파일을 생성한다.
-2.
+사용자는 개인키 파일을 생성한다. 2.
 
-이후 개인키 + 사용자이름 + 그룹이름을 담은 CSR 파일을 생성한다.
-3. `CertificateSigningRequest` YAML을 작성하여 `kubectl apply` 한다.
-4.
+이후 개인키 + 사용자이름 + 그룹이름을 담은 CSR 파일을 생성한다. 3. `CertificateSigningRequest` YAML을 작성하여 `kubectl apply` 한다. 4.
 
-클러스터 관리자가 해당 CSR 을 승인하면 CSR 의 상태를 Approved 로 변경한다.
-5.
+클러스터 관리자가 해당 CSR 을 승인하면 CSR 의 상태를 Approved 로 변경한다. 5.
 
-CSR Signing Controller가 승인된 요청을 감시(Watch)하다가 포착하고, 클러스터 내부 RootCA 를 사용하여 CSR 승인 데이터를 다시 CSR 내부 `status.certificate` 필드에 다시 저장한다.
-6.
+CSR Signing Controller가 승인된 요청을 감시(Watch)하다가 포착하고, 클러스터 내부 RootCA 를 사용하여 CSR 승인 데이터를 다시 CSR 내부 `status.certificate` 필드에 다시 저장한다. 6.
 
-사용자는 `kubectl get csr <이름> -o jsonpath='{.status.certificate}'` 명령으로 발급된 인증서를 다운로드한다.
-7.
+사용자는 `kubectl get csr <이름> -o jsonpath='{.status.certificate}'` 명령으로 발급된 인증서를 다운로드한다. 7.
 
 이제 이 인증서와 처음에 만든 개인키를 `kubeconfig`에 등록하면, API 서버는 인증서의 `CN`과 `O`를 보고 사용자를 인식하게된다.
 
@@ -100,12 +91,12 @@ graph TD
     subgraph "Control Plane (Master Node)"
         APIServer[<b>4. kube-apiserver</b><br/>CSR 리소스 생성 및 보관]
         ETCD[(<b>etcd</b><br/>CSR Object 상태 저장)]
-        
+
         subgraph "kube-controller-manager"
             ApproveController[<b>5. CSR Approving</b><br/>승인 여부 감시]
             SigningController[<b>7. CSR Signing</b><br/>CA 키로 실제 서명]
         end
-        
+
         ClusterCA[[Cluster CA<br/>ca.key / ca.crt]]
     end
 
@@ -117,12 +108,12 @@ graph TD
     CSRFile --> B64
     B64 ==>|kubectl apply| APIServer
     APIServer <--> ETCD
-    
+
     Admin -.->|kubectl certificate approve| APIServer
-    
+
     APIServer <--> ApproveController
     ApproveController -.->|승인 상태 업데이트| APIServer
-    
+
     APIServer -->|Approved 상태 감지| SigningController
     SigningController -->|CA 서명 요청| ClusterCA
     ClusterCA -->|인증서 .crt 생성| SigningController
@@ -141,26 +132,19 @@ graph TD
 
 1.
 
-개인키 생성
-2.
+개인키 생성 2.
 
-CSR 파일 생성
-3.
+CSR 파일 생성 3.
 
-Base64 인코딩
-4.
+Base64 인코딩 4.
 
-서명 주체 (SignerName)
-5.
+서명 주체 (SignerName) 5.
 
-관리자가 CSR 승인
-6.
+관리자가 CSR 승인 6.
 
-최종 확인
-7.
+최종 확인 7.
 
-사용자가 승인완료된 인증서를 kubeconfig 에 등록
-8.
+사용자가 승인완료된 인증서를 kubeconfig 에 등록 8.
 
 해당 사용자가 문제없이 kube-api-server 와 통신이 되는지 확인한다.
 
@@ -216,6 +200,7 @@ spec:
 	    kind: Issuer
 	    group: cert-manager.io
 ```
+
 ```yaml
 # 2. Certificate 생성
 apiVersion: cert-manager.io/v1
@@ -224,15 +209,16 @@ metadata:
   name: example-test-com
 spec:
   dnsNames:
-    - 'example.com'
+    - "example.com"
   issuerRef:
     name: nameOfClusterIssuer
   secretName: example-test-com-tls
-  
+
 # 이후 Secret 은 Certificate 에 의해 자동으로 생성됨
 # Secret 내에는 CA 인증서와 TLS 인증서&키가 저장되며
 # CA 인증서는 Issuer 에 의해, TLS 인증서&키는 Certificate 에 의해 발행됨
 ```
+
 ```bash
 # certificate 상태 확인
 kubectl describe certificate ${certificate-이름}
@@ -240,12 +226,14 @@ kubectl describe certificate ${certificate-이름}
 # certificaterequest 확인
 kubectl get certificaterequest
 ```
+
 ```bash
 # 실제 자동 생성된 Secret 내 인증서 유효기간과 도메인 확인
 kubectl get secret my-tls-secret -o jsonpath='{.data.tls\.crt}' \
 		| base64 -d  \
 		| openssl x509 -text -noout
 ```
+
 ```bash
 # 실제 적용
 # Ingress
@@ -272,7 +260,7 @@ spec:
             name: my-service
             port:
               number: 80
-              
+
 # Deployment
 # Certificate로 생성된 Secret을 파드에 Volume으로 마운트
 spec:

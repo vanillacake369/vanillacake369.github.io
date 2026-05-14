@@ -1,5 +1,4 @@
 ---
-title: "lombok 사용 시 동일 interface 에 대한 구현체 변경 방법 (feat. required a single bean, but n were found,,)"
 description: "동일 인터페이스 구현체 매핑 방법 원리와 해결책에 대해 알아보자!"
 date: 2025-03-02
 tags: [journal]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 # Episode 📜
-
 
 lombok 사용 도중 사내 팀원 중 한 분께서 구현체 매핑이 안 된다고 하였다.
 
@@ -21,7 +19,6 @@ lombok 사용 도중 사내 팀원 중 한 분께서 구현체 매핑이 안 된
 이에 대해 원인과 해결책을 공유하면 좋을 것 같아 이렇게 포스트를 작성해본다.
 
 # Reason 🤷‍♂️
-
 
 Spring Bean 주입은 아래와 같은 원리로 돌아간다.
 
@@ -44,7 +41,7 @@ Qualifier 는 아래와 같이 쓰여한다.
 
 ```java
 public class FooService {
-     
+
     @Autowired
     @Qualifier("fooFormatter")
     private Formatter formatter;
@@ -68,7 +65,6 @@ public class BarFormatter implements Formatter {
 이외에도 다르게 적용할 수 있는 방법을 소개하고자한다.
 
 # Fix 🔧
-
 
 ### **방법 #1)  lombok.config 사용하여 Qualifier 와 RequiredArgsConstructor 가 함께 작동하도록 처리**
 
@@ -94,25 +90,28 @@ lombok.copyableAnnotations += org.springframework.beans.factory.annotation.Quali
 1. @Resource 는 이름으로 주입하기에 클래스명이 바뀌면 의존관계가 틀어짐
 2.
 
-Constructor Injection 을 하지 않기에 위험함 
-    
-    그럴 일은 없으나, 코드상에서 임의로 변경하게되면 추적이 어려움
-    
+Constructor Injection 을 하지 않기에 위험함
 
-|  | @Autowired | @Resource |
-| --- | --- | --- |
-| 공통점 | 의존관계를 자동으로 주입하기 위한 설정 |  |
-| 차이점1: 지원 | Spring Framework | Java |
-| 차이점2: 검색 | bean의 Type으로 검색하여 의존성 주입 | bean의 Name으로 검색하여 의존성 주입 |
-| 옵션 | @Autowired는 **타입을 이용해서** 자동적으로 값을 설정하기때문에 해당 타입의 빈 객체가 존재하지 않거나 또는 2개이상 존재할 경우 빈객체를 생성할때 예외를 발생시킨다.이 경우를 대비하여  @Autowired(required=false) 옵션을 설정할 수 있다.
+    그럴 일은 없으나, 코드상에서 임의로 변경하게되면 추적이 어려움
+
+|               | @Autowired                                                                                                                                                                                                                               | @Resource                            |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 공통점        | 의존관계를 자동으로 주입하기 위한 설정                                                                                                                                                                                                   |                                      |
+| 차이점1: 지원 | Spring Framework                                                                                                                                                                                                                         | Java                                 |
+| 차이점2: 검색 | bean의 Type으로 검색하여 의존성 주입                                                                                                                                                                                                     | bean의 Name으로 검색하여 의존성 주입 |
+| 옵션          | @Autowired는 **타입을 이용해서** 자동적으로 값을 설정하기때문에 해당 타입의 빈 객체가 존재하지 않거나 또는 2개이상 존재할 경우 빈객체를 생성할때 예외를 발생시킨다.이 경우를 대비하여  @Autowired(required=false) 옵션을 설정할 수 있다. |
 
 해당 옵션을 설정하면 연결할 bean을 찾지 못해도 예외를 발생시키지 않는다. | name 속성을 이용하여 명시적으로 bean name을 줄 수 있다. |
 | 단점 | type으로 검색하여 연결하기 때문에 같은 타입이 2개 이상 존재하는 경우, 예외가 발생한다.
-  
-  
+
+ 
+
 ~~아마 나라면 세 가지 방법 중 그냥 귀찮아서 lombok.config 를 건드려줄 것이다 😅~~
 
 [^1]: Java - Lombok + Spring에서 @Qualifer 적용 이슈 <https://velog.io/@mertyn88/Lombok-Spring에서-Qualifer-적용-이슈>
+
 [^2]: 롬복(lombok)에서 생성자 필드에 선언된 애노테이션을 복사적용하는 것 <https://gist.github.com/ihoneymon/8b62cabb2e985c4ebd29271b3e25181f>
+
 [^3]: @NoArgsConstructor, @RequiredArgsConstructor, @AllArgsConstructor <https://projectlombok.org/features/constructor>
+
 [^4]: @Autowired VS @Resource 그리고 @Qualifier <https://luceatluxvestra.tistory.com/18>

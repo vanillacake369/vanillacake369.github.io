@@ -1,5 +1,4 @@
 ---
-title: "JPA Entity Lifecycle"
 description: "최근에 사내에 코드 아키텍처를 새로 도입하였다."
 date: 2025-05-30
 tags: [java]
@@ -8,12 +7,6 @@ draft: false
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 최근에 사내에 코드 아키텍처를 새로 도입하였다.
 
@@ -30,12 +23,6 @@ draft: false
 이러한 의심을 해소하고자 아래 내용들을 공부해보았다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## JPA 의 엔티티 저장
 
@@ -107,10 +94,10 @@ Persistable 은 새로운 객체인지를 판별하는 isNew() 를 override 할 
 
 > ☝ TL;DR;
 
-새로운 객체가 아니라면 비영속, 준영속 상태의 객체를 영속 상태로 처리하기 위해 
+새로운 객체가 아니라면 비영속, 준영속 상태의 객체를 영속 상태로 처리하기 위해
 EntityManager 의 merge() 를 호출한다.
 
-이 때 EntityManager 의 자식 인터페이스인 Session 을 호출하게 되고, 
+이 때 EntityManager 의 자식 인터페이스인 Session 을 호출하게 되고,
 그에 대한 구현체 SessionImpl 이 호출된다.
 
 ```java
@@ -132,13 +119,14 @@ public interface Session extends SharedSessionContract, EntityManager {
 	<T> T merge(T object);
 }
 ```
+
 ```java
 
 public class SessionImpl
 		extends AbstractSharedSessionContract
 		implements Serializable, SharedSessionContractImplementor, JdbcSessionOwner, SessionImplementor, EventSource,
 				TransactionCoordinatorBuilder.Options, WrapperOptions, LoadAccessContext {
-				
+
 	,,,
 	@Override @SuppressWarnings("unchecked")
 	public <T> T merge(T object) throws HibernateException {
@@ -151,7 +139,8 @@ public class SessionImpl
 ### 세션 검증 및 MergeEvent 발행 ( SessionImpl.merge() )
 
 ### MergeEvent 수신 ( DefaultMergeEventListener.onMerge() )
-### 중복 병합 방지  ( DefaultMergeEventListener.doMerge() )
+
+### 중복 병합 방지 ( DefaultMergeEventListener.doMerge() )
 
 ### 식별자를 통해 영 속속성 검증 및 영속 상태에 따라 영속화 진행 ( DefaultMergeEventListener.merge() )
 
@@ -165,7 +154,7 @@ public class SessionImpl
 
 - 먼저 영속성 컨텍스트(1차 캐시)를 조회
 - 캐시에 없으면 SELECT를 실행
-- SELECT 결과가 없을 땐 stale/transient 여부를 판정하여 예외 혹은 새로 저장 처리 
+- SELECT 결과가 없을 땐 stale/transient 여부를 판정하여 예외 혹은 새로 저장 처리
 
 실제로 아래와 같이 처리된다.
 
@@ -180,6 +169,7 @@ switch ( entityState ) {
 		,,,
 }
 ```
+
 ```java
 protected void entityIsDetached(MergeEvent event, Object copiedId, Object originalId, MergeContext copyCache) {
 		LOG.trace( "Merging detached instance" );
@@ -262,7 +252,7 @@ flowchart LR
 **하지만 merge() 를 호출하게 되고, 영속성 컨텍스트에 데이터가 없으므로 **
 **결과적으로 SELECT 쿼리가 부가적으로 호출되게 된다.**
 
-실제로 아래와 같이 데이터 변경 유스케이스에 대한 테스트코드를 실행하게 되면 
+실제로 아래와 같이 데이터 변경 유스케이스에 대한 테스트코드를 실행하게 되면
 UPDATE 쿼리를 수행하기 위해 SELECT → UPDATE 가 처리되는 것을 볼 수 있다.
 
 ```java
@@ -309,8 +299,13 @@ DETACHED 상태인데 Dirty Checking 을 쓸 수가 없고, 무조건 save()/mer
 만약 피할 수 있는 방법을 알게 된다면 해당 포스트에 더 이어서 적도록 하겠다.
 
 [^1]: https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity <https://howisitgo1ng.tistory.com/entry/JPA-JPA%EA%B0%80-Entity%EB%A5%BC-%ED%8C%90%EB%B3%84%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95%EA%B3%BC-save%EC%9D%98-%EB%B9%84%EB%B0%80entityInformationisNewentity>
+
 [^2]: https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html <https://docs.spring.io/spring-data/jpa/reference/jpa/entity-persistence.html>
+
 [^3]: https://velog.io/@yglee8048/JPA-Persistable <https://velog.io/@yglee8048/JPA-Persistable>
+
 [^4]: https://ttl-blog.tistory.com/852 <https://ttl-blog.tistory.com/852>
+
 [^5]: https://bjwan-career.tistory.com/221 <https://bjwan-career.tistory.com/221>
+
 [^6]: https://devs0n.tistory.com/113 <https://devs0n.tistory.com/113>

@@ -1,5 +1,4 @@
 ---
-title: "Aerospace :: yabai 의 한계점을 극복한 mac window manager"
 description: "불편한 mac 기본 window manager 와 yabai 대신 aerospace 를 사용해보는 건 어떨까?"
 date: 2025-12-22
 tags: [journal]
@@ -11,29 +10,17 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 mac 에서는 기본적인 tilling window 처리가 그냥 똥이다.
 
-특히 linux distro 에서는 window manager 들을 바꿀 수 있는데 반면, 
+특히 linux distro 에서는 window manager 들을 바꿀 수 있는데 반면,
 
-— hyprland, i3, Sway (for Wayland), Awesome, bspwm, Qtile ,,, — 
+— hyprland, i3, Sway (for Wayland), Awesome, bspwm, Qtile ,,, —
 
 mac 에서는 mac 전용의 tilling manager 앱과 설정을 따로 구성해주어야 한다.
 
 옛날에는 tilling manager 의 중요성을 모르고 살았지만, 점점 개발하면 할수록 답답하여 공부 및 적용하게 되었다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## yabai, skhd, sketchybar
 
@@ -113,7 +100,7 @@ alt - g: yabai -m display --focus east
 
 # --- Modify Layout ---
 
-# balance out tree 
+# balance out tree
 hyper - e : yabai -m space --balance
 
 # rotate layout clockwise
@@ -155,7 +142,7 @@ hyper - n : yabai -m window --space next;
 
 # move window to space #
 hyper - 1 : yabai -m window --space 1;
-hyper - 2 : yabai -m window --space 2; 
+hyper - 2 : yabai -m window --space 2;
 hyper - 3 : yabai -m window --space 3;
 hyper - 4 : yabai -m window --space 4;
 hyper - 5 : yabai -m window --space 5;
@@ -210,7 +197,7 @@ hyprland waybar 와 같이 말이다.
 
 이 세 가지 조합은 간단한 window manager 를 위해서 몇 날 몇 일의 프로그래밍을 해야하는 지경에 이르르게 된다
 
-또한 세 개의 앱이 계속 background 상태로 돌아가고 있어야 하고, 
+또한 세 개의 앱이 계속 background 상태로 돌아가고 있어야 하고,
 
 안 그래도 ram 관리 때문에 스트레스인데 생각보다 버벅이고 400mb 정도 차지한다.
 
@@ -238,19 +225,19 @@ workspace 상태바를 기본 menu bar 에 띄워주기 때문에 sketchybar 가
 
 위처럼 해소된 점들을 나열해보자면 아래와 같다.
 
-|  | Aerospace | Yabai |
-| --- | --- | --- |
-| **핫키 관리** | 내장 | skhd 별도 설치 필요 |
-| **SIP 비활성화** | 불필요 | 일부 기능에 필요 |
-| **설정 형식** | `.toml` (단일 파일) | `.yabairc` + `.skhdrc` (복수 파일) |
-| **워크스페이스** | 자체 에뮬레이션 | macOS Spaces API 의존 |
-| **모니터 핫플러그** | 안정적 | 윈도우 유실, 재시작 필요 [Keyruu](https://oblivion.keyruu.de/MacOS/Window-Management) |
-| **모드 표시** | 네이티브 트레이 아이콘 | sketchybar 등 별도 설정 필요 |
-| **앱별 규칙** | `on-window-detected` 내장 | 별도 스크립트 작성 필요 |
-| **macOS 업데이트 호환** | 높음 (public API 사용) | 낮음 (private API 의존) |
-| **학습 곡선** | 낮음 | 높음 |
-| **커스터마이징** | 중간 | 높음 (스크립트 자유도) |
-| RAM 처리율 | 116M | 380M (세 가지 스택 통합 기준) |
+|                         | Aerospace                 | Yabai                                                                                 |
+| ----------------------- | ------------------------- | ------------------------------------------------------------------------------------- |
+| **핫키 관리**           | 내장                      | skhd 별도 설치 필요                                                                   |
+| **SIP 비활성화**        | 불필요                    | 일부 기능에 필요                                                                      |
+| **설정 형식**           | `.toml` (단일 파일)       | `.yabairc` + `.skhdrc` (복수 파일)                                                    |
+| **워크스페이스**        | 자체 에뮬레이션           | macOS Spaces API 의존                                                                 |
+| **모니터 핫플러그**     | 안정적                    | 윈도우 유실, 재시작 필요 [Keyruu](https://oblivion.keyruu.de/MacOS/Window-Management) |
+| **모드 표시**           | 네이티브 트레이 아이콘    | sketchybar 등 별도 설정 필요                                                          |
+| **앱별 규칙**           | `on-window-detected` 내장 | 별도 스크립트 작성 필요                                                               |
+| **macOS 업데이트 호환** | 높음 (public API 사용)    | 낮음 (private API 의존)                                                               |
+| **학습 곡선**           | 낮음                      | 높음                                                                                  |
+| **커스터마이징**        | 중간                      | 높음 (스크립트 자유도)                                                                |
+| RAM 처리율              | 116M                      | 380M (세 가지 스택 통합 기준)                                                         |
 
 특히 yabai 의 최대 단점인 코드분산 & SIP 활용, 워크스페이스 생성/삭제 한계점을 극복했다는 점과
 
@@ -259,8 +246,6 @@ RAM 사용률이 비교적 낮다는 게 최대 매력 포인트였다.
 # How?
 
 어떻게 씀?
-
----
 
 우선 현재 시점 (25.12) 셋업부터 공유해주자면 아래와 같다.
 
@@ -285,40 +270,40 @@ RAM 사용률이 비교적 낮다는 게 최대 매력 포인트였다.
 
 Capslock 은 karabiner 를 통해 hyper key 로 선언해두었다.
 
-| 동작 | 키 조합 | 설명 |
-| --- | --- | --- |
-| **워크스페이스 이동** | `Caps + 워크스페이스키` | C/D/M/S/T/W |
-| **창을 워크스페이스로** | `Caps + Cmd + 워크스페이스키` | 창 이동 후 따라감 |
-| **포커스 이동** | `Caps + ←↓↑→` | 같은 워크스페이스 내 |
-| **창 위치 swap** | `Caps + Cmd + ←↓↑→` | 타일 위치 교환 |
-| **모니터 포커스** | `Caps + 1/2/3` | 상/중/하 모니터 |
-| **창을 모니터로** | `Caps + Cmd + 1/2/3` | 창 이동 후 따라감 |
-| **이전 워크스페이스** | `Caps + Tab` | back-and-forth |
-| **풀스크린 토글** | `Caps + Space` | fullscreen |
-| **서비스 모드** | `Caps + ;` | 추가 명령 모드 |
-| **리사이즈** | `Caps + -/=` | 축소/확대 (±50) |
-| **레이아웃 전환** | `Caps + /` | tiles 전환 |
-| **아코디언 전환** | `Caps + ,` | accordion 전환 |
+| 동작                    | 키 조합                       | 설명                 |
+| ----------------------- | ----------------------------- | -------------------- |
+| **워크스페이스 이동**   | `Caps + 워크스페이스키`       | C/D/M/S/T/W          |
+| **창을 워크스페이스로** | `Caps + Cmd + 워크스페이스키` | 창 이동 후 따라감    |
+| **포커스 이동**         | `Caps + ←↓↑→`                 | 같은 워크스페이스 내 |
+| **창 위치 swap**        | `Caps + Cmd + ←↓↑→`           | 타일 위치 교환       |
+| **모니터 포커스**       | `Caps + 1/2/3`                | 상/중/하 모니터      |
+| **창을 모니터로**       | `Caps + Cmd + 1/2/3`          | 창 이동 후 따라감    |
+| **이전 워크스페이스**   | `Caps + Tab`                  | back-and-forth       |
+| **풀스크린 토글**       | `Caps + Space`                | fullscreen           |
+| **서비스 모드**         | `Caps + ;`                    | 추가 명령 모드       |
+| **리사이즈**            | `Caps + -/=`                  | 축소/확대 (±50)      |
+| **레이아웃 전환**       | `Caps + /`                    | tiles 전환           |
+| **아코디언 전환**       | `Caps + ,`                    | accordion 전환       |
 
 이 셋업의 장점은 아래와 같다.
 
 - **즉각적인 컨텍스트 스위칭**
-    - `Caps + C` → 코드, `Caps + D` → 문서, `Caps + T` → 터미널
-    - 손가락 하나로 워크스페이스 전환
+  - `Caps + C` → 코드, `Caps + D` → 문서, `Caps + T` → 터미널
+  - 손가락 하나로 워크스페이스 전환
 - **풀스크린 토글** (`Caps + Space`)
-    - 집중 모드와 멀티 윈도우 모드 즉시 전환
+  - 집중 모드와 멀티 윈도우 모드 즉시 전환
 - **문서 ↔ 코드 워크플로우**
-    - 상단 모니터: 공식문서/아키텍처 (읽기 전용)
-    - 중앙 모니터: 코드 작성
-    - `Caps + 1/2` 로 시선만 이동하며 참조
+  - 상단 모니터: 공식문서/아키텍처 (읽기 전용)
+  - 중앙 모니터: 코드 작성
+  - `Caps + 1/2` 로 시선만 이동하며 참조
 - **모니터 기반 역할 분리**
-    - Monitor 1: 참조용 (Docs)
-    - Monitor 2: 작업용 (Code/Web)
-    - Monitor 3: 보조용 (Terminal/Music/Schedule)
+  - Monitor 1: 참조용 (Docs)
+  - Monitor 2: 작업용 (Code/Web)
+  - Monitor 3: 보조용 (Terminal/Music/Schedule)
 - **앱 자동 배치**
-    - IntelliJ 열면 자동으로 Code 워크스페이스
-    - WezTerm 열면 자동으로 Terminal 워크스페이스
-    - 수동 정리 불필요
+  - IntelliJ 열면 자동으로 Code 워크스페이스
+  - WezTerm 열면 자동으로 Terminal 워크스페이스
+  - 수동 정리 불필요
 
 아래 파일을 ~/.config/aerospace/aerospace.toml 에 복사해주면 위와 같은 셋업을 구성할 수 있다
 
@@ -329,10 +314,17 @@ https://github.com/vanillacake369/tonys-nix/blob/main/dotfiles/aerospace/aerospa
 https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s[^11]
 
 [^3]: https://www.youtube.com/watch?v=J4SXh8UhiCQ&t=444s <https://www.youtube.com/watch?v=J4SXh8UhiCQ&t=444s>
+
 [^4]: https://www.youtube.com/watch?v=k94qImbFKWE&t=366s <https://www.youtube.com/watch?v=k94qImbFKWE&t=366s>
+
 [^5]: https://github.com/mehd-io/dotfiles/tree/backup-yabai?tab=readme-ov-file <https://github.com/mehd-io/dotfiles/tree/backup-yabai?tab=readme-ov-file>
+
 [^6]: https://www.josean.com/posts/yabai-setup <https://www.josean.com/posts/yabai-setup>
+
 [^7]: https://www.reddit.com/r/unixporn/comments/1d8pc0g/yabai_please_recommend_sketchybar_configs_for_me/ <https://www.reddit.com/r/unixporn/comments/1d8pc0g/yabai_please_recommend_sketchybar_configs_for_me/>
+
 [^8]: https://zackreed.me/posts/aerospace_and_sketchybar_setup_on_macos/ <https://zackreed.me/posts/aerospace_and_sketchybar_setup_on_macos/>
+
 [^11]: https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s <https://www.youtube.com/watch?v=-FoWClVHG5g&t=167s>
+
 [^12]: https://www.youtube.com/watch?v=5nwnJjr5eOo&t=148s <https://www.youtube.com/watch?v=5nwnJjr5eOo&t=148s>

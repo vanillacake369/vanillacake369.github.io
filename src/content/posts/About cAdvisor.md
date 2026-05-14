@@ -1,5 +1,4 @@
 ---
-title: "About cAdvisor"
 description: "어떻게 하면 배포한 컨테이너들에 대한 시스템 메트릭을 모니터링할 수 있을까?"
 date: 2025-12-22
 tags: [journal]
@@ -8,12 +7,6 @@ draft: false
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 컨테이너에 대해서만 커널과 프로세스와 같은 시스템 메트릭을 보고 싶을 때가 있다.
 
@@ -24,12 +17,6 @@ CAdvisor 를 사용하면 코드 없이 간단히 설정하여 수집하게 할 
 그렇다면 CAdvisor 는 무엇이고 어떻게 동작하는지 알아보자.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ![](/images/velog/41dced71003e3a11.png)
 
@@ -61,10 +48,12 @@ CAdvisor 를 사용하면 코드 없이 간단히 설정하여 수집하게 할 
 - 메트릭 수집을 위해서는 운영체제마다 다른 설정이 필요합니다.
 
 예를 들어, RHEL과 CentOS는 특권 모드에서 실행해야 하는 반면, Debian은 메모리 cgroups를 활성화해야 합니다.
+
 - GPU와 같은 맞춤형 하드웨어 데이터 수집을 위해서는 추가 구성이 필요하며, 이 구성은 기반 인프라에 따라 달라집니다.
 - cAdvisor가 실행 중인 상태에서 런타임 옵션을 변경하려면 업데이트된 매개변수로 cAdvisor 컨테이너를 재시작해야 합니다.
 
 즉, 사용자는 기존 cAdvisor 컨테이너를 중지한 후 원하는 구성 변경 사항을 적용하여 새 컨테이너를 시작해야 합니다.
+
 - 추가 분석을 수행하고 수집된 데이터를 장기간 저장하려면 cAdvisor는 외부 도구가 필요합니다.
 
 ## 기본 동작 원리
@@ -99,17 +88,17 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
 1.
 
 공유 Docker 데몬
-    
+
     Docker Compose 배포 환경의 모든 컨테이너는 호스트의 동일한 Docker 데몬을 공유합니다.
-    
+
 2.
 
 컨테이너 감지
-    
-    cAdvisor의 Docker 팩토리는 Docker 클라이언트를 사용하여 컨테이너를 검사하고 발견합니다. [factory.go:167-184](https://github.com/google/cadvisor/blob/5adb1c3b/container/docker/factory.go#L167) 
-    
+
+    cAdvisor의 Docker 팩토리는 Docker 클라이언트를 사용하여 컨테이너를 검사하고 발견합니다. [factory.go:167-184](https://github.com/google/cadvisor/blob/5adb1c3b/container/docker/factory.go#L167)
+
     ContainerInspect()를 호출하여 컨테이너가 실행 중이며 Docker에 인식되는지 확인합니다. [factory.go:178-181](https://github.com/google/cadvisor/blob/5adb1c3b/container/docker/factory.go#L167)
-    
+
     ```go
     // Docker handles all containers under /docker
     func (f *dockerFactory) CanHandleAndAccept(name string) (bool, bool, error) {
@@ -117,29 +106,29 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
     	if !dockerutil.IsContainerName(name) {
     		return false, false, nil
     	}
-    
+
     	// Check if the container is known to docker and it is active.
     	id := dockerutil.ContainerNameToId(name)
-    
+
     	// We assume that if Inspect fails then the container is not known to docker.
     	ctnr, err := f.client.ContainerInspect(context.Background(), id)
     	if err != nil || !ctnr.State.Running {
     		return false, true, fmt.Errorf("error inspecting container: %v", err)
     	}
-    
+
     	return true, true, nil
     }
-    
+
     ```
-    
+
 3.
 
 네임스페이스 처리
-    
+
     매니저는 /rootfs/proc의 존재 여부를 확인하여 cAdvisor가 호스트 네임스페이스에서 실행 중인지 감지합니다. [manager.go:183-188](https://github.com/google/cadvisor/blob/5adb1c3b/manager/manager.go)
-    
+
     호스트 네임스페이스가 아닌 경우(컨테이너화됨), 경로 앞에 /rootfs를 접두사로 추가하여 경로를 조정합니다. [handler.go:138-142](https://github.com/google/cadvisor/blob/5adb1c3b/container/docker/handler.go#L112)
-    
+
     ```go
     	rootFs := "/"
     	if !inHostNamespace {
@@ -147,26 +136,26 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
     		storageDir = path.Join(rootFs, storageDir)
     	}
     ```
-    
+
 4.
 
 컨테이너 핸들러 생성
-    
-    발견된 각 컨테이너에 대해 cAdvisor는 마운트된 볼륨을 사용하여 컨테이너 데이터에 접근하는 핸들러를 생성합니다. [manager.go:913-931](https://github.com/google/cadvisor/blob/5adb1c3b/manager/manager.go) 
-    
+
+    발견된 각 컨테이너에 대해 cAdvisor는 마운트된 볼륨을 사용하여 컨테이너 데이터에 접근하는 핸들러를 생성합니다. [manager.go:913-931](https://github.com/google/cadvisor/blob/5adb1c3b/manager/manager.go)
+
     컨테이너화된 상태로 실행될 때 핸들러는 inHostNamespace를 false로 설정하여 초기화됩니다. [manager.go:185-188](https://github.com/google/cadvisor/blob/5adb1c3b/manager/manager.go)
-    
+
     ```go
     func (m *manager) createContainerLocked(containerName string, watchSource watcher.ContainerWatchSource) error {
     	namespacedName := namespacedContainerName{
     		Name: containerName,
     	}
-    
+
     	// Check that the container didn't already exist.
     	if _, ok := m.containers[namespacedName]; ok {
     		return nil
     	}
-    
+
     	handler, accept, err := container.NewContainerHandler(containerName, watchSource, m.containerEnvMetadataWhiteList, m.inHostNamespace)
     	if err != nil {
     		return err
@@ -180,18 +169,17 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
     	if err != nil {
     		return err
     	}
-    
+
     	logUsage := *logCadvisorUsage && containerName == m.cadvisorContainer
     	cont, err := newContainerData(containerName, m.memoryCache, handler, logUsage, collectorManager, m.maxHousekeepingInterval, m.allowDynamicHousekeeping, clock.RealClock{})
     	if err != nil {
     		return err
     	}
-    	
+
     	,,,,
-    	
+
     }
     ```
-    
 
 ## 필수요건
 
@@ -204,8 +192,6 @@ Docker Compose 설정에서 cAdvisor를 다른 컨테이너와 함께 실행할 
 # How?
 
 어떻게 씀?
-
----
 
 ### 1) Container
 
@@ -246,28 +232,39 @@ services:
 ```
 
 1. /:/rootfs:ro
+
 - 호스트 루트 파일시스템 (읽기 전용)
 - 전체 파일시스템 구조 접근으로 컨테이너 정보 수집
+
 2. /var/run:/var/run:ro
+
 - 실행 중인 프로세스 및 소켓 정보
 - Docker 소켓 및 런타임 정보 접근
+
 3. /sys:/sys:ro
+
 - 시스템 정보 및 커널 통계
 - CPU, 메모리, 네트워크 인터페이스 정보 수집
+
 4. /var/lib/docker/:/var/lib/docker:ro
+
 - Docker 컨테이너 메타데이터 및 로그
 - 컨테이너별 상세 정보 및 통계 수집
+
 5. /dev/disk/:/dev/disk:ro
+
 - 디스크 디바이스 정보
 - 컨테이너별 디스크 I/O 통계 수집
+
 6. devices: /dev/kmsg
+
 - 커널 메시지 버퍼 접근
 - 시스템 로그 및 이벤트 모니터링
 
 > 💡
-> 
+>
 > 이외 플래그 값들에 대해서는 아래를 추가로 살펴보자
-> 
+>
 > https://github.com/google/cadvisor/blob/master/docs/runtime_options.md
 
 ### 2) otel-receiver 레벨에서 필터링 처리
@@ -291,27 +288,29 @@ receivers:
     config:
       scrape_configs:
         # Node Exporter
-        - job_name: 'node-exporter'
+        - job_name: "node-exporter"
           scrape_interval: 15s
           static_configs:
-            - targets: ['node_exporter:9100']
+            - targets: ["node_exporter:9100"]
         # CAdvisor
         # metric_relabel_configs 을 통해
         # hello-world 에 대해서만 수집하도록 필터링
-        - job_name: 'cadvisor'
+        - job_name: "cadvisor"
           scrape_interval: 15s
           static_configs:
-            - targets: ['cadvisor:8080']
+            - targets: ["cadvisor:8080"]
           metric_relabel_configs:
             - source_labels: [name]
-              regex: 'hello-world'
+              regex: "hello-world"
               action: keep
-              
 
 # ,,, processor 나 exporter 에 대해서는 생략 ,,,
 ```
 
 [^1]: https://cast.ai/blog/cadvisor/ <https://cast.ai/blog/cadvisor/>
+
 [^2]: https://deepwiki.com/search/how-cadvisor-collect-container_c2b22e92-8089-4b56-abb7-ff410e682c4f?mode=fast <https://deepwiki.com/search/how-cadvisor-collect-container_c2b22e92-8089-4b56-abb7-ff410e682c4f?mode=fast>
+
 [^3]: https://github.com/google/cadvisor/blob/5adb1c3b/docs/running.md <https://github.com/google/cadvisor/blob/5adb1c3b/docs/running.md>
+
 [^4]: https://prometheus.io/docs/guides/cadvisor/ <https://prometheus.io/docs/guides/cadvisor/>

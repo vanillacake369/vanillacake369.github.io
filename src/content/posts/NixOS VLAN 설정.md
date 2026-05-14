@@ -1,5 +1,4 @@
 ---
-title: "NixOS VLAN 설정"
 description: "현대적인 홈랩 구성에서 **NixOS**는 시스템의 상태를 코드로 관리(Declarative)할 수 있는 최고의 플랫폼입니다."
 date: 2026-01-15
 tags: [homelab, nix]
@@ -10,12 +9,6 @@ series: { id: "NixOS Ecosystem", order: 12 }
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 현대적인 홈랩 구성에서 **NixOS**는 시스템의 상태를 코드로 관리(Declarative)할 수 있는 최고의 플랫폼입니다.
 
 - **보안:** OPNsense 방화벽을 가상화하여 모든 트래픽을 통제하고, VLAN을 통해 관리망(Management)과 서비스망(K8s)을 물리적으로 분리한 것과 같은 효과를 냅니다.
@@ -23,26 +16,17 @@ series: { id: "NixOS Ecosystem", order: 12 }
 
 # What?
 
-뭘 배움?
-
----
-
----
-
 [최종 Blueprint](https://www.notion.so/24619c3902908001851fec43ece63aef#2e019c3902908030aa94e5b1b983cdb3) 에 맞춰서 설정하고자 한다.
 
 처리 순서는 다음과 같다.
 
 1.
 
-대상 서버 식별
-2.
+대상 서버 식별 2.
 
-NixOS 설정
-3.
+NixOS 설정 3.
 
-가상화 VM 활성화
-4.
+가상화 VM 활성화 4.
 
 최종 점검
 
@@ -53,6 +37,7 @@ NixOS 설정
 - **bridges (vmbr):** 가상 스위치입니다.
 
 물리 포트(`enp1s0`)를 `vmbr0`에 꽂으면 외부망 전용 스위치가 되고, 인터페이스 없이 만든 `vmbr1`은 내부 전용 가상 스위치가 됩니다.
+
 - **vlans:** 하나의 선 위로 여러 네트워크 패킷이 흐를 때, 꼬리표(Tag ID)를 붙여 서로 섞이지 않게 분리하는 기술입니다.
 - **interfaces:** NixOS 호스트(물리 서버 자체)가 각 네트워크 대역에서 가질 주소표입니다.
 - **defaultGateway:** 서버가 모르는 외부 주소(예: google.com)를 찾을 때 나가는 "출구" 주소입니다.
@@ -317,7 +302,5 @@ rtt min/avg/max/mdev = 0.024/0.076/0.117/0.038 ms
 # How?
 
 어떻게 씀?
-
----
 
 [^1]: https://nixos.wiki/wiki/Networking#:~:text=duid%0A%27%27%3B-,VLANs,-Refer%20to%20networking <https://nixos.wiki/wiki/Networking#:~:text=duid%0A%27%27%3B-,VLANs,-Refer%20to%20networking>

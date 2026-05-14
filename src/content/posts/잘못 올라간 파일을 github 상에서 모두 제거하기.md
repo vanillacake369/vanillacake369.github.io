@@ -1,5 +1,4 @@
 ---
-title: "잘못 올라간 파일을 github 상에서 모두 제거하기"
 description: "commit 되지 말아야할 파일을 commit & push 하는 사고가 발생하면 어떻게 대처해야할까?
 어떻게 하면 local git 과 remote git 상에서 해당 파일에 대해서만 제거할 수 있을까 ?"
 date: 2025-12-22
@@ -11,12 +10,6 @@ draft: false
 ![](/images/velog/05df6c0754eeb89d.png)
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 환경변수나 DB 정보들을 잘못하고 github 상에 올려버렸다.
 
@@ -32,13 +25,13 @@ draft: false
 
 BFG Repo-Cleaner는 기존 `git filter-branch`을 개선하기 위해 만들어진 Java 기반의 경량 툴이다.
 
-| 항목 | 내용 |
-| --- | --- |
-| 언어 | Java |
-| 주 용도 | 대용량 파일, 비밀키, 특정 경로 삭제 |
-| 장점 | **매우 빠름** (기존 방식 대비 10~50배) |
-| 단점 | 복잡한 리라이트(예: 커밋 메시지 변경)는 제한적 |
-| 설치 | `brew install bfg` or [JAR 파일 다운로드](https://rtyley.github.io/bfg-repo-cleaner/[^3]) |
+| 항목    | 내용                                                                                      |
+| ------- | ----------------------------------------------------------------------------------------- |
+| 언어    | Java                                                                                      |
+| 주 용도 | 대용량 파일, 비밀키, 특정 경로 삭제                                                       |
+| 장점    | **매우 빠름** (기존 방식 대비 10~50배)                                                    |
+| 단점    | 복잡한 리라이트(예: 커밋 메시지 변경)는 제한적                                            |
+| 설치    | `brew install bfg` or [JAR 파일 다운로드](https://rtyley.github.io/bfg-repo-cleaner/[^3]) |
 
 ### Installation
 
@@ -70,91 +63,92 @@ BFG Repo-Cleaner는 기존 `git filter-branch`을 개선하기 위해 만들어�
 ### Usage
 
 1. `git clone --mirror` 을 통해 모든 refs 에 대한 clone 을 받는다.
-    
-    ** [git clone 의 mirror 옵션이란?](https://stackoverflow.com/questions/3959924/whats-the-difference-between-git-clone-mirror-and-git-clone-bare)
-    
-    ```nix
-    # 실제 레포 URL 은 사내용이므로 예시로 가져옴
-    ~/dev/newsclipping-java-api-v2/deploy/modules/monitoring/alloy feature                          3m 49s
-    ❯ git clone --mirror git://example.com/some-big-repo.git
-    ```
-    
+
+   \*\* [git clone 의 mirror 옵션이란?](https://stackoverflow.com/questions/3959924/whats-the-difference-between-git-clone-mirror-and-git-clone-bare)
+
+   ```nix
+   # 실제 레포 URL 은 사내용이므로 예시로 가져옴
+   ~/dev/newsclipping-java-api-v2/deploy/modules/monitoring/alloy feature                          3m 49s
+   ❯ git clone --mirror git://example.com/some-big-repo.git
+   ```
+
 2. `bfg --delete-files ${삭제하고자 하는 파일명} ${대상 .git 파일}` 을 통해 모든 커밋에 대한 파일 내역을 삭제한다.
-    
-    ```nix
-    /mnt/c/Users/limjihoon/dev/newsclipping-java-api-v2 feature ?2                                      7s
-    ❯ bfg --delete-files .env.dev  ~/dev/newsclipping-java-api-v2/.git
-    
-    Using repo : /home/limjihoon/dev/newsclipping-java-api-v2/.git
-    
-    Found 625 objects to protect
-    Found 8 commit-pointing refs : HEAD, refs/heads/develop, refs/heads/feature, ...
-    
-    Protected commits
-    -----------------
-    
-    These are your protected commits, and so their contents will NOT be altered:
-    
-     * commit ec120c1a (protected by 'HEAD') - contains 1 dirty file :
-            - deploy/modules/monitoring/alloy/.env.dev (598 B )
-    
-    WARNING: The dirty content above may be removed from other commits, but as
-    the *protected* commits still use it, it will STILL exist in your repository.
-    
-    Details of protected dirty content have been recorded here :
-    
-    /home/limjihoon/dev/newsclipping-java-api-v2.bfg-report/2025-11-11/12-27-17/protected-dirt/
-    
-    If you *really* want this content gone, make a manual commit that removes it,
-    and then run the BFG on a fresh copy of your repo.
-    
-    Cleaning
-    --------
-    
-    Found 970 commits
-    Cleaning commits:       100% (970/970)
-    Cleaning commits completed in 239 ms.
-    
-    BFG aborting: No refs to update - no dirty commits found??
-    ```
-    
+
+   ```nix
+   /mnt/c/Users/limjihoon/dev/newsclipping-java-api-v2 feature ?2                                      7s
+   ❯ bfg --delete-files .env.dev  ~/dev/newsclipping-java-api-v2/.git
+
+   Using repo : /home/limjihoon/dev/newsclipping-java-api-v2/.git
+
+   Found 625 objects to protect
+   Found 8 commit-pointing refs : HEAD, refs/heads/develop, refs/heads/feature, ...
+
+   Protected commits
+   -----------------
+
+   These are your protected commits, and so their contents will NOT be altered:
+
+    * commit ec120c1a (protected by 'HEAD') - contains 1 dirty file :
+           - deploy/modules/monitoring/alloy/.env.dev (598 B )
+
+   WARNING: The dirty content above may be removed from other commits, but as
+   the *protected* commits still use it, it will STILL exist in your repository.
+
+   Details of protected dirty content have been recorded here :
+
+   /home/limjihoon/dev/newsclipping-java-api-v2.bfg-report/2025-11-11/12-27-17/protected-dirt/
+
+   If you *really* want this content gone, make a manual commit that removes it,
+   and then run the BFG on a fresh copy of your repo.
+
+   Cleaning
+   --------
+
+   Found 970 commits
+   Cleaning commits:       100% (970/970)
+   Cleaning commits completed in 239 ms.
+
+   BFG aborting: No refs to update - no dirty commits found??
+   ```
+
 3.
 
 실제로 해당 값이 잘 지워졌는지 확인한다.
 
 만약 출력되는 값이 없다면 잘 지워진 것이다.
-    
+
     ```nix
     ~/dev/newsclipping-java-api-v2 feature                                                                                                                                                                     56s
     ❯ git log --all --full-history -- deploy/modules/monitoring/alloy/.env.dev
-    
+
     ~/dev/newsclipping-java-api-v2 feature
     ❯ git log --all --full-history -- .env.dev
-    
+
     ```
-    
+
 4.
 
 강제 푸시를 통해 원격 저장소에 업로드한다.
-    
+
     ```nix
     ~/dev/newsclipping-java-api-v2/deploy/modules/monitoring/alloy feature                          3m 49s
     ❯ git push --force
     ```
-    
 
 > 💡
-> 
+>
 > 더 자세한 옵션을 보고 싶다면 아래 man 을 확인해보자 (웹에 없어서 실제 man 코드를 퍼옴)
-> 
+>
 > - bfg man
->   
+
     ```
     /mnt/c/Users/limjihoon/dev/tonys-nix main ⇡1 !8                                                  4m 0s
     ❯ bfg man
     bfg 1.15.0
     Usage: bfg [options] [<repo>]
->    
+
+>
+
       -b, --strip-blobs-bigger-than <size>
                                strip blobs bigger than X (eg '128K', '1M', etc)
       -B, --strip-biggest-blobs NUM
@@ -183,12 +177,12 @@ BFG Repo-Cleaner는 기존 `git filter-branch`을 개선하기 위해 만들어�
       <repo>                   file path for Git repository to clean
     Aborting : man is not a valid Git repository.
     ```
-    
+
 > 🚧
-> 
-> bfg-repo-cleaner 의 가장 큰 ***단점은 파일명으로만 삭제가 가능하다는 것*** 이다
 >
-> 이로 인해 특정 디렉토리마다 
+> bfg-repo-cleaner 의 가장 큰 **_단점은 파일명으로만 삭제가 가능하다는 것_** 이다
+>
+> 이로 인해 특정 디렉토리마다
 >
 > 가령 각 컴포넌트 별로 [README.md](http://README.md) 를 선언한 경우 bfg 를 사용할 수 없다.
 >
@@ -232,90 +226,89 @@ git-filter-repo는 Git 커뮤니티가 filter-branch의 공식 대체제로 인�
 ### Usage
 
 1. `git clone --mirror` 을 통해 모든 refs 에 대한 clone 을 받는다.
-    
-    ** [git clone 의 mirror 옵션이란?](https://stackoverflow.com/questions/3959924/whats-the-difference-between-git-clone-mirror-and-git-clone-bare)
-    
-    ```nix
-    # 실제 레포 URL 은 사내용이므로 예시로 가져옴
-    ~/dev/newsclipping-java-api-v2/deploy/modules/monitoring/alloy feature                          3m 49s
-    ❯ git clone --mirror git://example.com/some-big-repo.git
-    ```
-    
-2. `git-filter-repo --sensitive-data-removal --invert-paths --path ${제거하고자하는 파일의 상대경로}` 을 통해 모든 커밋에 대한 파일 내역을 삭제한다. 
-    
-    ```nix
-    ~/dev/newsclipping-java-api-v2 feature
-    ❯ git-filter-repo --sensitive-data-removal --invert-paths --path  deploy/README.md
-    NOTICE: Fetching all refs from origin to make sure we rewrite
-            all history that may reference the sensitive data, via
-          git fetch -q --prune --update-head-ok --refmap "" origin +refs/*:refs/*
-    Parsed 973 commits
-    New history written in 7.19 seconds; now repacking/cleaning...
-    You rewrote 9 (of 973) commits.
-    
-    NOTE: First Changed Commit(s) is/are:
-      07221bd591ef1c83b7952dfffe69bd641471cb15
-    NOTE: LFS object orphaning not checked (LFS not in use)
-    
-    Repacking your repo and cleaning out old unneeded objects
-    HEAD is now at f60542f0 fix : 잘못 설정한 api image domain 수정
-    Enumerating objects: 20640, done.
-    Counting objects: 100% (20640/20640), done.
-    Delta compression using up to 16 threads
-    Compressing objects: 100% (8501/8501), done.
-    Writing objects: 100% (20640/20640), done.
-    Total 20640 (delta 7414), reused 20605 (delta 7389), pack-reused 0 (from 0)
-    Completely finished after 55.32 seconds.
-    
-    NEXT STEPS FOR YOUR SENSITIVE DATA REMOVAL:
-      * If you are doing your rewrite in multiple steps, ignore these next steps
-        until you have completed all your invocations of git-filter-repo.
-      * See the "Sensitive Data Removal" subsection of the "DISCUSSION" section
-        of the manual for more details about any of the steps below.
-      * Inspect this repository and verify that the sensitive data is indeed
-        completely removed from all commits.
-      * Force push the rewritten history to the server:
-          git push --force --mirror origin
-      * Contact the server admins for additional steps they need to take; the
-        First Changed Commit(s) may come in handy here.
-      * Have other colleagues with a clone either discard their clone and reclone
-        OR follow the detailed steps in the manual to repeatedly rebase and
-        purge the sensitive data from their copy.  Again, the First Changed
-        Commit(s) may come in handy.
-      * See the "Prevent repeats and avoid future sensitive data spills" section
-        of the manual.
-    
-    ```
-    
+
+   \*\* [git clone 의 mirror 옵션이란?](https://stackoverflow.com/questions/3959924/whats-the-difference-between-git-clone-mirror-and-git-clone-bare)
+
+   ```nix
+   # 실제 레포 URL 은 사내용이므로 예시로 가져옴
+   ~/dev/newsclipping-java-api-v2/deploy/modules/monitoring/alloy feature                          3m 49s
+   ❯ git clone --mirror git://example.com/some-big-repo.git
+   ```
+
+2. `git-filter-repo --sensitive-data-removal --invert-paths --path ${제거하고자하는 파일의 상대경로}` 을 통해 모든 커밋에 대한 파일 내역을 삭제한다.
+
+   ```nix
+   ~/dev/newsclipping-java-api-v2 feature
+   ❯ git-filter-repo --sensitive-data-removal --invert-paths --path  deploy/README.md
+   NOTICE: Fetching all refs from origin to make sure we rewrite
+           all history that may reference the sensitive data, via
+         git fetch -q --prune --update-head-ok --refmap "" origin +refs/*:refs/*
+   Parsed 973 commits
+   New history written in 7.19 seconds; now repacking/cleaning...
+   You rewrote 9 (of 973) commits.
+
+   NOTE: First Changed Commit(s) is/are:
+     07221bd591ef1c83b7952dfffe69bd641471cb15
+   NOTE: LFS object orphaning not checked (LFS not in use)
+
+   Repacking your repo and cleaning out old unneeded objects
+   HEAD is now at f60542f0 fix : 잘못 설정한 api image domain 수정
+   Enumerating objects: 20640, done.
+   Counting objects: 100% (20640/20640), done.
+   Delta compression using up to 16 threads
+   Compressing objects: 100% (8501/8501), done.
+   Writing objects: 100% (20640/20640), done.
+   Total 20640 (delta 7414), reused 20605 (delta 7389), pack-reused 0 (from 0)
+   Completely finished after 55.32 seconds.
+
+   NEXT STEPS FOR YOUR SENSITIVE DATA REMOVAL:
+     * If you are doing your rewrite in multiple steps, ignore these next steps
+       until you have completed all your invocations of git-filter-repo.
+     * See the "Sensitive Data Removal" subsection of the "DISCUSSION" section
+       of the manual for more details about any of the steps below.
+     * Inspect this repository and verify that the sensitive data is indeed
+       completely removed from all commits.
+     * Force push the rewritten history to the server:
+         git push --force --mirror origin
+     * Contact the server admins for additional steps they need to take; the
+       First Changed Commit(s) may come in handy here.
+     * Have other colleagues with a clone either discard their clone and reclone
+       OR follow the detailed steps in the manual to repeatedly rebase and
+       purge the sensitive data from their copy.  Again, the First Changed
+       Commit(s) may come in handy.
+     * See the "Prevent repeats and avoid future sensitive data spills" section
+       of the manual.
+
+   ```
+
 3.
 
 실제로 해당 값이 잘 지워졌는지 확인한다.
 
 만약 출력되는 값이 없다면 잘 지워진 것이다.
-    
+
     ```nix
     ~/dev/newsclipping-java-api-v2 feature                                                                                                                                                                     56s
     ❯ git log --all --full-history -- deploy/modules/monitoring/alloy/.env.dev
-    
+
     ~/dev/newsclipping-java-api-v2 feature
     ❯ git log --all --full-history -- .env.dev
-    
+
     ```
-    
+
 4.
 
 강제 푸시를 통해 원격 저장소에 업로드한다.
-    
+
     ```nix
     ~/dev/newsclipping-java-api-v2/deploy/modules/monitoring/alloy feature                          3m 49s
     ❯ git push --force
     ```
-    
 
 > 💡
-> 
+>
 > 더 자세한 옵션을 보고 싶다면 아래 man 을 확인해보자
-> 
+>
 > [git-filter-repo man](https://htmlpreview.github.io/?https://github.com/newren/git-filter-repo/blob/docs/html/git-filter-repo.html)
 
 ## **git filter-branch vs. filter-repo**
@@ -329,6 +322,9 @@ git-filter-repo는 Git 커뮤니티가 filter-branch의 공식 대체제로 인�
 https://graphite.com/guides/git-filter-repo#git-filter-branch-vs-filter-repo[^8]
 
 [^3]: https://rtyley.github.io/bfg-repo-cleaner/ <https://rtyley.github.io/bfg-repo-cleaner/>
+
 [^4]: https://llshl.tistory.com/30 <https://llshl.tistory.com/30>
+
 [^7]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository>
+
 [^8]: https://graphite.com/guides/git-filter-repo#git-filter-branch-vs-filter-repo <https://graphite.com/guides/git-filter-repo#git-filter-branch-vs-filter-repo>

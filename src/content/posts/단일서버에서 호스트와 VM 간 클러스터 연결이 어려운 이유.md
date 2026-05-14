@@ -1,5 +1,4 @@
 ---
-title: "단일서버에서 호스트와 VM 간 클러스터 연결이 어려운 이유"
 description: "현재 홈랩 환경은 다음과 같이 구성되어 있습니다:"
 date: 2026-01-29
 tags: [homelab, nix]
@@ -62,8 +61,6 @@ graph TB
 
 이 구성이 실현되었다면, Kubernetes 스케줄러가 GPU가 필요한 Pod를 자동으로 호스트 노드에 배치할 수 있었을 것입니다.
 
----
-
 ## WHAT: 핵심 문제 - CNI와 VM 브릿지의 충돌
 
 ### 근본적인 충돌 원인
@@ -72,22 +69,22 @@ graph TB
 
 이 충돌은 CNI의 종류와 관계없이 발생하며, 그 메커니즘만 다릅니다.
 
-| CNI | 충돌 메커니즘 | 결과 |
-| --- | --- | --- |
+| CNI         | 충돌 메커니즘                                       | 결과                          |
+| ----------- | --------------------------------------------------- | ----------------------------- |
 | **Flannel** | br_netfilter가 모든 브릿지 트래픽을 iptables로 보냄 | VM 트래픽이 방화벽에서 차단됨 |
-| **Cilium** | eBPF가 모든 네트워크 인터페이스를 장악 | VM 브릿지 동작 방해 |
+| **Cilium**  | eBPF가 모든 네트워크 인터페이스를 장악              | VM 브릿지 동작 방해           |
 
 ### Flannel vs Cilium 기술 비교
 
-| 항목 | Flannel | Cilium |
-| --- | --- | --- |
-| **기반 기술** | iptables + VXLAN | eBPF |
-| **br_netfilter 요구** | 필수 (없으면 Pod 통신 불가) | 불필요 |
-| **성능** | 보통 (iptables 오버헤드) | 높음 (커널 직접 처리) |
-| **NetworkPolicy** | 미지원 (별도 Calico 필요) | 기본 지원 + L7 정책 |
-| **Observability** | 없음 | Hubble 내장 |
-| **복잡도** | 단순 | 복잡 |
-| **리소스 사용량** | 가벼움 (~100MB) | 상대적으로 무거움 (~500MB) |
+| 항목                     | Flannel                           | Cilium                      |
+| ------------------------ | --------------------------------- | --------------------------- |
+| **기반 기술**            | iptables + VXLAN                  | eBPF                        |
+| **br_netfilter 요구**    | 필수 (없으면 Pod 통신 불가)       | 불필요                      |
+| **성능**                 | 보통 (iptables 오버헤드)          | 높음 (커널 직접 처리)       |
+| **NetworkPolicy**        | 미지원 (별도 Calico 필요)         | 기본 지원 + L7 정책         |
+| **Observability**        | 없음                              | Hubble 내장                 |
+| **복잡도**               | 단순                              | 복잡                        |
+| **리소스 사용량**        | 가벼움 (~100MB)                   | 상대적으로 무거움 (~500MB)  |
 | **호스트 네트워크 영향** | br_netfilter로 브릿지 트래픽 변경 | eBPF로 모든 인터페이스 제어 |
 
 ### 패킷 처리 방식 비교
@@ -153,8 +150,6 @@ graph TB
 **핵심 포인트**: vmbr0는 VM들의 생명선입니다.
 
 CNI가 이 브릿지의 동작을 방해하면 VM들은 네트워크 접근을 완전히 잃게 됩니다.
-
----
 
 ## HOW: 검토 과정 및 실험
 
@@ -297,8 +292,6 @@ networking.firewall = {
 
 **결과**: 이 설정으로 호스트는 K8s 클러스터에서 제외되지만, VM들 간의 클러스터는 정상 동작합니다.
 
----
-
 ## TROUBLE SHOOTING: 발생한 문제들과 해결 과정
 
 이 섹션에서는 하이브리드 클러스터 구성 시도 중 겪은 다양한 문제들과 그 해결 방법을 상세히 설명합니다.
@@ -353,8 +346,6 @@ sudo iptables -L nixos-filter-forward -v -n
 
 1. **권장**: 호스트에서 br_netfilter 비활성화 (호스트를 K8s에서 제외)
 2. **대안**: vmbr0 트래픽을 허용하는 iptables 규칙 추가 (복잡하고 유지보수 어려움)
-
----
 
 ### 2.
 
@@ -441,8 +432,6 @@ sudo systemctl restart kubelet
 
 ```
 
----
-
 ### 3.
 
 CNI 플러그인이 시스템 명령어를 덮어씀 (bridge 명령 충돌)
@@ -508,8 +497,6 @@ systemd.tmpfiles.rules = [
 
 이제 `bridge vlan show`가 정상 동작하면서도 kubelet의 CNI 플러그인 사용에는 문제가 없습니다.
 
----
-
 ### 4.
 
 Flannel Pod가 Error 상태 (br_netfilter 미로드)
@@ -565,8 +552,6 @@ boot.kernel.sysctl = lib.optionalAttrs isVM {
 ```
 
 **주의**: 호스트에서는 br_netfilter를 활성화하면 안 됩니다 (문제 #1 참조).
-
----
 
 ### 5.
 
@@ -637,8 +622,6 @@ kubectl get pods
 
 ```
 
----
-
 ### 6.
 
 CNI 설정 파일 충돌 (제거된 CNI를 계속 사용)
@@ -701,18 +684,11 @@ CNI를 교체할 때는 항상 다음 순서를 따르세요:
 
 1.
 
-이전 CNI 완전 제거 (helm uninstall 등)
-2. `/etc/cni/net.d/`의 설정 파일 삭제
-3. `/var/run/<cni-name>` 디렉토리 삭제
-4.
+이전 CNI 완전 제거 (helm uninstall 등) 2. `/etc/cni/net.d/`의 설정 파일 삭제 3. `/var/run/<cni-name>` 디렉토리 삭제 4.
 
-CNI 관련 인터페이스 삭제 (`ip link delete`)
-5. containerd, kubelet 재시작
-6.
+CNI 관련 인터페이스 삭제 (`ip link delete`) 5. containerd, kubelet 재시작 6.
 
 새 CNI 설치
-
----
 
 ## 결론: 아키텍처 분리가 유일한 해결책
 
@@ -774,8 +750,6 @@ graph TB
 - GPU 워크로드는 Podman으로 호스트에서 직접 실행
 - K8s에서 Ollama API를 ExternalName Service로 노출
 - 또는 GPU가 있는 별도 물리 서버를 K8s 워커로 추가 (VM 브릿지가 없는 서버)
-
----
 
 ## 부록: 유용한 명령어 및 참고 자료
 

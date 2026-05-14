@@ -1,5 +1,4 @@
 ---
-title: "Java 8 기본메서드"
 description: "Iterable의 기본 메소드"
 date: 2026-02-25
 tags: [java]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 ## 무엇을 공부하였는가 🤔
-
 
 Iterable의 기본 메소드
 
@@ -31,11 +29,10 @@ Comparator의 기본 메소드 및 스태틱 메소드
 
 ## 어떻게 쓰는가 ☝️
 
-
 ### forEach
 
-> **`Interface Iterable<T>`**** ⇒ **`default void forEach(`[`Consumer`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Consumer.html)`<? super `[`T`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Iterable.html)`> action)`
-> **The action to be performed is contained in a class that implements the *****Consumer***** interface and is passed to *****forEach *****as an argument.**
+> **`Interface Iterable<T>`\*\*** ⇒ **`default void forEach(`[`Consumer`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Consumer.html)`<? super `[`T`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Iterable.html)`> action)`
+> **The action to be performed is contained in a class that implements the **\***Consumer**\*** interface and is passed to **\***forEach **\***as an argument.\*\*
 
 ```java
 // 우리가 흔지 사용하는 forEach 문
@@ -95,31 +92,32 @@ int sum = widgets.stream()
 
 **중개 operation & 종료 operation**
 
-> To perform a computation, stream operations are composed into a stream pipeline. 
-> A stream pipeline consists 
-> - of a ***source ***(which might be an array, a collection, a generator function, an I/O channel, etc), 
-> - zero or more*** ******intermediate operations*** (which transform a stream into another stream, such as filter(Predicate)), 
-> - and a ***terminal operation*** (which produces a result or side-effect, such as count() or forEach(Consumer)). 
-> 
+> To perform a computation, stream operations are composed into a stream pipeline.
+> A stream pipeline consists
+>
+> - of a **_source _**(which might be an array, a collection, a generator function, an I/O channel, etc),
+> - zero or more**\* \*\*\*\***intermediate operations\*\*\* (which transform a stream into another stream, such as filter(Predicate)),
+> - and a **_terminal operation_** (which produces a result or side-effect, such as count() or forEach(Consumer)).
+>
 > Streams are lazy; computation on the source data is only performed when the terminal operation is initiated, and source elements are consumed only as needed.
-> 
-> 계산을 수행하기 위해 스트림 작업은 스트림 파이프라인으로 구성됩니다. 
-> 스트림 파이프라인은 
-> 소스(배열, 컬렉션, 생성기 함수, I/O 채널 등일 수 있음), 
+>
+> 계산을 수행하기 위해 스트림 작업은 스트림 파이프라인으로 구성됩니다.
+> 스트림 파이프라인은
+> 소스(배열, 컬렉션, 생성기 함수, I/O 채널 등일 수 있음),
 > 0개 이상의 중간 작업(필터(Predicate)과 같이 스트림을 다른 스트림으로 변환하는)
 > 종료 작업(count() 또는 forEach(Consumer)와 같은 결과 또는 부작용 생성).
 
 으로 구성된다.
-> 
+
 > 스트림은 게으르다.
 
 소스 데이터에 대한 계산은 터미널 작업이 시작될 때만 수행되며 소스 요소는 필요한 경우에만 소비됩니다.
 
-***intermediate operation은 stream을 반환하고 terminal operation은 stream을 반환하지 않는다.***
+**_intermediate operation은 stream을 반환하고 terminal operation은 stream을 반환하지 않는다._**
 
 대표적으로 쓰이는 intermediate operation이다.
 
-- `filter`<데이터를 걸러내는 작업> 
+- `filter`<데이터를 걸러내는 작업>
 - `map`<변환 작업>
 
 대표적으로 쓰이는 terminal operation이다.
@@ -131,8 +129,7 @@ int sum = widgets.stream()
 1.
 
 실행처리에 대한 저장소가 아니다.
-*// 단순히 source를 아웃소싱하여 termainl operation에 의한 실행처리가 되어질 뿐, 이전 데이터를 저장하는 저장소가 아니다.*
-2.
+_// 단순히 source를 아웃소싱하여 termainl operation에 의한 실행처리가 되어질 뿐, 이전 데이터를 저장하는 저장소가 아니다._ 2.
 
 반드시 마지막에 terminal operation이 와야 작업 처리가 된 스트림이 반환된다.
 
@@ -145,6 +142,7 @@ int sum = widgets.stream()
 또한, 실행할 때마다 처리되는 쓰레드의 타이밍이 다르기 때문에 결과가 달라질 수 있습니다.
 
 그렇기 때문에 처리 순서가 달라져도 결과에 영향을 주지 않을 때만 병렬로 처리해야 합니다.
+
 > 병렬 stream 처리가 항상 좋은 것만은 아님!!
 
 따라서 실제로 stream이나 다른 로직 케이스들을 성능비교해보는 게 가장 좋음!
@@ -159,7 +157,6 @@ stream.parallel().forEach(System.out::println);
 
 ## 왜 쓰는가 ❓
 
-
 ### Stream을 사용하는 이유
 
 - 컬렉션 구조에 대한 순회 혹은 필터링 처리를 할 수 있음
@@ -167,7 +164,6 @@ stream.parallel().forEach(System.out::println);
 - 람다식, 람다식 메소드 참조를 사용하기에 코드를 간결하게 짤 수 있음
 
 ## 레퍼런스 🔍
-
 
 - forEach [https://www.baeldung.com/foreach-java](https://www.baeldung.com/foreach-java)
 - Comparator [https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html](https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html)

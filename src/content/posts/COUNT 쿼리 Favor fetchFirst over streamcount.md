@@ -1,5 +1,4 @@
 ---
-title: "[COUNT 쿼리] Favor fetchFirst() over .stream().count()"
 description: "count 쿼리에 대한 에러가 발생한다는 리포트를 보고 코드를 수정 중에"
 date: 2024-08-05
 tags: [java]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 # Episode 📜
-
 
 count 쿼리에 대한 에러가 발생한다는 리포트를 보고 코드를 수정 중에
 코드스멜을 감지해서 오랜만에 글을 작성한다.
@@ -95,7 +93,6 @@ public Long countList(Long admIdx, HtmlFailQueryRequest historyQueryRequest) {
 
 # Reason of Err🤷‍♂️
 
-
 > stream().count() 는 내부적으로 JAVA 8 Stream API 를 사용하여 불안정하기 때문
 
 ![](/images/notion/876e888ee1832afd.png)
@@ -106,17 +103,15 @@ parsingErrorLog.count() & stream().count() 를 사용한 count 처리는 다음 
 
 1.
 
-우선 첫 번째로 count(parsingErrorLog) 를 수행한다.
-2.
+우선 첫 번째로 count(parsingErrorLog) 를 수행한다. 2.
 
-그 다음 new Long() 을 통해 Stream 인스턴스를 만들게 된다.
-3.
+그 다음 new Long() 을 통해 Stream 인스턴스를 만들게 된다. 3.
 
 이후 Stream 을 memory 에 fetch 하여 Stream 의 크기를 count 한다.
 
 여기서 문제는 1,2 번이다.
 
-위와 같이 new Long(count(parsingErrorLog)) 를 수행하게 될 때, 
+위와 같이 new Long(count(parsingErrorLog)) 를 수행하게 될 때,
 fetch 된 count(parsingErrorLog) 는 한 개가 된다.
 ( 당연하다. count query 를 통해 parsingErrorLog 개수를 가져왔으니 )
 
@@ -130,22 +125,23 @@ fetch 된 count(parsingErrorLog) 는 한 개가 된다.
 
 # How to fix 🔧
 
-
 stream().count() 처리 방법은 java agnostic, 즉 java 지향적이다.
 
 모든 결과를 fetch 한 뒤 java 를 통해 순회하며 개수를 세므로 불필요한 작업이 수행된다.
 
 따라서 count() 에 대한 fetchFirst() 을 사용하도록 하자
-**fetchCount(), fetchResults() 는 deprecated 되었다.
+\*\*fetchCount(), fetchResults() 는 deprecated 되었다.
 
 ### `fetchFirst()`
 
 - **Database-Native**: This method relies on the database to perform the counting operation.
 
 The `COUNT` function in SQL is executed directly by the database, which is highly optimized for such operations.
+
 - **Efficiency**: The database engine counts the rows and returns a single result.
 
 This minimizes data transfer and leverages the database's optimized algorithms.
+
 - **Consistency**: The result is consistent with the state of the database at the time the query is executed.
 
 ### `stream().count()`
@@ -154,11 +150,12 @@ This minimizes data transfer and leverages the database's optimized algorithms.
 - **Inefficiency**: The query first retrieves all matching records, which can be resource-intensive and slow, especially for large datasets.
 
 It then counts the records in memory, which is less efficient than performing the count directly in the database.
+
 - **Potential for Inconsistency**: If data changes during the fetching process, the count might not be accurate.
 
 There’s also a higher chance of running into performance and memory issues due to large result sets.
 
-위와 같은 이유로 인해, 
+위와 같은 이유로 인해,
 count 쿼리를 통해 페이지네이션을 처리할 때는 fetchOne() 을 권장한다.
 
 이 방법이 조금 더 datababase 지향적인 방법이다.
@@ -196,12 +193,11 @@ private <T> JPAQuery<T> getCustomerSearchListQuery(Expression<T> select, Custome
 }
 ```
 
-이렇게 작성한 데이터 조회 메서드를 아래와 같이 
+이렇게 작성한 데이터 조회 메서드를 아래와 같이
 
 1.
 
-말그대로 select 하는 메서드 하나
-2. count 하는 메서드 하나
+말그대로 select 하는 메서드 하나 2. count 하는 메서드 하나
 
 를 작성하여 호출해주었다.
 
@@ -335,6 +331,7 @@ public interface QuerydslFilterApplier<T> {
   void modify(JPAQuery<T> query);
 }
 ```
+
 ```java
 @SafeVarargs
 protected final <T> void applyFiltersIfNotCountQuery(JPAQuery<T> query, Expression<T> select, QuerydslFilterApplier<T>... filters) {
@@ -395,6 +392,7 @@ protected final <T> void applyPaginationIfPaging(JPAQuery<T> query, Expression<T
     return query;
   }
 ```
+
 ```java
 public Long getCustomerSearchListCount(CustomerSearchListGetReq req, Long admIdx) {
   return getCustomerSearchListQuery(customer.cusIdx.countDistinct(), req, admIdx).fetchFirst();
@@ -409,10 +407,10 @@ public Long getCustomerSearchListCount(CustomerSearchListGetReq req, Long admIdx
 
 좋은 글이 있어 가져와봤다.
 
-HAVING 절은 POST AGGREGATION 에 대해 적용되므로 
+HAVING 절은 POST AGGREGATION 에 대해 적용되므로
 AGGREGATE RESULT 에 적용하는 것이 아니라면 최대한 WHERE 절로 옮기는 게 좋다.
 
-근데 이러한 것을 알고 넘기는 것보다 더 중요한 것은 
+근데 이러한 것을 알고 넘기는 것보다 더 중요한 것은
 단순히 QUERY 처리순서를 이해하는 것이다.
 
 처리순서를 이해하면 자연스레 알게된다는 것이다.

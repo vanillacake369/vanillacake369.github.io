@@ -1,5 +1,4 @@
 ---
-title: "JPA 연관관계(feat.연관관계 주인)"
 description: "JPA에서는 **두 객체 연관관계 중 하나를 정해서 테이블의 외래키를 관리**"
 date: 2026-02-25
 tags: [java]
@@ -9,20 +8,18 @@ draft: false
 
 # Why(What For?) 🤷‍♂️
 
-
 > 테이블은 곧 엔티티이다.
 
 # What(What should I know?) 👇
-
 
 ## 연관관계의 주인
 
 - 연관관계 주인이란??
 
 JPA에서는 **두 객체 연관관계 중 하나를 정해서 테이블의 외래키를 관리**
-**연관관계의 주인만이 데이터베이스 연관관계와 매핑되고 외래 키를 관리(등록, 수정, 삭제)할 수 있습니다.
+\*\*연관관계의 주인만이 데이터베이스 연관관계와 매핑되고 외래 키를 관리(등록, 수정, 삭제)할 수 있습니다.
 
-반면에 주인이 아닌 쪽은 읽기만 할 수 있습니다.**
+반면에 주인이 아닌 쪽은 읽기만 할 수 있습니다.\*\*
 어떤 연관관계를 주인으로 정할지는 `mappedBy` 속성을 사용하면 됩니다.
 
 > 데이터베이스 테이블의 다대일, 일대다 관계에서는 항상 **다** 쪽이 외래 키를 가집니다.
@@ -41,21 +38,23 @@ JPA에서는 **두 객체 연관관계 중 하나를 정해서 테이블의 외
 
 ```java
 class Member {
- 
+
 	 @ManyToOne
 	 @JoinColumn(name = "TEAM_ID")
 	 private Team team;
 	 // ...
 }
 ```
+
 ```java
 class Team {
-  
+
   @OneToMany(mappedBy = "team")
   private List<Member> members = new ArrayList<>();
   // ...
 }
 ```
+
 </details>
 
 [https://velog.io/@conatuseus/연관관계-매핑-기초-2-양방향-연관관계와-연관관계의-주인](https://velog.io/@conatuseus/연관관계-매핑-기초-2-양방향-연관관계와-연관관계의-주인)
@@ -73,7 +72,7 @@ class Team {
 @Entity
 public class Member {
 	// 연결 테이블(MEMBER_PRODUCT)쪽이 외래키를 갖고있기 때문에, 연결 테이블이 연관관계의 주인이다.
-    @OneToMany(mappedBy = "member") 
+    @OneToMany(mappedBy = "member")
     private List<MemberProduct> memberProducts = new ArrayList<>();
 }
 ```

@@ -1,5 +1,4 @@
 ---
-title: "NixOS 는 어떤 원리로 커널/패키지를 관리할까?"
 description: "NixOS 홈랩을 운영하다 보면 한 가지 질문이 점점 또렷해진다."
 date: 2026-05-08
 tags: [nix]
@@ -10,17 +9,11 @@ series: { id: "NixOS Ecosystem", order: 15 }
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 NixOS 홈랩을 운영하다 보면 한 가지 질문이 점점 또렷해진다.
 
-> *"Terraform 이나 OpenTofu 로도 풀지 못한 OS 레벨 구성을  — 커널, 부트 파라미터, 시스템 서비스 —*
+> _"Terraform 이나 OpenTofu 로도 풀지 못한 OS 레벨 구성을 — 커널, 부트 파라미터, 시스템 서비스 —_
 
-기존 IaC 도구들은 클라우드 리소스의 선언적 관리 에는 탁월하지만, 
+기존 IaC 도구들은 클라우드 리소스의 선언적 관리 에는 탁월하지만,
 OS 안쪽 — 어떤 커널 모듈을 올릴 것인지, `/etc` 의 어떤 파일이 누구에 의해 관리되는지, 시스템 업그레이드가 atomic 한지 — 까지는 책임지지 못한다.
 
 이 영역은 여전히 Ansible/Chef 같은 명령형 도구로, 혹은 manual + bash 스크립트 로 메워지고 있다.
@@ -31,22 +24,16 @@ NixOS 는 정확히 이 빈 자리를 메우는 도구다.
 
 시스템 한 대를 하나의 함수의 출력값 으로 다루겠다는 것이다.
 
-이 글은 *"NixOS 가 어떤 원리로 패키지부터 커널까지 통제하는가"* 라는 질문에 답하기 위해, 
-가장 표층의 사용자 경험에서 출발해 가장 깊은 곳의 자료구조까지 한 줄기로 내려가 본다. 
+이 글은 _"NixOS 가 어떤 원리로 패키지부터 커널까지 통제하는가"_ 라는 질문에 답하기 위해,
+가장 표층의 사용자 경험에서 출발해 가장 깊은 곳의 자료구조까지 한 줄기로 내려가 본다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## 들어가며: NixOS 를 이해하려면 어디서부터 시작해야 하는가 🔍
 
 NixOS 의 동작 원리는 한 번에 보이지 않는다.
 
-그것은 본질적으로 *세 겹으로 쌓인 추상* 이기 때문이다.
+그것은 본질적으로 _세 겹으로 쌓인 추상_ 이기 때문이다.
 
 ```
 NixOS         =  ( Nix 모델 ) 을 OS 단위로 확장한 것
@@ -74,12 +61,12 @@ NixOS 의 동작 원리를 이해하려면, 먼저 그 기반이 되는 **Nix** 
 
 ### 기존 패키지 매니저의 공통적 한계
 
-Nix 를 본격적으로 알아보기 앞서, Nix 와 다른 패키지 매니저들이 공유하는 *문제* 부터 짚어보자.
+Nix 를 본격적으로 알아보기 앞서, Nix 와 다른 패키지 매니저들이 공유하는 _문제_ 부터 짚어보자.
 
 그래야 Nix 가 도대체 무엇을 다르게 했는지가 선명하게 드러나기 때문이다.
 dpkg, rpm, apt, yum — 우리가 흔히 쓰는 패키지 매니저들은 출신도 다르고 명령어도 다르지만 한 가지 공통점이 있다.
 
-모두 **글로벌 가변 상태(global mutable state)** 위에서 동작한다는 점이다. 
+모두 **글로벌 가변 상태(global mutable state)** 위에서 동작한다는 점이다.
 `/usr/lib`, `/usr/bin` 같은 공유 디렉토리에 파일을 직접 쓰고, 새 버전을 깔면 옛 버전을 덮어쓴다.
 
 이러한 모델의 패키지 매니저들은 다음과 같은 고질적인 문제들을 공통적으로 만들어 왔다.
@@ -87,7 +74,7 @@ dpkg, rpm, apt, yum — 우리가 흔히 쓰는 패키지 매니저들은 출신
 - **Dependency Hell:**
 - **불완전한 의존성 명세:**
 - **비-원자적 업그레이드:**
-- **명령형 구성의 drift**: 
+- **명령형 구성의 drift**:
 
 여기서 한 가지 흥미로운 관찰이 가능하다.
 
@@ -99,12 +86,12 @@ dpkg, rpm, apt, yum — 우리가 흔히 쓰는 패키지 매니저들은 출신
 
 2003년, 네덜란드 Utrecht 대학에서 박사 과정을 밟던 **Eelco Dolstra** 가 정확히 이 답을 패키지 관리에 가져왔다[^1].
 
-그가 2006년에 방어한 박사학위 논문 *The Purely Functional Software Deployment Model*[^2] 은 Nix 의 모든 설계 사상이 담겨 있는 원전이며, 핵심 명제는 논문 1장 첫 문장으로 압축된다.
+그가 2006년에 방어한 박사학위 논문 _The Purely Functional Software Deployment Model_[^2] 은 Nix 의 모든 설계 사상이 담겨 있는 원전이며, 핵심 명제는 논문 1장 첫 문장으로 압축된다.
 
-> *"given identical inputs, the software should behave the same on an end-user machine as on the developer machine"*
+> _"given identical inputs, the software should behave the same on an end-user machine as on the developer machine"_
 > 동일한 입력이 주어졌다면, 소프트웨어는 개발자 머신과 사용자 머신에서 동일하게 동작해야 한다.
 
-말로 풀어쓰면 당연한 얘기지만, 정작 이 속성을 *수학적으로 보장하는* 패키지 매니저는 그전까지 존재하지 않았다.
+말로 풀어쓰면 당연한 얘기지만, 정작 이 속성을 _수학적으로 보장하는_ 패키지 매니저는 그전까지 존재하지 않았다.
 
 Dolstra 의 답은 한 문장으로 요약된다.
 
@@ -125,7 +112,7 @@ flowchart LR
     F --> O["/nix/store/&lt;hash&gt;-&lt;name&gt;<br/>불변 디렉토리"]
 ```
 
-빌드의 **입력** 은 소스 코드, 빌드 스크립트, 모든 의존성의 정확한 해시, 대상 플랫폼이다. 
+빌드의 **입력** 은 소스 코드, 빌드 스크립트, 모든 의존성의 정확한 해시, 대상 플랫폼이다.
 **출력** 은 `/nix/store/<해시>-<이름>` 경로에 놓이는 불변 디렉토리다.
 
 같은 입력은 같은 출력 경로로 결정되며, 빌드는 sandbox 안에서 실행되어 외부 상태에 의존할 수 없다.
@@ -138,36 +125,36 @@ flowchart LR
 
 여기서 "자동으로" 라는 표현은 과장이 아니다.
 
-아래 속성들은 Nix 의 개발자들이 따로 공들여 구현한 기능이 아니라, 빌드를 순수 함수로 정의한 그 순간 *수학적 귀결로* 따라 나오는 성질들이다.
+아래 속성들은 Nix 의 개발자들이 따로 공들여 구현한 기능이 아니라, 빌드를 순수 함수로 정의한 그 순간 _수학적 귀결로_ 따라 나오는 성질들이다.
 
-- **재현성(Reproducibility)**: 
-- **원자적 업그레이드와 즉각적 롤백**: 
-- **동일 패키지의 다중 버전 공존**: 
-- **선언적 시스템 구성**: 
-- **Cross-Compilation**: 
+- **재현성(Reproducibility)**:
+- **원자적 업그레이드와 즉각적 롤백**:
+- **동일 패키지의 다중 버전 공존**:
+- **선언적 시스템 구성**:
+- **Cross-Compilation**:
 
-여기까지가 Nix 가 *어떤 문제를 어떤 발상으로 풀었는가* 에 대한 이야기다.
+여기까지가 Nix 가 _어떤 문제를 어떤 발상으로 풀었는가_ 에 대한 이야기다.
 
-흥미롭게도 Dolstra 가 2006년 논문에서 제시한 아이디어들 — 격리, 선언적 구성, 원자적 배포, immutable infrastructure — 은 그 후 십여 년 동안 Docker, Terraform, Kubernetes 같은 다른 도구들로 *분산되어 재발견* 되었다[^4].
+흥미롭게도 Dolstra 가 2006년 논문에서 제시한 아이디어들 — 격리, 선언적 구성, 원자적 배포, immutable infrastructure — 은 그 후 십여 년 동안 Docker, Terraform, Kubernetes 같은 다른 도구들로 _분산되어 재발견_ 되었다[^4].
 
-그러나 이들 중 어느 것도 *운영체제 한 대 전체* 를 한 번에 다루지는 못했다.
+그러나 이들 중 어느 것도 _운영체제 한 대 전체_ 를 한 번에 다루지는 못했다.
 
 바로 그 지점이 우리가 이 글에서 도달하려는 NixOS 의 의의다.
 
 그렇다면 이 "순수 함수" 모델은 실제 코드 수준에서 어떤 자료구조와 메커니즘으로 구현되어 있을까?
 
-다음 장에서는 Nix 가 `/nix/store` 와 derivation 이라는 두 가지 무기로 이 추상을 어떻게 *물리적으로* 구체화하는지 살펴본다.
+다음 장에서는 Nix 가 `/nix/store` 와 derivation 이라는 두 가지 무기로 이 추상을 어떻게 _물리적으로_ 구체화하는지 살펴본다.
 
 ## Nix 동작 원리: 추상에서 구현으로 🍯
 
 추상적 모델은 그것을 떠받치는 자료구조와 메커니즘이 있어야 비로소 작동한다.
 
-이 장에서는 *"빌드 = 순수 함수"* 라는 발상이 실제로 어떻게 파일과 디렉토리, 그리고 명령어로 구현되어 있는지를 따라간다.
+이 장에서는 _"빌드 = 순수 함수"_ 라는 발상이 실제로 어떻게 파일과 디렉토리, 그리고 명령어로 구현되어 있는지를 따라간다.
 
 ### 핵심 데이터 구조: /nix/store
 
 Nix 의 모든 빌드 결과물은 단 한 장소 — `/nix/store` — 에 저장된다[^8].
- `/usr/bin`, `/usr/lib`, `/usr` 같은 전통적인 디렉토리는 NixOS 에 *존재하지 않는다*. 
+`/usr/bin`, `/usr/lib`, `/usr` 같은 전통적인 디렉토리는 NixOS 에 _존재하지 않는다_.
 (예외는 `/bin/sh` 정도이며, 이것조차 store 안의 bash 로 향하는 심볼릭 링크다.)
 store 안의 모든 항목은 다음과 같은 형식의 경로를 갖는다.
 
@@ -176,15 +163,15 @@ store 안의 모든 항목은 다음과 같은 형식의 경로를 갖는다.
             └─────────── hash ───────────┘ └── name ──┘
 ```
 
-여기서 `5rnf...` 는 단순한 임의 문자열이 아니다. 
+여기서 `5rnf...` 는 단순한 임의 문자열이 아니다.
 **이 패키지를 빌드할 때 사용된 모든 입력값의 암호학적 해시** 이다.
 
 입력이 한 글자라도 다르면 해시가 달라지고, 따라서 store path 도 달라진다.
 
-이로부터 다음 두 속성이 *물리적으로* 보장된다.
+이로부터 다음 두 속성이 _물리적으로_ 보장된다.
 
 - **격리(Isolation)**: 같은 이름의 다른 버전은 다른 해시를 가지므로 같은 디렉토리를 두고 충돌할 수 없다.
-- **불변성(Immutability)**: 한 번 빌드된 store path 는 절대 덮어쓰이지 않는다. "업그레이드" 란 *새 store path 를 추가로 만들고* 시스템이 그것을 가리키게 하는 일이다.
+- **불변성(Immutability)**: 한 번 빌드된 store path 는 절대 덮어쓰이지 않는다. "업그레이드" 란 _새 store path 를 추가로 만들고_ 시스템이 그것을 가리키게 하는 일이다.
 
 `/etc` 같은 시스템 설정 디렉토리도 예외가 아니다.
 
@@ -194,45 +181,45 @@ NixOS 에서 `/etc/ssh/sshd_config` 를 따라가 보면 다음과 비슷한 곳
 /nix/store/s2sjbl85xnrc18rl4fhn56irkxqxyk4p-sshd_config
 ```
 
-*설정 파일조차도 derivation 의 출력물* 이라는 뜻이다.
+_설정 파일조차도 derivation 의 출력물_ 이라는 뜻이다.
 
 이것이 NixOS 의 거의 모든 구성의 출발점이다.
 
 ### Derivation: 빌드의 사양서 (.drv)
 
-이제 *"어떤 입력이 어떤 store path 를 만든다"* 라는 함수 관계를 *기계가 읽을 수 있는 형태* 로 표현해야 한다.
+이제 _"어떤 입력이 어떤 store path 를 만든다"_ 라는 함수 관계를 _기계가 읽을 수 있는 형태_ 로 표현해야 한다.
 
 그것이 바로 **derivation** 이다[^5][^6].
 derivation 은 store 안에 `.drv` 파일로 저장되며, 빌드에 필요한 모든 정보를 담은 매니페스트 파일이라고 보면된다.
 
 그 안에는 다음 7가지 필드가 들어 있다.
 
-| 필드 | 의미 |
-| --- | --- |
-| **outputs** | 이 derivation 이 만들어낼 store path 들 |
-| **inputDrvs** | 빌드 전에 먼저 빌드되어야 할 다른 derivation 들 |
-| **inputSrcs** | 이미 store 에 있어야 할 입력 (소스 파일 등) |
-| **platform** | 어떤 플랫폼에서 빌드해야 하는가 (e.g. `x86_64-linux`) |
-| **builder** | 빌드를 수행할 실행 파일 (보통 bash) |
-| **args** | builder 에 전달할 인자 |
-| **env** | builder 에 전달할 환경 변수 |
+| 필드          | 의미                                                  |
+| ------------- | ----------------------------------------------------- |
+| **outputs**   | 이 derivation 이 만들어낼 store path 들               |
+| **inputDrvs** | 빌드 전에 먼저 빌드되어야 할 다른 derivation 들       |
+| **inputSrcs** | 이미 store 에 있어야 할 입력 (소스 파일 등)           |
+| **platform**  | 어떤 플랫폼에서 빌드해야 하는가 (e.g. `x86_64-linux`) |
+| **builder**   | 빌드를 수행할 실행 파일 (보통 bash)                   |
+| **args**      | builder 에 전달할 인자                                |
+| **env**       | builder 에 전달할 환경 변수                           |
 
 가장 중요한 사실은 **이 7개의 필드가 곧 함수의 입력이라는 점** 이다.
 
 이들 중 무엇 하나라도 바뀌면 derivation 의 해시가 바뀌고, 따라서 출력 store path 가 바뀐다.
 
-이것이 *재현성* 과 *불변성* 의 수학적 토대다.
+이것이 _재현성_ 과 _불변성_ 의 수학적 토대다.
 
-REPL 에서 가장 작은 derivation 을 만들고 그 .drv 의 내용을 확인해 볼 수 있다 
+REPL 에서 가장 작은 derivation 을 만들고 그 .drv 의 내용을 확인해 볼 수 있다
 (자세한 명령은 §How 에서 다룬다)[^7].
 
 ### Binary Cache: 분산 배포에서도 작동하는 이유
 
-여기서 한 가지 의문이 자연스럽게 떠오른다. *"매번 모든 패키지를 처음부터 빌드한다고?
+여기서 한 가지 의문이 자연스럽게 떠오른다. \*"매번 모든 패키지를 처음부터 빌드한다고?
 
-너무 느리지 않은가?"*
-답은 우아하다. 
-**같은 derivation 은 항상 같은 결과를 만들어내므로, 누가 미리 빌드해 둔 결과물을 가져와도 그것이 직접 빌드한 것과 비트 단위로 동일하다는 보장이 있다.** 
+너무 느리지 않은가?"\*
+답은 우아하다.
+**같은 derivation 은 항상 같은 결과를 만들어내므로, 누가 미리 빌드해 둔 결과물을 가져와도 그것이 직접 빌드한 것과 비트 단위로 동일하다는 보장이 있다.**
 Nix 는 이 사실을 활용해 Binary Cache 라는 메커니즘을 둔다.
 
 ```mermaid
@@ -246,9 +233,9 @@ flowchart LR
 
 기본 캐시는 `cache.nixos.org` 이며, 사용자나 조직이 자체 캐시를 운영할 수도 있다 (Cachix, Attic 등).
 
-직접 빌드와 다운로드의 결과가 *비트 단위로 같다는 보장이 있기 때문에* 이 캐시는 단순한 성능 도구가 아니라 *분산 신뢰 시스템* 으로 기능한다.
+직접 빌드와 다운로드의 결과가 _비트 단위로 같다는 보장이 있기 때문에_ 이 캐시는 단순한 성능 도구가 아니라 _분산 신뢰 시스템_ 으로 기능한다.
 
-Nix 가 단순한 빌드 도구를 넘어 *대규모 패키지 배포 시스템* 까지 될 수 있는 이유가 여기에 있다.
+Nix 가 단순한 빌드 도구를 넘어 _대규모 패키지 배포 시스템_ 까지 될 수 있는 이유가 여기에 있다.
 
 ### 정리: Nix 의 빌드 파이프라인
 
@@ -263,14 +250,14 @@ flowchart TD
     CACHE -.-> OUT
 ```
 
-세 단계 각각이 *서로 다른 형태의 결과물* 을 반환한다는 점이 중요하다.
+세 단계 각각이 _서로 다른 형태의 결과물_ 을 반환한다는 점이 중요하다.
 
-평가는 *값* 을, instantiation 은 *.drv 경로* 를, realisation 은 *실제로 빌드된 디렉토리* 를 반환한다.
+평가는 _값_ 을, instantiation 은 _.drv 경로_ 를, realisation 은 _실제로 빌드된 디렉토리_ 를 반환한다.
 `nix-build` 와 `nix build` 같은 명령어는 이 세 단계를 한 번에 묶어 실행하는 편의 명령일 뿐, 내부적으로는 항상 이 파이프라인을 따른다.
 
-이제 우리는 *패키지 단위의 Nix* 를 충분히 이해했다.
+이제 우리는 _패키지 단위의 Nix_ 를 충분히 이해했다.
 
-다음 장에서는 이 모델을 *시스템 한 대 전체로 확장하면* 무슨 일이 벌어지는지를 본다.
+다음 장에서는 이 모델을 _시스템 한 대 전체로 확장하면_ 무슨 일이 벌어지는지를 본다.
 
 ## NixOS 동작 원리: Nix 모델을 OS 한 대로 확장하기 :nix-logo:
 
@@ -285,7 +272,7 @@ NixOS 의 가장 깊은 통찰은 한 줄로 표현된다.
 
 ### Module System: configuration.nix → 거대한 attribute set
 
-NixOS 사용자는 `/etc/nixos/configuration.nix` 라는 한 파일에 시스템의 *원하는 상태* 를 적는다. 
+NixOS 사용자는 `/etc/nixos/configuration.nix` 라는 한 파일에 시스템의 _원하는 상태_ 를 적는다.
 
 ```nix
 { config, pkgs, ... }:
@@ -296,30 +283,30 @@ NixOS 사용자는 `/etc/nixos/configuration.nix` 라는 한 파일에 시스템
   };
   users.users.alice = { ... };
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  
+
 }
 ```
 
 그러나 이 파일 한 장이 시스템의 전부일 리는 없다.
 
-실제로는 nixpkgs 안에 들어 있는 *수천 개의 모듈* 이 함께 평가된다.
+실제로는 nixpkgs 안에 들어 있는 _수천 개의 모듈_ 이 함께 평가된다.
 
 각 모듈은 두 가지를 정의한다.
 
 - **options**: 어떤 옵션을 받을 수 있는가 (타입, 기본값, 설명)
 - **config**: 그 옵션이 주어졌을 때 무엇을 만들어낼 것인가
 
-수천 개의 모듈은 nixpkgs 의 `lib.evalModules` 함수에 의해 *하나의 거대한 attribute set 으로 합쳐진다*[^12].
+수천 개의 모듈은 nixpkgs 의 `lib.evalModules` 함수에 의해 _하나의 거대한 attribute set 으로 합쳐진다_[^12].
 
 이 합치는 과정에서 옵션의 우선순위, 타입 검사, 기본값 적용이 수학적으로 정의된 규칙에 따라 이루어진다.
 
-결과적으로 `config.boot.kernelPackages` 나 `config.services.openssh.settings.PermitRootLogin` 같은 *모든 시스템 설정 값* 이 단 하나의 값으로 결정된다.
+결과적으로 `config.boot.kernelPackages` 나 `config.services.openssh.settings.PermitRootLogin` 같은 _모든 시스템 설정 값_ 이 단 하나의 값으로 결정된다.
 
 ### System Derivation: 운영체제도 결국 하나의 .drv
 
 이 거대한 attribute set 의 정점에 있는 값이 바로 `config.system.build.toplevel` 이다[^11].
 
-이것은 *시스템 한 대 전체* 를 표현하는 단 하나의 derivation 이다.
+이것은 _시스템 한 대 전체_ 를 표현하는 단 하나의 derivation 이다.
 
 그 출력 store path 는 다음 것들을 모두 포함한다.
 
@@ -332,9 +319,9 @@ NixOS 사용자는 `/etc/nixos/configuration.nix` 라는 한 파일에 시스템
 - **kernel-modules**: 적재될 커널 모듈들
 - **bootloader 설정**: GRUB / systemd-boot 메뉴 항목
 
-이 모든 것이 *하나의 store path* 안에 묶여 있다는 사실이 NixOS 의 모든 마법의 근원이다.
+이 모든 것이 _하나의 store path_ 안에 묶여 있다는 사실이 NixOS 의 모든 마법의 근원이다.
 
-따라서 *"커널을 어떻게 관리하는가"* 라는 이 글의 첫 질문에 대한 답이 이 한 문장으로 압축할 수 있다
+따라서 _"커널을 어떻게 관리하는가"_ 라는 이 글의 첫 질문에 대한 답이 이 한 문장으로 압축할 수 있다
 **커널은 별도의 메커니즘으로 관리되는 것이 아니라, 시스템 derivation 이라는 거대한 함수의 한 입력일 뿐이다.**
 
 ```mermaid
@@ -354,12 +341,12 @@ flowchart TD
 
 마지막 한 단계가 추가로 붙는다.
 
-Nix 인터프리터가 `/etc/nixos/configuration.nix` 를 시작점으로 nixpkgs 의 모든 관련 모듈을 읽고 평가한다. 
+Nix 인터프리터가 `/etc/nixos/configuration.nix` 를 시작점으로 nixpkgs 의 모든 관련 모듈을 읽고 평가한다.
 `boot.kernelPackages`, `services.xserver.enable` 같은 옵션이 모두 결정되어 거대한 attribute set 이 된다.
 
 평가된 결과로부터 `system.build.toplevel.drvPath` 가 계산된다.
 
-이 시점에 store 에는 *.drv 파일들* 만 존재할 뿐 실제 바이너리는 아직 없다.
+이 시점에 store 에는 _.drv 파일들_ 만 존재할 뿐 실제 바이너리는 아직 없다.
 
 .drv 들이 의존성 순서대로 실제로 빌드된다.
 
@@ -376,16 +363,16 @@ Nix 인터프리터가 `/etc/nixos/configuration.nix` 를 시작점으로 nixpkg
 
 이것이 원자적 업그레이드 의 정체다.
 
-이 4단계 중 ①~③ 은 *빌드 시점* 의 일이고 ④ 는 *적용 시점* 의 일이다.
+이 4단계 중 ①~③ 은 _빌드 시점_ 의 일이고 ④ 는 _적용 시점_ 의 일이다.
 
 다음 섹션에서 다룰 부팅 시 의 Stage 1/2 와는 또 다른 차원의 이야기이므로 혼동하지 말자
 
 ### Boot 파이프라인: Stage 1 (initrd) & Stage 2 (systemd)
 
-위 4단계가 *시스템을 새로 빌드해서 적용하는* 과정이라면, 
-다음은 *전원을 켰을 때* 그 시스템이 어떻게 살아나는지에 대한 이야기다.
+위 4단계가 _시스템을 새로 빌드해서 적용하는_ 과정이라면,
+다음은 _전원을 켰을 때_ 그 시스템이 어떻게 살아나는지에 대한 이야기다.
 
-NixOS 도 결국 Linux 이므로 부팅 흐름의 큰 틀은 같지만, 모든 단계가 *Nix 가 미리 빌드해 둔 산출물* 위에서 작동한다는 점이 다르다.
+NixOS 도 결국 Linux 이므로 부팅 흐름의 큰 틀은 같지만, 모든 단계가 _Nix 가 미리 빌드해 둔 산출물_ 위에서 작동한다는 점이 다르다.
 
 ```mermaid
 flowchart TD
@@ -406,7 +393,7 @@ NixOS 는 `boot.initrd.availableKernelModules` 에 적힌 모듈들을 포함하
 - LVM, LUKS 같은 디스크 암호화 해제
 - 루트 파일 시스템 마운트
 
-이 모든 과정은 Nix 가 빌드 시점에 *생성해 둔* `init` 셸 스크립트에 의해 통제된다.
+이 모든 과정은 Nix 가 빌드 시점에 _생성해 둔_ `init` 셸 스크립트에 의해 통제된다.
 
 루트 파티션이 마운트된 후 실제 OS 서비스가 시작되는 단계다.
 
@@ -415,17 +402,17 @@ NixOS 는 `boot.initrd.availableKernelModules` 에 적힌 모듈들을 포함하
 - 위 ④ 의 activate 스크립트가 실행되어 `/etc` 의 심볼릭 링크들이 새 store path 를 가리키도록 갱신된다.
 - systemd 가 `boot.kernelParams` 와 함께 정의된 모든 시스템 서비스를 시작한다.
 
-여기서 주목할 만한 부분은 *NixOS 는 **`/etc`** 의 거의 모든 파일을 직접 관리하지 않는다는 것이다*[^8]. 
+여기서 주목할 만한 부분은 _NixOS 는 **`/etc`** 의 거의 모든 파일을 직접 관리하지 않는다는 것이다_[^8].
 `/etc` 의 대부분은 `/nix/store` 안의 derivation 출력물로 향하는 심볼릭 링크들이다.
 
 사용자가 `/etc/ssh/sshd_config` 를 손으로 편집해도, 다음 활성화 시점에 그 변경은 흔적도 없이 사라진다.
 
-시스템의 *진짜 상태* 는 언제나 `configuration.nix` 안에 있다.
+시스템의 _진짜 상태_ 는 언제나 `configuration.nix` 안에 있다.
 
 ### Generation 과 Rollback
 
-이러한 순수함수형 빌드 모델 위에서 NixOS 는 *generation* 이라는 개념을 사용한다
-앞서 [④ Activation: System Path → 실제 동작](https://www.notion.so/35a19c39029080e6aebbc617829d5a03#35a19c390290805d99d4efc60699e924) 에서 설명한 것처럼, 
+이러한 순수함수형 빌드 모델 위에서 NixOS 는 _generation_ 이라는 개념을 사용한다
+앞서 [④ Activation: System Path → 실제 동작](https://www.notion.so/35a19c39029080e6aebbc617829d5a03#35a19c390290805d99d4efc60699e924) 에서 설명한 것처럼,
 NixOS 는 `bin/switch-to-configuration` 스크립트 실행하여 새로운 시스템에 대해 `/run/current-system` 산하에 새로운 시스템 path 를 만든다
 즉, NixOS 에서는 각 새로운 Build 를 돌릴 때마다 generation 을 찍어 이정표를 찍는다
 이 generation 들을 통해 특정 시점의 generation 으로 rollback 할 수 있는 기능을 제공한다
@@ -442,7 +429,7 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 
 이러한 각 generation 은 부트로더 메뉴에 그대로 등록된다.
 
-따라서 만약 새 커널로 부팅했는데 패닉이 나거나 디스플레이가 안 잡히면, 
+따라서 만약 새 커널로 부팅했는데 패닉이 나거나 디스플레이가 안 잡히면,
 재부팅해서 GRUB 메뉴에서 이전 generation 을 고르면 그만이다.
 
 이는 디스크에 시스템이 그대로 살아 있기 때문에 가능한 일이다.
@@ -453,15 +440,15 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 sudo nixos-rebuild switch --rollback
 ```
 
-이 한 줄은 단순히 `/run/current-system` 심볼릭 링크를 직전 generation 으로 다시 가리키게 하고 
+이 한 줄은 단순히 `/run/current-system` 심볼릭 링크를 직전 generation 으로 다시 가리키게 하고
 activate 스크립트를 한 번 더 실행할 뿐이다.
 
-다른 OS 에서는 *"마지막에 무엇을 바꿨더라"* 를 떠올리며 손으로 되돌리는 그 작업이, NixOS 에서는 한 번의 syscall 이다.
+다른 OS 에서는 _"마지막에 무엇을 바꿨더라"_ 를 떠올리며 손으로 되돌리는 그 작업이, NixOS 에서는 한 번의 syscall 이다.
 
-여기까지가 *NixOS 가 어떤 원리로 패키지부터 커널까지 통제하는가* 라는 이 글의 첫 질문에 
+여기까지가 _NixOS 가 어떤 원리로 패키지부터 커널까지 통제하는가_ 라는 이 글의 첫 질문에
 답을 요약하면 다음과 같다.
 
-> *NixOS 는 시스템 한 대를 순수 함수의 출력값 으로 다룬다. *
+> _NixOS 는 시스템 한 대를 순수 함수의 출력값 으로 다룬다. _
 
 다음 장에서는 이 추상이 명령어 수준에서 어떻게 만져지는지를 직접 손으로 확인해 본다.
 
@@ -469,15 +456,13 @@ activate 스크립트를 한 번 더 실행할 뿐이다.
 
 어떻게 씀?
 
----
-
-여기까지 읽었다면 *Nix 가 무엇이고 NixOS 가 어떻게 동작하는가* 에 대한 머릿속 그림은 어느 정도 잡혔을 것이다.
+여기까지 읽었다면 _Nix 가 무엇이고 NixOS 가 어떻게 동작하는가_ 에 대한 머릿속 그림은 어느 정도 잡혔을 것이다.
 
 그러나 추상적 모델은 손으로 만져 보기 전까지는 진짜로 이해되지 않는다.
 
 이 장에서는 앞서 다룬 개념들 — store path, derivation, 빌드 파이프라인, generation — 을 직접 명령어로 확인해 본다.
 
-> 💡 
+> 💡
 
 ## 실습 ①: 내 시스템 안에서 Nix 의 흔적 찾기
 
@@ -497,8 +482,8 @@ less /run/current-system/activate
 readlink /run/current-system/kernel
 ```
 
-`activate` 스크립트를 끝까지 스크롤해 보면 본문에서 이야기한 fragment 들 — `binsh`, `etc`, `users`, `modprobe`, `specialfs`[^10] — 이 모두 그 안에 차례로 들어 있는 것을 확인할 수 있다. 
-*configuration.nix 한 파일이 거대한 bash 스크립트로 컴파일된* 결과를 직접 볼 수 있다.
+`activate` 스크립트를 끝까지 스크롤해 보면 본문에서 이야기한 fragment 들 — `binsh`, `etc`, `users`, `modprobe`, `specialfs`[^10] — 이 모두 그 안에 차례로 들어 있는 것을 확인할 수 있다.
+_configuration.nix 한 파일이 거대한 bash 스크립트로 컴파일된_ 결과를 직접 볼 수 있다.
 
 ## 실습 ②: Derivation 직접 만들고 해부하기
 
@@ -538,7 +523,7 @@ nix derivation show -r nixpkgs#hello | jq 'keys'
 
 ## 실습 ③: 빌드 파이프라인을 단계별로 끊어서 실행하기
 
-본문에서 다룬 4단계 (Evaluation → Instantiation → Realisation → Activation) 중 앞 세 단계를 *분리해서* 실행해 본다.
+본문에서 다룬 4단계 (Evaluation → Instantiation → Realisation → Activation) 중 앞 세 단계를 _분리해서_ 실행해 본다.
 
 각 단계의 결과물 형태가 다르다는 사실이 모델 이해의 핵심이다.
 
@@ -558,7 +543,7 @@ nix-store --realise /nix/store/xxx-hello-2.12.1.drv
 # → /nix/store/yyy-hello-2.12.1
 ```
 
-요약하면 평가는 *값* 을, instantiation 은 *.drv 경로* 를, realisation 은 *빌드된 디렉토리* 를 반환한다.
+요약하면 평가는 _값_ 을, instantiation 은 _.drv 경로_ 를, realisation 은 _빌드된 디렉토리_ 를 반환한다.
 
 같은 일을 한 줄로 처리하는 `nix-build` 와 `nix build` 는 위 세 단계를 묶어주는 편의 명령일 뿐이다.
 
@@ -575,7 +560,7 @@ nix-store --query --requisites \
 
 ## 실습 ④: NixOS 활성화와 Generation 추적하기
 
-이제 *시스템 단위* 의 동작을 살펴본다. 
+이제 _시스템 단위_ 의 동작을 살펴본다.
 configuration.nix 에 작은 변경을 하나 가하고 (예: 패키지 추가) 다음을 차례로 실행해 본다.
 
 ```bash
@@ -598,17 +583,17 @@ sudo nixos-rebuild switch
 sudo nixos-rebuild switch --rollback
 ```
 
-`nix store diff-closures` 의 출력은 본문에서 다룬 
-*"시스템 한 대 = 하나의 derivation"* 이라는 명제를 가장 직관적으로 보여준다.
+`nix store diff-closures` 의 출력은 본문에서 다룬
+_"시스템 한 대 = 하나의 derivation"_ 이라는 명제를 가장 직관적으로 보여준다.
 
-두 시스템의 차이를 단순한 *set difference* 로 계산할 수 있다는 사실 자체가 모델의 결과다. 
-*"이번 업그레이드로 정확히 무엇이 바뀌었는가" *에 대해* *다른 OS 에서는 이러한 변경점 추적 도구를 찾기 어렵다.
+두 시스템의 차이를 단순한 _set difference_ 로 계산할 수 있다는 사실 자체가 모델의 결과다.
+*"이번 업그레이드로 정확히 무엇이 바뀌었는가" *에 대해\* \*다른 OS 에서는 이러한 변경점 추적 도구를 찾기 어렵다.
 
 ## 실습 ⑤: 가장 실용적인 응용 — 프로젝트별 격리된 개발 환경
 
 홈랩을 굴리다 보면 프로젝트마다 필요한 언어와 도구가 다르다.
 
-Nix 의 `nix-shell` / `nix develop` 은 이를 *프로젝트 단위로 격리* 할 수 있게 해 준다.
+Nix 의 `nix-shell` / `nix develop` 은 이를 _프로젝트 단위로 격리_ 할 수 있게 해 준다.
 
 ```bash
 # 일회성: 현재 셸에서 임시로 python + node 환경 띄우기
@@ -634,6 +619,7 @@ exit            # → 빠져나오면 흔적도 없이 사라진다
     };
 }
 ```
+
 ```bash
 # 활성화
 nix develop
@@ -642,19 +628,20 @@ nix develop
 echo "use flake" > .envrc && direnv allow
 ```
 
-이렇게 하면 *"이 머신에 무엇이 깔려 있는가"* 라는 질문 자체가 무의미해진다.
+이렇게 하면 _"이 머신에 무엇이 깔려 있는가"_ 라는 질문 자체가 무의미해진다.
 
 어떤 머신에서든, 어떤 시점에서든, `flake.nix` 만 같으면 동일한 환경이 재현된다.
 
-Nix 의 순수 함수 모델이 일상에서 가장 자주 빛나는 순간이며, 
-많은 사람이 NixOS 까지 가지 않더라도 *Nix 만은* 도입하게 되는 진입점이기도 하다.
+Nix 의 순수 함수 모델이 일상에서 가장 자주 빛나는 순간이며,
+많은 사람이 NixOS 까지 가지 않더라도 _Nix 만은_ 도입하게 되는 진입점이기도 하다.
 
 [^1]: ^1]: NixOS - Wikipedia. [https://en.wikipedia.org/wiki/NixOS <https://en.wikipedia.org/wiki/NixOS>
-[^2]: ^2]: Eelco Dolstra (2006). *The Purely Functional Software Deployment Model*.
+
+[^2]: ^2]: Eelco Dolstra (2006). _The Purely Functional Software Deployment Model_.
 
 PhD Thesis, Utrecht University. [https://edolstra.github.io/pubs/phd-thesis.pdf <https://edolstra.github.io/pubs/phd-thesis.pdf>
 [^3]: ^3]: NixOS Reproducible Builds. [https://reproducible.nixos.org/ <https://reproducible.nixos.org/>
-[^4]: ^4]: Jonathan Lorimer. *The Nix Thesis*. [https://jonathanlorimer.dev/posts/nix-thesis.html <https://jonathanlorimer.dev/posts/nix-thesis.html>
+[^4]: ^4]: Jonathan Lorimer. _The Nix Thesis_. [https://jonathanlorimer.dev/posts/nix-thesis.html <https://jonathanlorimer.dev/posts/nix-thesis.html>
 [^5]: ^5]: Nix Reference Manual — Glossary (Derivation). [https://nix.dev/manual/nix/2.28/glossary.html <https://nix.dev/manual/nix/2.28/glossary.html>
 [^6]: ^6]: Nix Reference Manual — Derivations. [https://nix.dev/manual/nix/2.28/language/derivations.html <https://nix.dev/manual/nix/2.28/language/derivations.html>
 [^7]: ^7]: Nix Pills — Our First Derivation. [https://nixos.org/guides/nix-pills/06-our-first-derivation <https://nixos.org/guides/nix-pills/06-our-first-derivation>

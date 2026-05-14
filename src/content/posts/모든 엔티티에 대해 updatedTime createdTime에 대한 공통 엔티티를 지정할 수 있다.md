@@ -1,5 +1,4 @@
 ---
-title: "모든 엔티티에 대해 updatedTime, createdTime에 대한 공통 엔티티를 지정할 수 있다?"
 description: "@MappedSuperclass와 @EntityListeners를 활용해 createdTime·updatedTime을 공통 BaseEntity로 관리하는 방법을 설명한다."
 date: 2026-02-25
 tags: [java]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 # 어떻게 함??
-
 
 [https://velog.io/@vpdls1511/Spring에서-BaseEntity작성하기](https://velog.io/@vpdls1511/Spring에서-BaseEntity작성하기)
 
@@ -40,7 +38,6 @@ public class Order extends BaseEntity {
 
 # 사용 개념
 
-
 - `@`**`MappedSuperclass`**
 
 Entity클래스는 Entity클래스끼리만 상속 가능
@@ -68,6 +65,7 @@ JPA Entity에 이벤트가 발생할 때 콜백을 처리하고 코드를 실행
 : Delete메서드가 호출된 후에 실행되는 메서드
 **@PostLoad**
 : Select조회가 일어난 직후에 실행되는 메서드
+
 </details>
 
 모든 엔티티에 대해 각 이벤트 별로 메서드를 지정하는 것은 매우 번거로운 일이다.

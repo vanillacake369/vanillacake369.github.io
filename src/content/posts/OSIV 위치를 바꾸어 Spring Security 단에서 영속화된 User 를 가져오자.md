@@ -1,5 +1,4 @@
 ---
-title: "OSIV 위치를 바꾸어, Spring Security 단에서 영속화된 User 를 가져오자 !"
 description: "Spring Security Filter에서 준영속 User가 반환되는 원인과 OSIV Filter 순서를 조정해 영속화된 User를 가져오는 해결법을 소개한다."
 date: 2026-02-25
 tags: [java]
@@ -9,11 +8,9 @@ draft: false
 
 # Why(What For?) 🤷‍♂️
 
-
 > 컨트롤러에서 로그인된 유저에 대해 영속화된 엔티티를 가져오려고 하였다.
 
 # What(What should I know?) 👇
-
 
 ### 결론부터 말하자면,,,
 
@@ -125,8 +122,8 @@ OSIVFilter는 Filter 아니야??
 
 그렇다고 맞는 말도 아니다.
 
-여기서 `OSIVFilter`라고 칭하는 `OpenEntityManagerInViewFilter`는 
-`OpenEntityManagerInViewInterceptor `를 Filter로 순서를 바꿔주기 위한 
+여기서 `OSIVFilter`라고 칭하는 `OpenEntityManagerInViewFilter`는
+`OpenEntityManagerInViewInterceptor `를 Filter로 순서를 바꿔주기 위한
 Spring Boot에서 지원해주는 클래스이다.
 
 그러나 스프링부트의 기본설정은 `OpenEntityManagerInViewFilter`가 아니다 ㅎㅎ
@@ -138,8 +135,8 @@ Spring Boot에서 지원해주는 클래스이다.
 Spring-Boot 는 프로퍼티를 기반으로 한 자동 설정을 지원한다.
 
 JpaBaseconfiguration 추상 클래스의 nested static class 인 `JpaWebConfiguration `에
- OSIV 를 담당하는 인터셉터인 `OpenEntityanagerInViewInterceptor `를 활성 여부를 관리한다.
- `spring.jpa.open-in-view` 프로퍼티를 통해 관리되며 별도의 설정이 없는 경우에는 
+OSIV 를 담당하는 인터셉터인 `OpenEntityanagerInViewInterceptor `를 활성 여부를 관리한다.
+ `spring.jpa.open-in-view` 프로퍼티를 통해 관리되며 별도의 설정이 없는 경우에는
 `OpenEntityanagerInViewInterceptor` 는 빈으로 등록되고 인터셉터로 관리된다.
 
 ```java
@@ -202,6 +199,7 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 
 	}
 ```
+
 ```
 spring.jpa.open-in-view: false # default value = true
 ```
@@ -223,10 +221,10 @@ OSIVFilter를 사용하게 되면 아래와 같이 동작된다.
 - DispatcherServlet은 UI 렌더링을 시작한다.
 
 이 때, Lazy Association을 탐색, 모든 Lazy Association에 대한 초기화를 실행한다.
+
 - 최종적으로 OpenSessionInViewFilter는 세션을 닫은 뒤, 기본 데이터베이스 연결도 해제된다.
 
 # How(How to apply to code?) ✍️
-
 
 추가로 OSIV 자체가 View 와 DB 시점에서 악영향을 끼칠 수 있는 가능성을 띄는지에 대해서 알아보면 좋을 것 같다.
 

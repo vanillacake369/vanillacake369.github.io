@@ -1,5 +1,4 @@
 ---
-title: "GithubActions CD & AWS CodeDeploy 시간 최적화하기"
 description: "GithubActions CD & AWS CodeDeploy 시간 최적화를 해보자!"
 date: 2024-03-17
 tags: [journal]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 # Intro
-
 
 ### AWS 아키텍처를 수정함에 따른 CI/CD 수정
 
@@ -40,23 +38,21 @@ CD, ALB, ElastiCache, Multi-AZ 의 RDS Read Replica 까지 사용해보았다.
 
 # GithubActions CD Optimization
 
-
-### Gradle Dependencies Caching 
+### Gradle Dependencies Caching
 
 Gradle 은 의존성에 대한 캐싱 메커니즘을 제공한다.
 
 2가지 타입의 저장소를 제공하는데, 1) 의존성 관련 바이너리 2) 모듈 메타 데이터 관련 바이너리 를 제공한다.
 
-> 
-[gradle-dependency-caching-mechanism](https://stackoverflow.com/questions/35026270/gradle-dependency-caching-mechanism)
-> 
-The Gradle dependency cache consists of 2 key types of storage:
-> 
-A file-based store of downloaded artifacts, including binaries like jars as well as raw downloaded meta-data like POM files and Ivy files.
+> [gradle-dependency-caching-mechanism](https://stackoverflow.com/questions/35026270/gradle-dependency-caching-mechanism)
+>
+> The Gradle dependency cache consists of 2 key types of storage:
+>
+> A file-based store of downloaded artifacts, including binaries like jars as well as raw downloaded meta-data like POM files and Ivy files.
 
 The storage path for a downloaded artifact includes the SHA1 checksum, meaning that 2 artifacts with the same name but different content can easily be cached.
-> 
-A binary store of resolved module meta-data, including the results of resolving dynamic versions, module descriptors, and artifacts.
+
+> A binary store of resolved module meta-data, including the results of resolving dynamic versions, module descriptors, and artifacts.
 
 Separating the storage of downloaded artifacts from the cache metadata permits us to do some very powerful things with our cache that would be difficult with a transparent, file-only cache layout.
 
@@ -76,9 +72,8 @@ Separating the storage of downloaded artifacts from the cache metadata permits u
 
 아래와 같이 actions warning 이 뜨길래 원인을 찾아보았다.
 
->
-[test](https://github.com/Team-BC-1/gream-backend/actions/runs/8113763403/job/22177835383)
-Node.js 16 actions are deprecated.
+> [test](https://github.com/Team-BC-1/gream-backend/actions/runs/8113763403/job/22177835383)
+> Node.js 16 actions are deprecated.
 
 Please update the following actions to use Node.js 20: actions/checkout@v3, actions/setup-java@v3, actions/cache@v3.
 
@@ -103,7 +98,6 @@ Ex) `actions/cache@v3` -> `actions/cache@v4`
 다만 Github 의 공식 지원이 종료된만큼 안전성을 위해서라도 버전 업데이트를 해줘야한다고 생각한다.
 
 # AWS CodeDeploy Optimization
-
 
 ### BlockTraffic/AllowTraffic 수정
 
@@ -151,12 +145,14 @@ ALB 를 사용한 CodeDeploy는 아래와 같이 Traffic 제어를 한다.
 
 따라서 여러 시도 끝에 1분이 적합하다고 판단했다.
 
-**또한 추가적으로 MSA 구조로 전환하게된다면, 각각의 기능별로 EC2가 마련되기 때문에 5,6개의 EC2 병렬 배포를 할 일이 적다고 생각된다.)*
+\*_또한 추가적으로 MSA 구조로 전환하게된다면, 각각의 기능별로 EC2가 마련되기 때문에 5,6개의 EC2 병렬 배포를 할 일이 적다고 생각된다.)_
 
 이에 따라 5분에서 1분대로 줄어든 것을 볼 수 있었다!
 
 ![](/images/velog/b53325597c8f24f0.png)
 
 [^1]: AWS CodeDeploy Event 정리 공식포스트 <https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html>
+
 [^2]: nodejs 버전 별 퍼포먼스 벤치마크 정리글 <https://blog.rafaelgss.dev/state-of-nodejs-performance-2023>
+
 [^3]: gradle-dependency-caching-mechanism | stackoverflow <https://stackoverflow.com/questions/35026270/gradle-dependency-caching-mechanism>

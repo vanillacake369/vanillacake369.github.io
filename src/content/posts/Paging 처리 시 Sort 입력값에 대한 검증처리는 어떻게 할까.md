@@ -1,5 +1,4 @@
 ---
-title: "Paging 처리 시, Sort 입력값에 대한 검증처리는 어떻게 할까?"
 description: "Pageable의 Sort 파라미터로 엔티티에 없는 필드가 들어올 때 검증하는 OrderCriteriaValidator 구현 방법을 소개한다."
 date: 2026-02-25
 tags: [java]
@@ -9,11 +8,9 @@ draft: false
 
 # Why(What For?) 🤷‍♂️
 
-
 > 조건에 따른 동적 검색 & 페이징 처리를 구현하고 있었다.
 
 # What(What should I know?) 👇
-
 
 > 혹시나 참고하실 분들은 냠냠꿀꺽하고 가져가시길 바란다.
 
@@ -50,6 +47,7 @@ public final class OrderCriteriaValidator {
     }
 }
 ```
+
 </details>
 
 - 입력한 정렬기준값이 아예 없다면 통과한다.
@@ -60,7 +58,6 @@ public final class OrderCriteriaValidator {
 ![](/images/notion/d9e77fb7f361caea.png)
 
 # How(How to apply to code?) ✍️
-
 
 > 사용법은 아래와 같다.
 

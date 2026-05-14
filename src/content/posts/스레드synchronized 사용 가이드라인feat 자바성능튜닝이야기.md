@@ -1,5 +1,4 @@
 ---
-title: "스레드,synchronized 사용 가이드라인(feat. 자바성능튜닝이야기)"
 description: "동기화를 처리하려면 서로 다른 스레드의 작업으로 인해 간섭받는 행위를 임계영역으로써 지정해주면 된다."
 date: 2024-04-22
 tags: [java]
@@ -49,7 +48,7 @@ draft: false
 
 ## wait() / notify()
 
-- 동일 자원에 대해 
+- 동일 자원에 대해
 
 ### wait() / notify() 의 문제점
 
@@ -100,13 +99,21 @@ monitor를 획득한 스레드는 공유 자원에 대한 로직을 처리한다
 - 여러 JVM 들을 걸쳐 지원하지 않는다.
 
 따라서 여러 서버에 대해 sync 처리 시, `synchronized` 적용은 좋은 옵션이 아니다.
+
 - Spring AOP 에 의한 트랜잭션 Proxy 와 어울리지 않는다.
 
 [^1]: https://velog.io/@chanyoung1998/자바-동기화-이해하기 <https://velog.io/@chanyoung1998/자바-동기화-이해하기>
+
 [^2]: https://velog.io/@jummi10/Concurrency-Control <https://velog.io/@jummi10/Concurrency-Control>
+
 [^3]: https://mangkyu.tistory.com/259 <https://mangkyu.tistory.com/259>
+
 [^4]: https://channel.io/ko/blog/distributedlock_2022_backend <https://channel.io/ko/blog/distributedlock_2022_backend>
+
 [^5]: https://www.baeldung.com/java-synchronized <https://www.baeldung.com/java-synchronized>
+
 [^6]: https://www.baeldung.com/cs/monitor <https://www.baeldung.com/cs/monitor>
+
 [^7]: https://www.baeldung.com/cs/monitor <https://www.baeldung.com/cs/monitor>
+
 [^8]: https://velog.io/@balparang/Transactional과-synchronized를-같이-사용할-때의-문제점 <https://velog.io/@balparang/Transactional과-synchronized를-같이-사용할-때의-문제점>

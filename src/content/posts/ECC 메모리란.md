@@ -1,5 +1,4 @@
 ---
-title: "ECC 메모리란?"
 description: "토발즈님이 자신의 개인 PC 를 조립하는 영상이 피드에 떴다."
 date: 2025-12-29
 tags: [infra]
@@ -8,12 +7,6 @@ draft: false
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 토발즈님이 자신의 개인 PC 를 조립하는 영상이 피드에 떴다.
 
@@ -28,17 +21,11 @@ ECC 메모리란 무엇이고, 어떤 역할을 하며 내 메모리가 ECC 를 
 
 # What?
 
-뭘 배움?
-
----
-
----
-
 ## ECC 메모리란?
 
 **ECC(Error Correcting Code)** 메모리는 데이터 오류를 자동으로 감지하고 수정할 수 있는 메모리입니다.
 
-일반 메모리(Non-ECC)가 64비트 데이터만 저장하는 반면, 
+일반 메모리(Non-ECC)가 64비트 데이터만 저장하는 반면,
 ECC 메모리는 **72비트**(64비트 데이터 + 8비트 ECC 코드)를 저장합니다.
 
 이 추가 8비트가 오류 검출과 수정에 사용됩니다.
@@ -61,9 +48,9 @@ ECC 메모리는 **72비트**(64비트 데이터 + 8비트 ECC 코드)를 저장
 
 오류 감지 및 수정 능력
 
-| 오류 유형 | ECC 메모리 대응 |
-| --- | --- |
-| 단일 비트 오류 (SBE) | 자동 감지 + **수정** |
+| 오류 유형            | ECC 메모리 대응       |
+| -------------------- | --------------------- |
+| 단일 비트 오류 (SBE) | 자동 감지 + **수정**  |
 | 다중 비트 오류 (MBE) | 감지 가능 (수정 불가) |
 
 ### 3.
@@ -101,6 +88,7 @@ sudo dmidecode -t memory | grep -i "error correction"
 # Error Correction Type: None → Non-ECC
 
 ```
+
 ```bash
 # 또는 edac-utils 사용
 sudo apt install edac-utils
@@ -119,8 +107,6 @@ ECC 메모리를 사용하려면 **CPU와 메인보드 모두** ECC를 지원해
 
 어떻게 씀?
 
----
-
 ## ECC 메모리 사용을 위한 3가지 조건 확인
 
 ECC 메모리를 사용하려면 **CPU, 메인보드, 메모리** 세 가지가 모두 ECC를 지원해야 합니다.
@@ -135,10 +121,12 @@ cat /proc/cpuinfo | grep "model name" | head -1
 # 또는 lscpu 사용
 lscpu | grep "Model name"
 ```
+
 ```bash
 # 메인보드 정보 확인
 dmidecode -t baseboard | grep -E "Manufacturer|Product Name"
 ```
+
 ```bash
 # 메모리 확인
 dmidecode -t memory | grep -E "Type:|Size:|Total Width:|Data Width:|Error Correction"

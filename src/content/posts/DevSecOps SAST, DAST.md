@@ -1,5 +1,4 @@
 ---
-title: "DevSecOps ? SAST/DAST ?"
 description: "OWASP 서울에서 DevSecOps 에 대한 세미나가 있길래 팟캐스트처럼 보던 와중"
 date: 2025-12-28
 tags: [conference]
@@ -9,23 +8,11 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 OWASP 서울에서 DevSecOps 에 대한 세미나가 있길래 팟캐스트처럼 보던 와중
 DevSecOps 가 하는 일이 정확히 무엇이고,
 영상에서 언급된 SAST / DAST 가 무엇인지 궁금하게 되어 정리해보았다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## DevSecOps란?
 
@@ -38,12 +25,12 @@ DevSecOps 가 하는 일이 정확히 무엇이고,
 
 ### 기존 방식 vs DevSecOps
 
-| 구분 | 기존 DevOps | DevSecOps |
-| --- | --- | --- |
-| 보안 시점 | 릴리즈 직전 | 코드 작성부터 |
-| 책임 주체 | 보안팀 | 개발·운영·보안 공동 |
-| 방식 | 수동 점검 | 자동화된 스캔 |
-| 결과 | 릴리즈 지연 | 빠르고 안전한 배포 |
+| 구분      | 기존 DevOps | DevSecOps           |
+| --------- | ----------- | ------------------- |
+| 보안 시점 | 릴리즈 직전 | 코드 작성부터       |
+| 책임 주체 | 보안팀      | 개발·운영·보안 공동 |
+| 방식      | 수동 점검   | 자동화된 스캔       |
+| 결과      | 릴리즈 지연 | 빠르고 안전한 배포  |
 
 ## SAST (Static Application Security Testing)
 
@@ -126,14 +113,15 @@ git push
 
 ```
 
-| 항목 | SAST | DAST |
-| --- | --- | --- |
-| 분석 대상 | 소스 코드 | 실행 중 앱 |
-| 실행 시점 | 개발/CI | 배포 후 |
-| 속도 | 빠름 | 느림 |
-| 정확성 | 낮을 수 있음 | 높음 |
-| 공격 시뮬레이션 | ❌ | ✅ |
-| 개발자 친화성 | 높음 | 낮음 |
+| 항목            | SAST         | DAST       |
+| --------------- | ------------ | ---------- |
+| 분석 대상       | 소스 코드    | 실행 중 앱 |
+| 실행 시점       | 개발/CI      | 배포 후    |
+| 속도            | 빠름         | 느림       |
+| 정확성          | 낮을 수 있음 | 높음       |
+| 공격 시뮬레이션 | ❌           | ✅         |
+| 개발자 친화성   | 높음         | 낮음       |
 
 [^1]: https://www.blackduck.com/glossary/what-is-sast.html <https://www.blackduck.com/glossary/what-is-sast.html>
+
 [^2]: https://www.wiz.io/ko-kr/academy/application-security/static-application-security-testing-sast <https://www.wiz.io/ko-kr/academy/application-security/static-application-security-testing-sast>

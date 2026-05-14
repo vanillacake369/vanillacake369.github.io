@@ -1,5 +1,4 @@
 ---
-title: "TestContainer, DBRider 기반 독립된 테스트 처리기"
 description: "TestContainer, DBRider 를 통해 리소스 미러링을 하여 어디서든 동작하는 테스트 환경을 만들어주자"
 date: 2025-03-02
 tags: [journal]
@@ -10,7 +9,6 @@ draft: false
 ![](/images/velog/346e85a54834b08e.png)
 
 # Episode 📜
-
 
 간혹 세심한 통합 테스트를 통해 API 가 (혹은 API 들 간의 ) 구현 검증을 해야할 때가 있다.
 
@@ -47,21 +45,20 @@ draft: false
 우리는 아래와 같은 통합 테스트 환경을 구색해볼 수 있을 것이다.
 
 - 개발서버 환경 자원과 분리된 테스트 환경 자원 준비
-    - 예컨대 테스트용 MySQL 을 따로 준비하는 경우가 있다.
+  - 예컨대 테스트용 MySQL 을 따로 준비하는 경우가 있다.
 - 테스트 케이스 목업 데이터 준비
 - 외부 서비스를 이용 중이라면 똑같은 행동을 하는 가짜를 준비(Mocking)
 
 본 포스트에서는 각 단계에 따른 오픈소스들을 소개하고자 한다.
 
 - 분리된 테스트 환경 자원
-    - TestContainer 활용
+  - TestContainer 활용
 - 테스트 케이스 목업 데이터
-    - DBRider 활용
+  - DBRider 활용
 
 ( 만약 외부서비스 가짜를 만들고 싶다면 SpringBoot 에서는 [MockWebServer](https://www.baeldung.com/spring-mocking-webclient) 를 제공 중에 있으니 찾아보길 바란다. )
 
 # About 💁‍♂️
-
 
 ## TestContainer
 
@@ -69,16 +66,16 @@ draft: false
 
 ( [다른 포스트](https://dev.gmarket.com/76)들에 더 잘 나와있어 세부 설명은 건너뛰겠다 )
 
-보통의 포스트들에서는 DBMS 에 대해서만 다루고 있지만, 
+보통의 포스트들에서는 DBMS 에 대해서만 다루고 있지만,
 
 Kafka, Nginx, GCP 등등 다양한 리소스를 지원 중에 있다.
 
 TestContainer 를 통해 아래와 같이 구성해줄 수 있다.
 
 - 필요한 자원에 대한 TestContainer 이미지 지정
-    - 만약 MySQL 8 이 필요하다면 이에 대한 TestContainer 이미지를 지정
+  - 만약 MySQL 8 이 필요하다면 이에 대한 TestContainer 이미지를 지정
 - 원하는 상태의 TestContainer 컨테이너를 세팅해준다.
-    - 이는 어떤 자원을 가져오냐에 따라 다르다.
+  - 이는 어떤 자원을 가져오냐에 따라 다르다.
 - 테스트케이스에 TestContainer 컨테이너 환경을 적용해준다.
 
 > Q.
@@ -86,11 +83,13 @@ TestContainer 를 통해 아래와 같이 구성해줄 수 있다.
 잠시만요,,,!
 
 H2 사용하면 되지 왜 TestContainer 를 쓰죠??
+
 > A.
 
 H2 와 MySQL 이 같은가?
 
 아니다.
+
 > 테스트환경을 제공한다는 것은 개발환경을 미러링하는 것과 같다.
 > 즉, 동일한 버전의 동일한 자원을 사용해야 한다는 것이다.
 > 예컨대 H2 는 Pessismistic Lock 을 걸 수 없다.
@@ -113,7 +112,6 @@ yaml, json 파일을 통해 데이터를 주입하여 테스트를 실행하고,
 
 # Apply 🧑‍💻
 
-
 ## TestContainer
 
 우선 gradle 이 필요하다 ^^
@@ -125,7 +123,7 @@ testImplementation 'org.testcontainers:junit-jupiter:1.20.4' // JUnit TestContai
 testImplementation 'org.testcontainers:mysql:1.20.4' // MySQL TestContainer
 ```
 
-또한 도커를 꼭 켜주어야 한다. 
+또한 도커를 꼭 켜주어야 한다.
 
 ### 1.
 
@@ -138,13 +136,13 @@ TestContainer Image
 따라서 컨테이너 A 를 아래와 같이 사용하게끔 할 수 있다.
 
 - 테스트 환경을 통일
-    - 여러 테스트 케이스 ㄱ,ㄴ,ㄷ ,,, 에 대해 컨테이너 A 를 실행
+  - 여러 테스트 케이스 ㄱ,ㄴ,ㄷ ,,, 에 대해 컨테이너 A 를 실행
 - 테스트 환경을 격리
-    - 각 테스트 케이스 별로 컨테이너 A 를 실행
+  - 각 테스트 케이스 별로 컨테이너 A 를 실행
 
 어떻게 사용할 것이냐에 따라 구현체의 구현 방법이 결정된다.
 
-통일된 환경을 사용하고 싶다면 싱글톤을, 
+통일된 환경을 사용하고 싶다면 싱글톤을,
 
 격리된 환경을 사용하고 싶다면 매 번 생성자를 호출하는 방법으로 처리를 해야한다.
 
@@ -153,7 +151,6 @@ TestContainer Image
 (싱글톤 구현법에 대해서는 [Baelgdung 포스트](https://www.baeldung.com/java-bill-pugh-singleton-implementation) 참조)
 
 > 매 번 생성자 호출
-> 
 
 ```java
 @Test
@@ -184,7 +181,6 @@ public class Test {
 ```
 
 > 싱글톤 구현
-> 
 
 ```java
 /**
@@ -579,28 +575,21 @@ class MemberJpaRepositoryV2Test {
 
 ## To Be Discussed 👀
 
-
 1.
 
-DBMS 사용 중이라면 Flyway, Liquibase 를 사용하여 개발과 테스트를 용이하게 할 수 있다.
-    1.
+DBMS 사용 중이라면 Flyway, Liquibase 를 사용하여 개발과 테스트를 용이하게 할 수 있다. 1.
 
-테스트 시, 개발환경을 똑같이 미러링할 수 있다. 
-    2.
+테스트 시, 개발환경을 똑같이 미러링할 수 있다. 2.
 
-아쉽게도 Flyway 는 자동 DB 변경점 감지를 지원 중이지 않는다. ( [~~자동감지에 대해 관심이 없다고 못을 박아버리고 이슈를 close 했다 ㅋ,,, flyway 를 좋게 보지 못 하는 이유 중 하나다,,~~](https://github.com/flyway/flyway/issues/648) )
-2.
+아쉽게도 Flyway 는 자동 DB 변경점 감지를 지원 중이지 않는다. ( [~~자동감지에 대해 관심이 없다고 못을 박아버리고 이슈를 close 했다 ㅋ,,, flyway 를 좋게 보지 못 하는 이유 중 하나다,,~~](https://github.com/flyway/flyway/issues/648) ) 2.
 
-DB Rider 는 sql 형식의 포맷을 지원하지 않는 모양이다.
-    1.
+DB Rider 는 sql 형식의 포맷을 지원하지 않는 모양이다. 1.
 
-필자가 아는 한해서는 DB Rider 는 Hibernate 를 통해 각 파일형식에 따라 값을 읽어서 저장해주고 테스트 이후에 테스트 데이터를 날려줄 수 있게끔 한다.
-    2.
+필자가 아는 한해서는 DB Rider 는 Hibernate 를 통해 각 파일형식에 따라 값을 읽어서 저장해주고 테스트 이후에 테스트 데이터를 날려줄 수 있게끔 한다. 2.
 
 커스터마이제이션을 통해 sql 파일도 지원할 수 있게 하면 어떨까 싶다.
 
 # Reference 📚
-
 
 https://dev.gmarket.com/76
 

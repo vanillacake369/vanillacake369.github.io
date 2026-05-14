@@ -1,5 +1,4 @@
 ---
-title: "Generic Method 를 언제 사용해야하며, 이점은 무엇일까? (feat. 이펙티브 자바 아이템 30)"
 description: "누군가 실수로 엉뚱한 타입의 객체를 넣어두면 런타임에 형변환 오류가 난다.제네릭은 이를 우회한다.제너릭을 사용하면 컬렉션이 담을 수 있는 타입을 컴파일러에게 알려주다. 따라서 엉뚱한 타입의 객체를 넣는 시도를 컴파일 과정에서 차단하여 안전한 프로그래밍을 지향할 수 있게"
 date: 2024-02-18
 tags: [effective-java, journal]
@@ -10,64 +9,59 @@ series: { id: "Effective Java", order: 3 }
 
 # Generic 을 사용할 때의 이점
 
-
 > 누군가 실수로 엉뚱한 타입의 객체를 넣어두면 런타임에 형변환 오류가 난다.
-> 
-> 
+>
 > 제네릭은 이를 우회한다.
-> 
-> 제너릭을 사용하면 컬렉션이 담을 수 있는 타입을 컴파일러에게 알려주다. 
-> 
+>
+> 제너릭을 사용하면 컬렉션이 담을 수 있는 타입을 컴파일러에게 알려주다.
+>
 > 따라서 엉뚱한 타입의 객체를 넣는 시도를 컴파일 과정에서 차단하여 안전한 프로그래밍을 지향할 수 있게 한다.
-> 
-> 그럼 제너릭을 안 쓸 이유가 없다. 
-> 
+>
+> 그럼 제너릭을 안 쓸 이유가 없다.
+>
 > 이제 아래 내용을 공부해보자!
-> 
+>
 > - 제너릭을 사용할 때 주의점
 > - 제너릭을 최대 활용법
 
 # Generic Method 를 왜 사용하는가 ?
 
-
 > 제너릭메서드를 사용할 때 이점이 명확하기에 권장함!
-> 
+>
 > - 제너릭이 훨씬 안정적임
 > - 형변환할 필요가 없기 때문
 > - 즉, 입력매개변수와 반환값을 명시적으로 형변환해야하는 메서드 👎
 
 > 추가로 Java가 발전하면 할 수록,함수형 인터페이스에 대한 의존성(사용)이 커지고 있다.
-> 
-> 
+>
 > 함수형 인터페이스는 “기본적으로 제너릭을 사용”한다.
-> 
+>
 > 따라서 제너릭에 대한 깊은 이해도는 필수적이게 되는 것 같다.
-> 
+>
 > [2.
 
-Java에서 기본적으로 제공하는 함수형 인터페이스](https://www.notion.so/2-Java-687c2fd070774547a3b2efa98d47973a?pvs=21) 
-> 
+Java에서 기본적으로 제공하는 함수형 인터페이스](https://www.notion.so/2-Java-687c2fd070774547a3b2efa98d47973a?pvs=21)
+
 > ![](/images/velog/b4156f17967fc49e.png)
->
 
 # 어떤 경우에 Generic Method 를 사용해야할까 ?
 
-> <span style="color:yellowgreen">**1.
+> <span style="color:yellowgreen">\*\*1.
 
-대상 타입이 미지정 되어있지만, 알고리즘은 명세화 되어있을 때**
-> <span style="color:yellowgreen">**2.
+대상 타입이 미지정 되어있지만, 알고리즘은 명세화 되어있을 때\*\*
 
-여러 도메인에 걸쳐서 사용되는 메서드일 때 -- 특히 정적 메서드인 경우 좋다**
+> <span style="color:yellowgreen">\*\*2.
+
+여러 도메인에 걸쳐서 사용되는 메서드일 때 -- 특히 정적 메서드인 경우 좋다\*\*
 
 ## 어떻게 Generic Method 를 정의하나요?
 
 - 외부에서 입력,반환의 타입을 명시할 수 있게 하자
-    
-    ⇒ 타입 매개변수 목록 사용
-    
-    - `<E> Set<E> 함수이름 (Set<E> 매개변수들) { ,,, }`
-        - 타입 매개변수 목록 ⇒ <E>
-        - 반환 타입 ⇒ Set<E>
+  ⇒ 타입 매개변수 목록 사용
+  - `<E> Set<E> 함수이름 (Set<E> 매개변수들) { ,,, }`
+    - 타입 매개변수 목록 ⇒ <E>
+    - 반환 타입 ⇒ Set<E>
+
 ```java
 // Avoid this ❌
 public static Set union(Set s1, Set s2) {
@@ -86,22 +80,19 @@ public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
 
 - 왜??
 
-어떻게??
-    - 매개변수화 타입은 불공변, 즉 바뀔 수 없다.
+어떻게?? - 매개변수화 타입은 불공변, 즉 바뀔 수 없다.
 
-따라서 다형적으로 사용할 수 없다.
-    - 아래와 같이 지정하면 **(본인 + 하위타입)**을 받을 수 있다.
-        - **Lower Bounded Wildcard**
-        
+따라서 다형적으로 사용할 수 없다. - 아래와 같이 지정하면 **(본인 + 하위타입)**을 받을 수 있다. - **Lower Bounded Wildcard**
+
         ```java
         public static <E> Set<E> union(Set<? extends E> s1, Set<? extends E> s2) {
         		,,,
         }
         ```
-        
+
     - 아래와 같이 지정하면 **(본인 + 상위타입)**을 받을 수 있다.
         - **Upper Bounded Wild**
-        
+
         ```java
         public static <E> Set<E> union(Set<? super E> s1, Set<? super E> s2) {
         		,,,
@@ -109,7 +100,6 @@ public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
         ```
 
 # 응용 1 :: Generic Singleton Factory
-
 
 ### 제너릭 싱글턴 팩터리란?
 
@@ -126,7 +116,6 @@ public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
 - 해당 타입으로 형변환을 해주는 정적 팩터리 메서드
 
 > 여러 컬렉션을 사용하는 유틸리티와 같은 용도에 사용되면 유용할 것이다.
-> 
 
 그렇다면 어떻게 만들 수 있을까?
 
@@ -137,20 +126,18 @@ public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
 ### 항등함수?
 
 > 항등함수란??
-> 
-> 
+>
 > : 입력값을 수정없이 그대로 반환하는 특별한 함수
-> 
+>
 > ```java
 > // #1
 > String sameVal(String input){
 > 	return input;
 > }
-> 
+>
 > // #2 (LAMDA)
 > String sameVal = (input) -> input;
 > ```
-> 
 
 ```java
 // Generic singleton factory pattern
@@ -174,7 +161,7 @@ public static void main(String[] args) {
         System.out.println(sameString.apply(s));
     }
 }
-		
+
 private staticUnaryOperator<Object> IDENTITY_FN = (t) -> t;
 
 @SuppressWarnings("unchecked")
@@ -198,19 +185,18 @@ public static<T>UnaryOperator<T> identityFunc() {
 ![](/images/velog/13ed7754deb14143.png)
 
 > Unchecked cast??
->    
+>
 > Raw Types Generic 을 쓰거나, Paramatized Generic을 쓰는 경우, 형변환 시, unchecked cast를 던질 수 있다.  
 > Java 컴파일러는 실행되는 모든 시점에서 각 변수의 유형을 알 수 있는데, 만약 잘못된 cating으로 호환되지 않는 유형으로 작동하면 컴파일 오류이기 때문에, 컴파일 이전에 unchecked cast에 관련된 경고를 던진다.
 
 만약 이를 무시하고 형변환 이후에, 호환되지 않는 값을 사용하게 되는 경우, 해당 코드가 실행되어야만 예외를 던진다.
 
 즉, 호환되지 않는 값에 대한 처리를 하기 전까지는 멀쩡히 돌아가게 된다.
->    
+
 > If we cast a raw type collection containing data with the wrong types to a parameterized type collection, the ***ClassCastException* won’t be thrown until we load the data with the wrong type**.
 > 따라서 raw type은 웬만하면 쓰지 말거나, 형변환 시 유의하는 게 좋다
 
-# 응용 2 :: Overriding Operator 
-
+# 응용 2 :: Overriding Operator
 
 > 해당 응용은 Effective Java 에서 제시하는 예시 중 하나일 뿐이다.
 
@@ -229,15 +215,13 @@ public interface Comparable<T> {
 ```
 
 - 타입 매개변수가 자신을 포함하는 수식에 의해 한정
-    - 타입 매개변수 T
-        
-        ⇒ Comparable<T>를 구현한 타입이 비교할 수 있는 타입
-        
-        ![](/images/velog/379d33ed1e711498.png)
+  - 타입 매개변수 T
 
-        
-        - String ⇒ Comparable<String>을 구현
-        - Integer ⇒ Comparable<Integer>을 구현
+    ⇒ Comparable<T>를 구현한 타입이 비교할 수 있는 타입
+
+    ![](/images/velog/379d33ed1e711498.png)
+    - String ⇒ Comparable<String>을 구현
+    - Integer ⇒ Comparable<Integer>을 구현
 
 ### 제너릭 메소드인데, type이 본인 스스로에게(recursive) 제한(bound)
 

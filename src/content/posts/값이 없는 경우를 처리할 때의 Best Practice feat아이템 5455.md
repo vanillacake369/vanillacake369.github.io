@@ -1,5 +1,4 @@
 ---
-title: "값이 없는 경우를 처리할 때의 Best Practice? (feat.아이템 54,55)"
 description: "null 반환, 빈 컬렉션, Optional 중 값이 없는 경우의 베스트 프랙티스를 이펙티브 자바 아이템 54·55 기반으로 정리했다."
 date: 2026-02-25
 tags: [java]
@@ -10,23 +9,11 @@ series: { id: "Effective Java", order: 8 }
 
 # Why?
 
-왜 배움?
+> \*\*\*비즈니스 로직 상, 값이 없는 경우를 어떻게 처리해주어야할까?
 
----
-
----
-
-> ***비즈니스 로직 상, 값이 없는 경우를 어떻게 처리해주어야할까?
-
-과연 어떤 방법이 best practice일까?? ***
+과연 어떤 방법이 best practice일까?? \*\*\*
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## null 반환을 “지양”해야하는 이유
 
@@ -42,9 +29,9 @@ series: { id: "Effective Java", order: 8 }
 - null 반환
 - Optional 반환
 
-## 옵셔널이란? 
+## 옵셔널이란?
 
-> A container object which may or may not contain a non-`null` value. 
+> A container object which may or may not contain a non-`null` value.
 
 [https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html)
 
@@ -63,18 +50,15 @@ series: { id: "Effective Java", order: 8 }
 
 1.
 
-컬렉션,스트림,배열,옵셔널 같은 컨테이너타입은 옵셔널로 감싸면 안 됨!
-2.
+컬렉션,스트림,배열,옵셔널 같은 컨테이너타입은 옵셔널로 감싸면 안 됨! 2.
 
-결과가 없을 수 있으며, 클라이언트가 이 상황을 특별하게 처리해야하는 경우 Optional<T>를 반환
-3.
+결과가 없을 수 있으며, 클라이언트가 이 상황을 특별하게 처리해야하는 경우 Optional<T>를 반환 3.
 
-박싱된 기본타입에 대해서는 OptionalInt와 같은 타입이 존재하므로 유념하자.
-4.
+박싱된 기본타입에 대해서는 OptionalInt와 같은 타입이 존재하므로 유념하자. 4.
 
 인스턴스의 키 값으로 옵셔널 사용을 “지양”하자.
 
-## QueryDSL에 비어있는 값들에 대한 핸들링 
+## QueryDSL에 비어있는 값들에 대한 핸들링
 
 ### QueryDSL :: BooleanExpression 사용
 
@@ -88,7 +72,7 @@ Querydsl에서는 이럴땔 대비해서 `BooleanExpression`을 지원하여 nul
 
 > 이외에도 여러가지 응용방법이 있겠다.
 
-### QueryDSL ::  Optional.ofNullable 사용
+### QueryDSL :: Optional.ofNullable 사용
 
 ```java
 default Optional<Correlation> findOne(
@@ -103,13 +87,14 @@ default Optional<Correlation> findOne(
     return findOne(builder);
 }
 ```
+
 ```java
 @RequiredArgsConstructor
 @Repository
 public class BookQueryRepository {
 
     private final JPAQueryFactory queryFactory;
-    
+
     public Optional<Book> findByIdx(Long idx) {
         return Optional.ofNullable(queryFactory
                 .selectFrom(book)

@@ -1,5 +1,4 @@
 ---
-title: "About OpenTelemetry / Grafana Alloy"
 description: "관찰대상에 대한 데이터 수집 표준인 OpenTelemetry 에 대해 알아보자"
 date: 2025-12-22
 tags: [journal]
@@ -8,12 +7,6 @@ draft: false
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 사내 크롤링 프로젝트에 대한 성능테스트 보고서 도출이 필요하였다.
 
@@ -35,18 +28,15 @@ draft: false
 
 1.
 
-어떤 컴포넌트들이 있고 
-2.
+어떤 컴포넌트들이 있고 2.
 
-어떤 역할을 하고
-3.
+어떤 역할을 하고 3.
 
 이를 어떻게 구성하는지
 
 학습해보았다.
 
 # Open Telemetry 🔭
-
 
 ### 전체 처리과정
 
@@ -55,43 +45,42 @@ open telemetry 처리과정을 순서도를 그려보자면 아래와 같이 처
 ![](/images/velog/6269802e2e9ef425.png)
 
 1. **앱에서 SDK 호출**
-    
-    언어별 OTel SDK가 트레이스/메트릭/로그를 만들고, **OTLP Exporter**로 내보내도록 환경변수/코드로 설정한다.
-    
-    https://opentelemetry.io/docs/languages/
-    
+
+   언어별 OTel SDK가 트레이스/메트릭/로그를 만들고, **OTLP Exporter**로 내보내도록 환경변수/코드로 설정한다.
+
+   https://opentelemetry.io/docs/languages/
+
 2. **OTLP로 전송**
-    
-    **gRPC(4317)** 또는 **HTTP(4318)** 로 Collector의 OTLP endpoint에 보낸다.
-    
-    https://opentelemetry.io/docs/specs/otlp/?utm_source=chatgpt.com
-    
+
+   **gRPC(4317)** 또는 **HTTP(4318)** 로 Collector의 OTLP endpoint에 보낸다.
+
+   https://opentelemetry.io/docs/specs/otlp/?utm_source=chatgpt.com
+
 3. **Receiver 수신**
-    
-    Collector의 **OTLP Receiver**가 수신한다.
+
+   Collector의 **OTLP Receiver**가 수신한다.
 
 공개 도메인은 **Gateway를 외부에 노출할 때만** 필요하고, 보통은 **동일 호스트/내부 네트워크/VPC**로 통신한다.
-    
+
     **이에 대한 여러 패턴이 존재한다.
 
-공식문서 상에선 배치 구조는 **Agent(로컬) → Gateway(중앙)**가 권장된다. 
-    
+공식문서 상에선 배치 구조는 **Agent(로컬) → Gateway(중앙)**가 권장된다.
+
     https://opentelemetry.io/docs/collector/deployment/
-    
+
 4. **Processor 처리**
-    
-    N 개의 파이프라인을 통해 필요한 전처리한다(예: `redaction`으로 민감정보 제거). 
-    
-    **필터 역할만 하는 게 아니라 backpressure 역할(batch, memory_limiter), 라벨링 (attributes, resource), 라우팅(routing) 등등을 처리한다.
-    
-    https://opentelemetry.io/docs/collector/architecture/?utm_source=chatgpt.com
-    
+
+   N 개의 파이프라인을 통해 필요한 전처리한다(예: `redaction`으로 민감정보 제거).
+
+   \*\*필터 역할만 하는 게 아니라 backpressure 역할(batch, memory_limiter), 라벨링 (attributes, resource), 라우팅(routing) 등등을 처리한다.
+
+   https://opentelemetry.io/docs/collector/architecture/?utm_source=chatgpt.com
+
 5. **Exporter 전송**
-    
-    백엔드별 Exporter로 Tempo/Jaeger/Prometheus/Loki 등으로 내보내고, Grafana 등에서 시각화한다.
-    
-     https://opentelemetry.io/docs/languages/js/exporters/
-    
+
+   백엔드별 Exporter로 Tempo/Jaeger/Prometheus/Loki 등으로 내보내고, Grafana 등에서 시각화한다.
+
+   https://opentelemetry.io/docs/languages/js/exporters/
 
 ### [Collector](https://opentelemetry.io/docs/collector/)
 
@@ -101,21 +90,21 @@ open telemetry 처리과정을 순서도를 그려보자면 아래와 같이 처
 
 > 💡
 >
-> **Why “collector” over “direct backend call” ?** 
-> 
+> **Why “collector” over “direct backend call” ?**
+>
 > 위와 같이 직접 옵저버 툴 OSS 를 호출하여 정보를 저장할 수도 있다.
-> 
+>
 > 하지만 이는 강결합을 일으켜 아래와 같은 단점을 불러일으킨다.
-> 
+>
 > - 옵저버 툴이 늘어나면 늘어날 수록 코드 수정이 늘어남
 > - 각 옵저버 툴에 대한 부가적인 처리 패턴이 단편화됨
 > - 언어별 구현체가 제한됨
-> 
+>
 > 결론적으로 Collector 는 강결합을 끊어주고 옵저버 데이터 처리과정을 하나로 응집시켜주는 딱풀 같은 역할을 하게 된다.
-> 
+>
 > 이것이 바로 Open Telemetry 의 존재 의의이다.
-> 
-https://www.elastic.co/kr/what-is/opentelemetry#:~:text=%EC%84%A4%EB%AA%85%EC%84%9C%EB%A5%BC%20%EC%B0%B8%EC%A1%B0%ED%95%98%EC%84%B8%EC%9A%94.-,OpenTelemetry%EC%9D%98%20%EA%B0%84%EB%9E%B5%ED%95%9C%20%EC%97%AD%EC%82%AC,-OpenTelemetry%20%EC%9D%B4%EC%A0%84%EC%97%90%EB%8A%94%20%EC%97%85%EA%B3%84%EA%B0%80
+>
+> https://www.elastic.co/kr/what-is/opentelemetry#:~:text=%EC%84%A4%EB%AA%85%EC%84%9C%EB%A5%BC%20%EC%B0%B8%EC%A1%B0%ED%95%98%EC%84%B8%EC%9A%94.-,OpenTelemetry%EC%9D%98%20%EA%B0%84%EB%9E%B5%ED%95%9C%20%EC%97%AD%EC%82%AC,-OpenTelemetry%20%EC%9D%B4%EC%A0%84%EC%97%90%EB%8A%94%20%EC%97%85%EA%B3%84%EA%B0%80
 
 ### [수집한 데이터를 Collector 로 보내는 여러 패턴](https://opentelemetry.io/docs/collector/deployment/)
 
@@ -123,20 +112,14 @@ https://www.elastic.co/kr/what-is/opentelemetry#:~:text=%EC%84%A4%EB%AA%85%EC%84
 
 ( Collector 의 하위 컴포넌트인 Receiver 가 이를 처리한다.
 
-Receiver 는 이따 알아보도록 하자. ) 
+Receiver 는 이따 알아보도록 하자. )
 
 - 백엔드툴에 직접 전송
-    
-    ![](/images/velog/7cbf7762a5ab42cb.png)
-    
+  ![](/images/velog/7cbf7762a5ab42cb.png)
 - Application 에 OTLP 담당 에이전트를 심어 전송
-    
-    ![](/images/velog/8393530cad8c58ed.png)
-    
+  ![](/images/velog/8393530cad8c58ed.png)
 - 게이트웨이 처리
-    
-    ![](/images/velog/33047be93e8af802.png)
-    
+  ![](/images/velog/33047be93e8af802.png)
 
 우선은 실습을 진행해봐야 알 거 같다.
 
@@ -146,13 +129,12 @@ Receiver 는 이따 알아보도록 하자. )
 
 ## Open Telemetry 실습
 
-
 > 💡
-> 
+>
 > **docker compose 설정 중 network_mode 에 대하여,,,**
-> 
+>
 > 만약 docker compose 로 모니터링 스택을 구성하고 있다면 network_mode 를 아래와 같이 host 로 구성하면 안 된다. “안 된다”
-> 
+>
 > ```yaml
 > # ❌
 > services:
@@ -163,7 +145,7 @@ Receiver 는 이따 알아보도록 하자. )
 
 왜냐하면 보통 Docker 내부 브리지 네트워크(`bridge` 혹은 `default`)를 통해 이루어지는데,
 
-`network_mode: host`  는 컨테이너가 호스트(OS)의 네트워크 스택을 그대로 공유하는 모드이므로 다른 컨테이너와 통신을 할 수 없기 때문이다.
+`network_mode: host` 는 컨테이너가 호스트(OS)의 네트워크 스택을 그대로 공유하는 모드이므로 다른 컨테이너와 통신을 할 수 없기 때문이다.
 
 따라서 다른 모니터링 컨테이너들과 동일한 네트워크 선상에 있도록 세팅하는 것이 중요하다.
 
@@ -190,7 +172,7 @@ services:
     command:
       # 호스트 파일시스템 루트 경로 지정
       # /host 경로를 시스템 루트로 인식하여 메트릭 수집
-      - '--path.rootfs=/host'
+      - "--path.rootfs=/host"
     # network_mode: host 제거 - Docker 네트워크 사용으로 다른 컨테이너와 통신 가능
     ports:
       - 9100:9100
@@ -203,7 +185,7 @@ services:
       # 시스템 메트릭 수집을 위한 전체 파일시스템 접근
       # /proc, /sys 등 시스템 정보 디렉토리 포함
       # WSL2 환경에서는 rslave 옵션 제거 (마운트 전파 불필요)
-      - '/:/host:ro'
+      - "/:/host:ro"
 
   # 오픈텔레메트리
   open-collector:
@@ -300,7 +282,6 @@ services:
       # 커널 메시지 버퍼 접근
       # 시스템 로그 및 이벤트 모니터링
       - /dev/kmsg
-
 ```
 
 ### 2) open telemetry 설정
@@ -326,20 +307,20 @@ receivers:
     config:
       scrape_configs:
         # Node Exporter
-        - job_name: 'node-exporter'
+        - job_name: "node-exporter"
           scrape_interval: 15s
           static_configs:
-            - targets: ['node_exporter:9100']
+            - targets: ["node_exporter:9100"]
         # CAdvisor
         # metric_relabel_configs 을 통해
         # hello-world 에 대해서만 수집하도록 필터링
-        - job_name: 'cadvisor'
+        - job_name: "cadvisor"
           scrape_interval: 15s
           static_configs:
-            - targets: ['cadvisor:8080']
+            - targets: ["cadvisor:8080"]
           metric_relabel_configs:
             - source_labels: [name]
-              regex: 'hello-world'
+              regex: "hello-world"
               action: keep
 
 # ====== processors 선언부 ======
@@ -397,11 +378,9 @@ service:
     # logs:
     #   receivers: [otlp]
     #   exporters: [prometheusremotewrite]
-
 ```
 
 # Grafana Alloy ☀️
-
 
 ## What Alloy ?
 
@@ -415,18 +394,18 @@ Alloy는 Grafana Labs에서 제공하는 오픈소스(또는 오픈소스 기반
 
 즉, OTel Collector 단독으로 구성했을 때보다
 
-**“인프라 감시를 위한 익스포터(exporter)/스크레이퍼(scraper)까지 포함된 통합형”** 으로 볼 수 있습니다. 
+**“인프라 감시를 위한 익스포터(exporter)/스크레이퍼(scraper)까지 포함된 통합형”** 으로 볼 수 있습니다.
 
 ## Open Telemetry 보다 좋은 게 뭔대?
 
-| 항목 | OTel Collector만 또는 Prometheus+Exporter 방식 | Alloy 방식의 장점 |
-| --- | --- | --- |
-| 구성 복잡성 | 여러 도구(node_exporter, cAdvisor, mysqld_exporter, Prometheus scrape 설정 등) 설치·관리 필요 | Exporter 기능이 통합된 Alloy 하나로 많은 구성 단순화 |
-| 메트릭 종류 | 인프라/컨테이너/DB 메트릭 별도 구성 필요 | 인프라, 컨테이너, DB 메트릭까지 내장 컴포넌트로 지원 |
-| 운영 일관성 | 메트릭별 도구가 달라 라벨/스크레이프 방식 통일 어려움 | 하나의 수집기로 통합되어 라벨/비헤이비어 일관성 확보 |
-| 확장성/배포유형 | 도구별 배포 전략 다를 수 있음 | Alloy는 호스트 데몬, DaemonSet, StatefulSet 등 다양하게 지원됨 ([Grafana Labs][4]) |
-| 유지보수 비용 | 여러 도구 각각 업그레이드·설정해야 함 | Alloy로 통합되면 설정·업그레이드 관리 범위 축소 가능 |
-| 커스터마이징 여지 | 각 exporter 별 설정이나 Prometheus 리모트라이트 구성 필요 | Alloy 설정 파일 하나에서 다양한 컴포넌트 관리 가능 (예: `prometheus.exporter.mysql` 설정) ([Grafana Labs][7]) |
+| 항목              | OTel Collector만 또는 Prometheus+Exporter 방식                                                | Alloy 방식의 장점                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 구성 복잡성       | 여러 도구(node_exporter, cAdvisor, mysqld_exporter, Prometheus scrape 설정 등) 설치·관리 필요 | Exporter 기능이 통합된 Alloy 하나로 많은 구성 단순화                                                          |
+| 메트릭 종류       | 인프라/컨테이너/DB 메트릭 별도 구성 필요                                                      | 인프라, 컨테이너, DB 메트릭까지 내장 컴포넌트로 지원                                                          |
+| 운영 일관성       | 메트릭별 도구가 달라 라벨/스크레이프 방식 통일 어려움                                         | 하나의 수집기로 통합되어 라벨/비헤이비어 일관성 확보                                                          |
+| 확장성/배포유형   | 도구별 배포 전략 다를 수 있음                                                                 | Alloy는 호스트 데몬, DaemonSet, StatefulSet 등 다양하게 지원됨 ([Grafana Labs][4])                            |
+| 유지보수 비용     | 여러 도구 각각 업그레이드·설정해야 함                                                         | Alloy로 통합되면 설정·업그레이드 관리 범위 축소 가능                                                          |
+| 커스터마이징 여지 | 각 exporter 별 설정이나 Prometheus 리모트라이트 구성 필요                                     | Alloy 설정 파일 하나에서 다양한 컴포넌트 관리 가능 (예: `prometheus.exporter.mysql` 설정) ([Grafana Labs][7]) |
 
 ## Grafana Alloy 실습
 
@@ -547,8 +526,6 @@ services:
     depends_on:
       - prometheus
       - hello-world
-   
-   
 ```
 
 ### 2) alloy 설정

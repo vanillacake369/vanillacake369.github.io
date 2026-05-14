@@ -1,5 +1,4 @@
 ---
-title: "Method Reference 메서드 참조 (feat.lambda)"
 description: "람다식은 간단한 파라미터에 대한 반환형 함수를 쉽게 작성할 수 있다."
 date: 2026-02-25
 tags: [java]
@@ -8,7 +7,6 @@ draft: false
 ---
 
 # 무엇을 공부하였는가 🤔
-
 
 람다식은 간단한 파라미터에 대한 반환형 함수를 쉽게 작성할 수 있다.
 
@@ -32,24 +30,21 @@ int result = converter.apply(5);
 
 람다는 이 메소드를 긁어올 수 있다.
 
-> ***다만 참조방법이 스태틱이냐, 어떤 종류의 객체냐, 생성자에 의한 참조냐에 따라 다름***
+> **_다만 참조방법이 스태틱이냐, 어떤 종류의 객체냐, 생성자에 의한 참조냐에 따라 다름_**
 
 1.
 
 스태틱 메소드 참조
 **Reference to a Static Method**
--> 타입::스태틱 메소드
-2.
+-> 타입::스태틱 메소드 2.
 
 특정 객체의 인스턴스 메소드 참조
 **Reference to an Instance Method of a Particular Object**
--> 객체 레퍼런스::인스턴스 메소드
-3.
+-> 객체 레퍼런스::인스턴스 메소드 3.
 
-임의 객체의 인스턴스 메소드 참조 
+임의 객체의 인스턴스 메소드 참조
 **Reference to an Instance Method of an Arbitrary Object of a Particular Type**
--> 타입::인스턴스 메소드
-4.
+-> 타입::인스턴스 메소드 4.
 
 생성자 참조
 **Reference to a Constructor**
@@ -57,14 +52,11 @@ int result = converter.apply(5);
 
 # 왜 쓰는가 ❓
 
-
 > 람다식의 한 종류로서, 동일한 코드구조의 연속인 boiler plate code를 줄이고, 가시성을 높일 수 있음
 
 # 어떻게 쓰는가 ☝️
 
-
 ## 특정 타입의 메소드 참조 예시
-
 
 만약 조건에 따른 조회를 통해 여러 인스턴스 리스트들이 나왔다고 해보자.
 

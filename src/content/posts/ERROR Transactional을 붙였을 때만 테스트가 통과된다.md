@@ -1,5 +1,4 @@
 ---
-title: "ERROR : Transactional을 붙였을 때만 테스트가 통과된다??"
 description: "카페 키오스크 시스템에서의 아래와 같은 프로세스의 케이스가 있다."
 date: 2026-02-25
 tags: [java]
@@ -9,19 +8,15 @@ draft: false
 
 # Episode 📜
 
-
 카페 키오스크 시스템에서의 아래와 같은 프로세스의 케이스가 있다.
 
 1.
 
-상품
-2.
+상품 2.
 
-상품 재고
-3.
+상품 재고 3.
 
-주문요청
-4.
+주문요청 4.
 
 주문만큼 상품 재고 삭감
 
@@ -29,17 +24,13 @@ draft: false
 
 1.
 
-상품들을 생성 / 저장
-2.
+상품들을 생성 / 저장 2.
 
-상품들의 재고 생성 / 저장
-3.
+상품들의 재고 생성 / 저장 3.
 
-주문요청 인스턴스를 생성한다.
-4.
+주문요청 인스턴스를 생성한다. 4.
 
-주문요청 서비스의 주문요청을 수행한다.
-5.
+주문요청 서비스의 주문요청을 수행한다. 5.
 
 주문요청만큼 재고가 감소한다.
 
@@ -69,10 +60,9 @@ void tearDown() {
 
 # Reason of Err🤷‍♂️
 
-
 ## 문제는, 테스트가 아니다.
 
-> **진짜 문제는 Service에서 ****`@Transactional`****을 안 붙였기 때문이었다.**
+> **진짜 문제는 Service에서 \*\***`@Transactional`\***\*을 안 붙였기 때문이었다.**
 
 ```java
 @Service
@@ -117,6 +107,7 @@ public class UserService {
 
 }
 ```
+
 ```java
 @SpringBootTest
 class UserServiceTest {
@@ -143,9 +134,8 @@ class UserServiceTest {
 이는 런타임 오류로, 서비스 동작 중에만 캐치할 수 있는 에러다.
 
 [https://velog.io/@tmdgh0221/스프링-테스트-케이스에서의-Transactional-유의점](https://velog.io/@tmdgh0221/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EC%BC%80%EC%9D%B4%EC%8A%A4%EC%97%90%EC%84%9C%EC%9D%98-Transactional-%EC%9C%A0%EC%9D%98%EC%A0%90)
-[Transactional 이 개 긑은 자식,,,, 😠](https://www.notion.so/b2a8bc7bcbf54540ae3b841cb2230eed#ca017517402e4769a2956c75b03dcdb8) 
+[Transactional 이 개 긑은 자식,,,, 😠](https://www.notion.so/b2a8bc7bcbf54540ae3b841cb2230eed#ca017517402e4769a2956c75b03dcdb8)
 
 # How to fix 🔧
-
 
 서비스 단에 트랜잭션 어노테이션을 붙여주자 ^^

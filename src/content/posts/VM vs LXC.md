@@ -1,5 +1,4 @@
 ---
-title: "VM vs LXC"
 description: "Proxmox 를 운영하면서 VM 은 언제 쓰고, LXC 는 언제 쓰는지 애매모호하여 정리해보기로 하였다."
 date: 2025-12-29
 tags: [infra]
@@ -9,48 +8,37 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 Proxmox 를 운영하면서 VM 은 언제 쓰고, LXC 는 언제 쓰는지 애매모호하여 정리해보기로 하였다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## **언제 VM 을 쓰고 언제 LXC 를 쓰는지?**
 
 ![](/images/notion/b363760d3ae2e6e9.png)
 
-|  | VM | LXC | Docker |
-| --- | --- | --- | --- |
-| 정의 | Hypervisor 를 통해 Host OS 로부터 아예 OS 레벨로 분리.
+|      | VM                                                     | LXC | Docker |
+| ---- | ------------------------------------------------------ | --- | ------ |
+| 정의 | Hypervisor 를 통해 Host OS 로부터 아예 OS 레벨로 분리. |
 
 따라서 OS, 커널, 유저스페이스가 아예 분리됨 | Host OS 와 동일한 커널을 사용하되 유저스페이스는 분리
 동일 커널을 사용하므로 init process 를 공유함 | Host OS 와 아예 분리되면서 동시에 컨테이너 간 유저스페이스도 분리 |
-| 유스케이스 | 아예 커널 레벨, OS 레벨로 분리되어야 하는 경우 | 커널 및 하드웨어 컨트롤을 해야하는 경우 | 커널 및 하드웨어 접근이 없으면서 확장성을 극대화해야할 때 
+| 유스케이스 | 아예 커널 레벨, OS 레벨로 분리되어야 하는 경우 | 커널 및 하드웨어 컨트롤을 해야하는 경우 | 커널 및 하드웨어 접근이 없으면서 확장성을 극대화해야할 때
 ( HostOS 에 직접적인 배포가 아닌 도커 엔진 위에 배포가 되므로 ) |
 | 예시 | - 클라우드 호스팅 서비싱을 할 때 (AWS, OCI ,,,)
+
 - 하나의 컴퓨터에서 Windows, Arch Linux, Ubuntu 등등 여러 OS 를 사용해야 하는 경우 | - AI 모델 처리와 같이 직접적인 GPU 컨트롤을 해야하는 경우 | - HostOS 와 상관없이 패키징하여 배포해야할 때
 - LXC 보다 더 가벼우므로 확장성을 극대화해야할 때 ( k8s 를 활용한 self healing 이라던지 ) |
 
 ```mermaid
 flowchart TD
     START([워크로드 분석]) --> Q1{OS/커널/GPU<br/>격리 필요?}
-    
+
     Q1 -->|Yes| VM[✅ VM]
     Q1 -->|No| Q2{확장성/이식성<br/>CI/CD 중요?}
-    
+
     Q2 -->|Yes| DOCKER[✅ Docker]
     Q2 -->|No| LXC[✅ LXC]
-    
+
     VM -.- E1([Windows, GPU ML, 커스텀 커널])
     DOCKER -.- E2([API, Worker, 마이크로서비스])
     LXC -.- E3([DNS, DB, Proxy])
@@ -62,28 +50,21 @@ flowchart TD
 
 1.
 
-레거시 혹은 커널 의존성
-2.
+레거시 혹은 커널 의존성 2.
 
-보안 및 격리
-3.
+보안 및 격리 3.
 
-안정성 및 영향 범위
-4.
+안정성 및 영향 범위 4.
 
-다양한 운영 체제 지원 및 유연성
-5.
+다양한 운영 체제 지원 및 유연성 5.
 
-백업, 복원 및 스냅샷
-6.
+백업, 복원 및 스냅샷 6.
 
 하드웨어 패스스루(Passthrough)
 
 # How?
 
 어떻게 씀?
-
----
 
 ## 이럴 때 VM 을 써라!
 
@@ -149,6 +130,7 @@ options vfio-pci ids=10de:2484,10de:228b  # NVIDIA GPU 예시
 qm set 100 -hostpci0 0000:01:00.0,pcie=1
 
 ```
+
 ```bash
 # Proxmox CLI로 VM 생성 예시
 qm create 100 \
@@ -239,6 +221,7 @@ pct start 200
 pct enter 200
 
 ```
+
 ```bash
 # LXC 설정 파일 예시 (/etc/pve/lxc/200.conf)
 arch: amd64
@@ -254,6 +237,7 @@ unprivileged: 1
 features: nesting=1                    # Docker-in-LXC 허용
 
 ```
+
 ```bash
 # LXC 내부에서 서비스 설정 예시 (nginx-proxy)
 #!/bin/bash
@@ -339,7 +323,7 @@ graph TB
 
 ```yaml
 # docker-compose.yml - 마이크로서비스 스택 예시
-version: '3.8'
+version: "3.8"
 
 services:
   # Reverse Proxy
@@ -371,7 +355,7 @@ services:
     networks:
       - web
     deploy:
-      replicas: 2  # 수평 확장
+      replicas: 2 # 수평 확장
 
   # Backend API
   backend:
@@ -433,8 +417,8 @@ volumes:
   postgres-data:
   redis-data:
   traefik-certs:
-
 ```
+
 ```bash
 # Kubernetes 배포 예시 (k3s on Proxmox)
 # deployment.yaml
@@ -472,7 +456,6 @@ spec:
           httpGet:
             path: /ready
             port: 8000
----
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -495,6 +478,9 @@ spec:
 ```
 
 [^1]: https://forums.oracle.com/ords/apexds/post/understanding-lxc-and-docker-containers-on-oracle-linux-7995 <https://forums.oracle.com/ords/apexds/post/understanding-lxc-and-docker-containers-on-oracle-linux-7995>
+
 [^2]: https://www.reddit.com/r/Amd/comments/nu22s1/what_is_amd_iommu_and_for_what_i_need_this/ <https://www.reddit.com/r/Amd/comments/nu22s1/what_is_amd_iommu_and_for_what_i_need_this/>
+
 [^3]: https://dzone.com/articles/evolution-of-linux-containers-future <https://dzone.com/articles/evolution-of-linux-containers-future>
+
 [^4]: https://earthly.dev/blog/lxc-vs-docker/ <https://earthly.dev/blog/lxc-vs-docker/>

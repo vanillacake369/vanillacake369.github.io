@@ -1,5 +1,4 @@
 ---
-title: "SSH 란? (feat. Nixos SSH 활성화)"
 description: "안전한 데이터 송수신을 해야할 때가 있다."
 date: 2025-06-11
 tags: [linux, infra, nix]
@@ -9,12 +8,6 @@ series: { id: "NixOS Ecosystem", order: 16 }
 ---
 
 # Why?
-
-왜 배움?
-
----
-
----
 
 안전한 데이터 송수신을 해야할 때가 있다.
 
@@ -33,12 +26,6 @@ SSH 는 위 세가지를 지원한다.
 
 # What?
 
-뭘 배움?
-
----
-
----
-
 ## SSH 란?
 
 SSH(Secure Shell)는 보호되지 않은 네트워크에서 안전한 원격 접속과 명령 실행을 위한 암호화 네트워크 프로토콜이다.
@@ -47,7 +34,7 @@ Telnet이나 rsh 같은 평문 프로토콜의 보안 문제를 해결하기 위
 
 SSH는 클라이언트-서버 구조로 동작하며 TCP 포트 22를 사용한다.
 
-공개키 암호화(RSA, ECDSA 등)를 통해 서버/사용자 인증, 데이터 암호화, 무결성 검증을 제공하며, 
+공개키 암호화(RSA, ECDSA 등)를 통해 서버/사용자 인증, 데이터 암호화, 무결성 검증을 제공하며,
 키 교환(Diffie-Hellman) 후 세션을 암호화한다.
 
 ### 주요 용도
@@ -67,6 +54,7 @@ SSH 는 **비대칭 암호화(Asymmetric Encryption)** 방식을 사용한다.
 - **Public Key (공개키)**: 누구에게나 공개 가능하며, 서버의 `~/.ssh/authorized_keys`에 등록된다.
 
 데이터를 암호화하거나 서명을 검증하는 데 사용된다.
+
 - **Private Key (개인키)**: 절대 외부에 공개하면 안 되며, 클라이언트 측에서만 보관한다.
 
 데이터를 복호화하거나 서명을 생성하는 데 사용된다.
@@ -120,14 +108,11 @@ sequenceDiagram
 
 1.
 
-클라이언트와 서버가 각자 임시 키 쌍을 생성
-2.
+클라이언트와 서버가 각자 임시 키 쌍을 생성 2.
 
-공개 값을 서로 교환
-3.
+공개 값을 서로 교환 3.
 
-각자 상대방의 공개 값과 자신의 비밀 값을 조합하여 동일한 세션 키를 독립적으로 계산
-4.
+각자 상대방의 공개 값과 자신의 비밀 값을 조합하여 동일한 세션 키를 독립적으로 계산 4.
 
 이 세션 키로 이후 모든 통신을 대칭 암호화 (AES 등)
 
@@ -137,14 +122,11 @@ sequenceDiagram
 
 1.
 
-SSH 전송 프로토콜(SSH Transport Layer Protocol, SSH TLP)
-2.
+SSH 전송 프로토콜(SSH Transport Layer Protocol, SSH TLP) 2.
 
-SSH 인증 프로토콜(SSH User Authentication Protocol)
-3.
+SSH 인증 프로토콜(SSH User Authentication Protocol) 3.
 
-SSH 연결 프로토콜(SSH Connection Protocol)
-4.
+SSH 연결 프로토콜(SSH Connection Protocol) 4.
 
 SSH 응용 프로토콜 : TELET, RLOGIN, SMTP 등
 
@@ -186,9 +168,9 @@ SSH 응용 프로토콜 : TELET, RLOGIN, SMTP 등
 비밀번호 프롬프트가 뜨면 이는 SSH 클라이언트가 요청하는 것이며, 서버는 클라이언트의 인증 요청에 응답만 한다.
 **주요 인증 방식**:
 
-| 방식 | 설명 |
-| --- | --- |
-| **password** | 전통적인 비밀번호 인증.
+| 방식         | 설명                    |
+| ------------ | ----------------------- |
+| **password** | 전통적인 비밀번호 인증. |
 
 비밀번호 변경 기능 포함 |
 | **publickey** | 공개키 기반 인증 (RSA, ECDSA, Ed25519 등).
@@ -223,13 +205,13 @@ OTP, 2FA 구현에 사용 |
 
 **표준 채널 타입**:
 
-| 채널 타입 | 용도 |
-| --- | --- |
-| **shell** | 터미널 쉘, SFTP, exec 요청 (SCP 포함) |
-| **direct-tcpip** | 클라이언트→서버 포트 포워딩 (로컬 포워딩) |
+| 채널 타입           | 용도                                        |
+| ------------------- | ------------------------------------------- |
+| **shell**           | 터미널 쉘, SFTP, exec 요청 (SCP 포함)       |
+| **direct-tcpip**    | 클라이언트→서버 포트 포워딩 (로컬 포워딩)   |
 | **forwarded-tcpip** | 서버→클라이언트 포트 포워딩 (리모트 포워딩) |
 
-**채널 요청(Channel Request)**: 
+**채널 요청(Channel Request)**:
 
 - 터미널 크기 변경, 서버 측 프로세스 종료 코드 등 채널별 부가 정보 전달
 
@@ -258,8 +240,6 @@ ssh -R 9000:localhost:3000 user@ssh-server
 
 어떻게 씀?
 
----
-
 > ✅ 실습은 NixOS 기준으로 진행했으나 설치방법만 다르고
 
 ## SSH 환경설정 & SSH 설치
@@ -274,15 +254,11 @@ ssh -R 9000:localhost:3000 user@ssh-server
 
 1.
 
-외부 IP 확인
-2.
+외부 IP 확인 2.
 
-내부 IP 확인
-3. [https://hellodoor.tistory.com/140#google_vignette](https://hellodoor.tistory.com/140#google_vignette) 을 참고하여 
-4.
+내부 IP 확인 3. [https://hellodoor.tistory.com/140#google_vignette](https://hellodoor.tistory.com/140#google_vignette) 을 참고하여 4.
 
-방화벽 설정
-5.
+방화벽 설정 5.
 
 SSH 설정
 
@@ -335,10 +311,7 @@ Public Key 기반 SSH 연결
 
 1.
 
-클라이언트용 vagrant 를 생성
-2. ssh-keygen 으로 공개키/개인키를 생성
-3.  ssh-copy-id 로 공개키를 전송
-4.
+클라이언트용 vagrant 를 생성 2. ssh-keygen 으로 공개키/개인키를 생성 3. ssh-copy-id 로 공개키를 전송 4.
 
 이제 key 기반으로 접속을 해보면 잘 되는 것을 볼 수 있다.
 
@@ -355,11 +328,9 @@ MFA 기반 SSH 연결
 
 1. google-authenticator 를 깔고 실행한다.
 
-모든 단계를 다 y 를 눌러 넘겨준다.
-2.
+모든 단계를 다 y 를 눌러 넘겨준다. 2.
 
-SSH PAM 설정
-3.
+SSH PAM 설정 3.
 
 이제 실제로 접속해보면 SSH 접속 이후에 MFA 인증을 요구하는 것을 볼 수 있다.
 
@@ -369,18 +340,18 @@ SSH PAM 설정
 
 ## 구축 시 겪었던 이슈와 해결법
 
-**1️⃣ ****`@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`**
+**1️⃣ \*\***`@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`\*\*
 
 - **원인**
-서버 재설치 또는 SSH 호스트 키 재생성으로 인해
-클라이언트의 `known_hosts`와 불일치 발생
+  서버 재설치 또는 SSH 호스트 키 재생성으로 인해
+  클라이언트의 `known_hosts`와 불일치 발생
 - **해결 방법**
 
-**2️⃣ ****`Permissions 0777 for 'mykey.pem' are too open.`**
+**2️⃣ \*\***`Permissions 0777 for 'mykey.pem' are too open.`\*\*
 
 - **원인**
-PEM 개인키 파일 권한이 과도하게 개방(`777`)되어 SSH 클라이언트가 보안상 키를 무시
-특히 WSL/윈도우 마운트 폴더에서 `chmod`가 적용되지 않는 경우가 많음
+  PEM 개인키 파일 권한이 과도하게 개방(`777`)되어 SSH 클라이언트가 보안상 키를 무시
+  특히 WSL/윈도우 마운트 폴더에서 `chmod`가 적용되지 않는 경우가 많음
 - **해결 방법**
 
 ## 4.
@@ -391,11 +362,11 @@ Hashicorp Valut 사용
 
 Vault 를 사용하게 되면 아래와 같은 장점이 존재한다.
 
-| 기존 방식 | Vault 방식 |
-| --- | --- |
-| 정적 SSH 키 (영구적) | 동적 키/인증서 (TTL 기반 자동 만료) |
-| 키 유출 시 수동 폐기 필요 | 자동 만료로 유출 영향 최소화 |
-| 키 관리가 분산됨 | 중앙 집중식 관리 및 감사 로그 |
+| 기존 방식                 | Vault 방식                          |
+| ------------------------- | ----------------------------------- |
+| 정적 SSH 키 (영구적)      | 동적 키/인증서 (TTL 기반 자동 만료) |
+| 키 유출 시 수동 폐기 필요 | 자동 만료로 유출 영향 최소화        |
+| 키 관리가 분산됨          | 중앙 집중식 관리 및 감사 로그       |
 
 Vault 사용 시 순서도는 아래와 같다.
 
@@ -471,29 +442,42 @@ Yubikey 는 최고 보안 표준을 따르는 장치이다.
 
 이에 GPG 암호화 패스워드 매니저인 Pass 를 적용하면 더 안전하게 인증을 처리할 수 있다.
 
-| 위협 | 소프트웨어 키 | Yubikey |
-| --- | --- | --- |
-| 키 파일 유출 | ❌ 취약 | ✅ 키가 장치 밖으로 나가지 않음 |
-| 멀웨어 키로깅 | ❌ 취약 | ✅ 물리적 터치 필요 |
-| 원격 공격 | ❌ 취약 | ✅ 물리적 소유 필수 |
+| 위협          | 소프트웨어 키 | Yubikey                         |
+| ------------- | ------------- | ------------------------------- |
+| 키 파일 유출  | ❌ 취약       | ✅ 키가 장치 밖으로 나가지 않음 |
+| 멀웨어 키로깅 | ❌ 취약       | ✅ 물리적 터치 필요             |
+| 원격 공격     | ❌ 취약       | ✅ 물리적 소유 필수             |
 
 # Further Work
-
 
 - Hashicorp Valut 를 이용한 SSH 인증
 
 [^2]: https://blog.naver.com/joje3029/223390866901 <https://blog.naver.com/joje3029/223390866901>
+
 [^3]: https://en.wikipedia.org/wiki/Secure_Shell <https://en.wikipedia.org/wiki/Secure_Shell>
+
 [^4]: https://www.cloudflare.com/ko-kr/learning/access-management/what-is-ssh/ <https://www.cloudflare.com/ko-kr/learning/access-management/what-is-ssh/>
+
 [^5]: https://www.reddit.com/r/explainlikeimfive/comments/1bq33b5/eli5_how_does_ssh_secure_shell_work/ <https://www.reddit.com/r/explainlikeimfive/comments/1bq33b5/eli5_how_does_ssh_secure_shell_work/>
+
 [^6]: https://velog.io/@lehdqlsl/SSH-%EA%B3%B5%EA%B0%9C%ED%82%A4-%EC%95%94%ED%98%B8%ED%99%94-%EB%B0%A9%EC%8B%9D-%EC%A0%91%EC%86%8D-%EC%9B%90%EB%A6%AC-i7rrv4de <https://velog.io/@lehdqlsl/SSH-%EA%B3%B5%EA%B0%9C%ED%82%A4-%EC%95%94%ED%98%B8%ED%99%94-%EB%B0%A9%EC%8B%9D-%EC%A0%91%EC%86%8D-%EC%9B%90%EB%A6%AC-i7rrv4de>
+
 [^7]: 가비아 > SSH 명칭부터 접속까지 한 번에 이해하기 1 <https://library.gabia.com/contents/infrahosting/9002>
+
 [^8]: 가비아 > SSH 명칭부터 접속까지 한 번에 이해하기 2 <https://library.gabia.com/contents/9008/>
+
 [^10]: https://zetawiki.com/wiki/%EB%A6%AC%EB%88%85%EC%8A%A4_%EA%B3%B5%EC%9D%B8_IP_%ED%99%95%EC%9D%B8 <https://zetawiki.com/wiki/%EB%A6%AC%EB%88%85%EC%8A%A4_%EA%B3%B5%EC%9D%B8_IP_%ED%99%95%EC%9D%B8>
+
 [^11]: https://medium.com/@prateek.malhotra004/enhancing-ssh-security-with-two-factor-authentication-2fa-via-pam-and-google-authenticator-70af135c2a95 <https://medium.com/@prateek.malhotra004/enhancing-ssh-security-with-two-factor-authentication-2fa-via-pam-and-google-authenticator-70af135c2a95>
+
 [^12]: https://www.digitalocean.com/community/tutorials/how-to-set-up-multi-factor-authentication-for-ssh-on-ubuntu-18-04 <https://www.digitalocean.com/community/tutorials/how-to-set-up-multi-factor-authentication-for-ssh-on-ubuntu-18-04>
+
 [^13]: https://github.com/NixOS/nixpkgs/issues/115044 <https://github.com/NixOS/nixpkgs/issues/115044>
+
 [^14]: https://discourse.nixos.org/t/setting-up-google-authenticator-for-ssh/36931 <https://discourse.nixos.org/t/setting-up-google-authenticator-for-ssh/36931>
+
 [^15]: https://mynixos.com/nixpkgs/option/security.pam.services.%3Cname%3E.googleAuthenticator.enable <https://mynixos.com/nixpkgs/option/security.pam.services.%3Cname%3E.googleAuthenticator.enable>
+
 [^16]: https://www.hashicorp.com/en/blog/managing-ssh-access-at-scale-with-hashicorp-vault <https://www.hashicorp.com/en/blog/managing-ssh-access-at-scale-with-hashicorp-vault>
+
 [^17]: https://ikcoo.tistory.com/251 <https://ikcoo.tistory.com/251>

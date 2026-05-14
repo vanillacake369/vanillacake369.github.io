@@ -1,5 +1,4 @@
 ---
-title: "Mono.defer() 기반 캐시 처리기"
 description: "대중적인 Cache-Aside 와 Mono.defer() 을 통해 캐시를 처리해보자"
 date: 2025-03-02
 tags: [journal]
@@ -11,11 +10,10 @@ draft: false
 
 # Episode 📜
 
-
 > 💡
-> 
+>
 > 요구사항
-> 
+>
 > - 대중교통 추천경로 조회한다.
 > - 데이터는 10분 단위로 캐싱되어야 한다.
 > - 사용자는 100,000 목표로 한다.
@@ -25,9 +23,9 @@ draft: false
 이를 구현하기 위해 WebFlux 를 사용하여 아래와 같이 처리하였다.
 
 - Cache 조회
-    - Hit 인 경우 캐시데이터 반환
-    - Miss 인 경우 추천경로 조회
-    - 추천경로 캐시 저장
+  - Hit 인 경우 캐시데이터 반환
+  - Miss 인 경우 추천경로 조회
+  - 추천경로 캐시 저장
 - 사용자 성향에 따라 정렬
 - 배와 비행기 결과 제거
 
@@ -60,7 +58,7 @@ private Mono<FetchRouteResponse> fetchAndCacheRoute(FetchRouteRequestDto request
 }
 ```
 
-위와 같이 구현한 뒤 테스트를 통해 
+위와 같이 구현한 뒤 테스트를 통해
 
 API 호출없이 캐싱된 데이터를 조회하는지 확인해보았다.
 
@@ -73,7 +71,6 @@ API 호출없이 캐싱된 데이터를 조회하는지 확인해보았다.
 이는 내가 Hot Publisher 로 데이터를 생성해냈기 때문이다.
 
 # Reason 🤷‍♂️
-
 
 ### Hot Publisher
 
@@ -119,6 +116,7 @@ Subscriber 2 to Hot Source: PURPLE
 - 이것은 HTTP 요청과 유사하다.
 
 호출을 하지 않으면 결과도 없다.
+
 - 각 Subscription은 해당 Publisher의 데이터를 처음부터 시작한다.
 - Cold Publisher는 데이터를 생성하고 Subscriber가 Subscription을 요청할 때 데이터를 제공한다.
 
@@ -156,9 +154,7 @@ Subscriber 2: PURPLE
 
 # Fix 🔧
 
-
 > 이전
-> 
 
 ```java
 private Mono<? extends FetchRouteResponse> fetchRoute(Member member, FetchRouteRequestDto request) {
@@ -174,7 +170,6 @@ private Mono<? extends FetchRouteResponse> fetchRoute(Member member, FetchRouteR
 ```
 
 > 이후
-> 
 
 ```java
 private Mono<? extends FetchRouteResponse> fetchRoute(Member member, FetchRouteRequestDto request) {
@@ -190,7 +185,6 @@ private Mono<? extends FetchRouteResponse> fetchRoute(Member member, FetchRouteR
 ```
 
 # Reference 📚
-
 
 https://randro.tistory.com/43
 

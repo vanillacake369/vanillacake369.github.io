@@ -1,5 +1,4 @@
 ---
-title: "A~Z of Mock Test"
 description: "Mockito의 @Mock·@MockBean 차이부터 MockitoExtension과 SpringExtension 선택 기준까지 Mock 테스트 핵심을 정리했다."
 date: 2026-02-25
 tags: [java]
@@ -9,14 +8,11 @@ draft: false
 
 # About Mock Test
 
-
 # Inject Mock
-
 
 [https://velog.io/@yyong3519/Mockito](https://velog.io/@yyong3519/Mockito)
 
 # `@Mock` vs `@MockBean`
-
 
 > 세 줄 요약
 
@@ -25,8 +21,7 @@ draft: false
 
 [https://www.baeldung.com/java-spring-mockito-mock-mockbean](https://www.baeldung.com/java-spring-mockito-mock-mockbean)
 
-# `@ExtendWith(MockitoExtension.`*`class`*`)` vs `@ExtendWith(SpringExtension.class)`
-
+# `@ExtendWith(MockitoExtension.`_`class`_`)` vs `@ExtendWith(SpringExtension.class)`
 
 > 세 줄 요약
 
@@ -49,7 +44,6 @@ Yes you can just use `@ExtendWith(SpringExtension.class)`, but if you're not in
 [https://jiminidaddy.github.io/dev/2021/05/20/dev-spring-단위테스트-Repository/](https://jiminidaddy.github.io/dev/2021/05/20/dev-spring-단위테스트-Repository/)
 
 # Don’t mock instance having dependecy of `@Configuration`
-
 
 > 세 줄 요약
 
@@ -92,11 +86,9 @@ class YourTestClass {
 
 # Test yml 따로 설정하기
 
-
 [https://stay-hungry.tistory.com/17](https://stay-hungry.tistory.com/17)
 
 # ContextConfiguration은 조심해서 사용해주자.
-
 
 > 만약 Test에 관련된 Config나 Bean들을 주입해주고자 할 때 사용하자.
 

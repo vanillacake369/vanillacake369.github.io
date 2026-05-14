@@ -1,5 +1,4 @@
 ---
-title: "Linux Systemd 를 통해 OpenVPN 활성화하기"
 description: "사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다."
 date: 2025-06-10
 tags: [linux]
@@ -9,24 +8,12 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다.
 linx distro 에서는 흔히 open vpn 에 대해 systemd service 를 선언하여 사용한다.
 
 필자가 사용하는 nixos 환경에서 이를 구축해보았다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## How OpenVPN works
 
@@ -46,7 +33,7 @@ TUN
 
 - TAP
 
-- OS 측에서의 TUN/TAP 
+- OS 측에서의 TUN/TAP
 - 사용자 공간 프로그램에서의 TUN/TAP
 
 ### How TUN/TAP being used in OpenVPN
@@ -189,8 +176,13 @@ Type=notify
 ```
 
 [^1]: https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/ <https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/>
+
 [^2]: https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con <https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con>
+
 [^3]: https://www.baeldung.com/linux/tun-interface-purpose <https://www.baeldung.com/linux/tun-interface-purpose>
+
 [^4]: https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking# <https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#>
+
 [^5]: https://en.wikipedia.org/wiki/Virtual_device <https://en.wikipedia.org/wiki/Virtual_device>
+
 [^6]: https://nixos.wiki/wiki/OpenVPN <https://nixos.wiki/wiki/OpenVPN>

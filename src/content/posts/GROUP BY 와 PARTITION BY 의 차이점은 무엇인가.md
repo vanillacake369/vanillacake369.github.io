@@ -1,5 +1,4 @@
 ---
-title: "GROUP BY 와 PARTITION BY 의 차이점은 무엇인가?"
 description: "GROUP BY는 행을 집약하고, PARTITION BY는 행을 유지한 채 집계한다. 두 방식의 차이를 예제와 함께 비교한다."
 date: 2024-05-25
 tags: [database]
@@ -30,11 +29,11 @@ FROM cte_login;
 
 ## 핵심 차이
 
-| 항목 | GROUP BY | PARTITION BY (윈도우 함수) |
-|---|---|---|
-| 행 수 변화 | 그룹당 1행으로 **축소** | 원본 행 수 **유지** |
-| 상세 데이터 | 집계 과정에서 **소실** | 모든 컬럼 **보존** |
-| 사용 위치 | `GROUP BY` 절 | `OVER(PARTITION BY ...)` 절 |
+| 항목               | GROUP BY                       | PARTITION BY (윈도우 함수)                  |
+| ------------------ | ------------------------------ | ------------------------------------------- |
+| 행 수 변화         | 그룹당 1행으로 **축소**        | 원본 행 수 **유지**                         |
+| 상세 데이터        | 집계 과정에서 **소실**         | 모든 컬럼 **보존**                          |
+| 사용 위치          | `GROUP BY` 절                  | `OVER(PARTITION BY ...)` 절                 |
 | 함께 쓸 수 있는 것 | 집계 함수 (COUNT, SUM, AVG 등) | 집계 함수 + 순위 함수 (ROW_NUMBER, RANK 등) |
 
 ## 예제 데이터
@@ -89,16 +88,17 @@ FROM orders;
 
 # 언제 무엇을 쓰는가
 
-| 상황 | 선택 |
-|---|---|
-| 그룹별 합계/평균/건수만 필요하다 | `GROUP BY` |
-| 집계 결과와 개별 행 데이터를 함께 보고 싶다 | `PARTITION BY` |
-| 그룹 내 순위를 매기고 싶다 (ROW_NUMBER, RANK) | `PARTITION BY` |
-| 그룹 내 이전/다음 행과 비교하고 싶다 (LAG, LEAD) | `PARTITION BY` |
-| 집계 결과를 WHERE 조건에 쓰고 싶다 | `GROUP BY` + `HAVING` |
+| 상황                                             | 선택                  |
+| ------------------------------------------------ | --------------------- |
+| 그룹별 합계/평균/건수만 필요하다                 | `GROUP BY`            |
+| 집계 결과와 개별 행 데이터를 함께 보고 싶다      | `PARTITION BY`        |
+| 그룹 내 순위를 매기고 싶다 (ROW_NUMBER, RANK)    | `PARTITION BY`        |
+| 그룹 내 이전/다음 행과 비교하고 싶다 (LAG, LEAD) | `PARTITION BY`        |
+| 집계 결과를 WHERE 조건에 쓰고 싶다               | `GROUP BY` + `HAVING` |
 
 처음 문제로 돌아오면, `GROUP BY player_id`를 사용하면 플레이어당 1행으로 축소되어 개별 `event_date`를 비교할 수 없다.
 `PARTITION BY player_id`를 사용하면 모든 로그인 행이 유지되면서도 각 행에서 최초 로그인 날짜(`MIN`)를 참조할 수 있으므로, DATEDIFF로 연속 로그인 여부를 판별할 수 있다.
 
 [^1]: MySQL 8.0 윈도우 함수 공식 문서. <https://dev.mysql.com/doc/refman/8.0/en/window-functions.html>
+
 [^2]: PostgreSQL PARTITION BY 문서. <https://www.postgresql.org/docs/current/tutorial-window.html>

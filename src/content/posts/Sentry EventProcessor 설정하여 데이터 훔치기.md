@@ -1,5 +1,4 @@
 ---
-title: "Sentry EventProcessor 설정하여 데이터 훔치기"
 description: "sentry 는 scrubbing 설정을 조정하여 요청 시점의 헤더와 사용자 데이터를 볼 수 있다."
 date: 2025-11-27
 tags: [java, tools]
@@ -9,24 +8,12 @@ draft: false
 
 # Why?
 
-왜 배움?
-
----
-
----
-
 sentry 는 scrubbing 설정을 조정하여 요청 시점의 헤더와 사용자 데이터를 볼 수 있다.
 
-허나 예전에 spring reactor 를 사용했을 때는 이게 안 되고 있어 
+허나 예전에 spring reactor 를 사용했을 때는 이게 안 되고 있어
 직접 디스코드 방에 sdk 조작가능을 물어봤었는데 그 때의 경험을 적어남겨본다.
 
 # What?
-
-뭘 배움?
-
----
-
----
 
 ## 이슈
 
@@ -35,7 +22,7 @@ sendDefaultPii=true 로 설정해도 인증 헤더 값이 차단 목록([여기 
 
 개발 단계에서 센트리가 요청 인증 헤더 — e.g.
 
-JWT 토큰 — 를 맞춤 설정하여 표시하도록 
+JWT 토큰 — 를 맞춤 설정하여 표시하도록
 HTTP 헤더의 차단 목록을 변경할 수 있는지 알고 싶습니다.
 
 이를 위한 방법이나 해결책이 있을까요?
@@ -52,6 +39,7 @@ sentry:
   enable-external-configuration: true
 
 ```
+
 ```java
 // application.yaml for my spring boot app
 spring:
