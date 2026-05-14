@@ -1,9 +1,8 @@
 ---
 title: "Concurrency Control in SpringBoot, MongoDB"
-description: "https://www.mongodb.com/resources/products/compatibilities/spring-boot"
+description: "Spring Boot와 MongoDB를 연동할 때 MongoRepository·MongoTemplate 차이, 동시성 제어, 임베디드 테스트 설정을 정리했다."
 date: 2024-05-28
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
@@ -26,7 +25,9 @@ draft: false
 - MongoRepository
 - MongoTemplate
 
-보통 hybrid 식으로 많이들 처리하는 것 같다 (이러면 infra 모듈로 어떻게 뜯어내지?? 싶지만,,,)
+보통 hybrid 식으로 많이들 처리하는 것 같다 (이러면 infra 모듈로 어떻게 뜯어내지??
+
+싶지만,,,)
 
 ```kotlin
 @Service
@@ -56,7 +57,10 @@ class BoardService(
 [https://velog.io/@onezerokang/오늘의-에러-Argument-passed-in-must-be-a-string-of-24-hex-characters](https://velog.io/@onezerokang/오늘의-에러-Argument-passed-in-must-be-a-string-of-24-hex-characters)
 
 **Argument passed in must be a string of 24 hex characters**이 에러를 자주 만나서 확실히 공부하고 기록하면 다음에 해결하는데 시간이 적게 걸릴 것이라 생각했고 공부했다.
-이 에러가 발생하는 이유는 **ObjectId가 들어가야 할 곳에 다른 값이 들어갔기 때문이다. 그래서 ObjectId를 넣어주면된다**(String으로 된 id를 넣어도 정상동작한다)
+
+이 에러가 발생하는 이유는 **ObjectId가 들어가야 할 곳에 다른 값이 들어갔기 때문이다.
+
+그래서 ObjectId를 넣어주면된다**(String으로 된 id를 넣어도 정상동작한다)
 
 # MongoDB Shell Commands
 

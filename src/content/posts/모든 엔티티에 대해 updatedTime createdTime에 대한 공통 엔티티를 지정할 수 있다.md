@@ -1,16 +1,14 @@
 ---
 title: "모든 엔티티에 대해 updatedTime, createdTime에 대한 공통 엔티티를 지정할 수 있다?"
-description: "https://velog.io/@vpdls1511/Spring에서-BaseEntity작성하기"
+description: "@MappedSuperclass와 @EntityListeners를 활용해 createdTime·updatedTime을 공통 BaseEntity로 관리하는 방법을 설명한다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # 어떻게 함??
 
----
 
 [https://velog.io/@vpdls1511/Spring에서-BaseEntity작성하기](https://velog.io/@vpdls1511/Spring에서-BaseEntity작성하기)
 
@@ -42,7 +40,6 @@ public class Order extends BaseEntity {
 
 # 사용 개념
 
----
 
 - `@`**`MappedSuperclass`**
 
@@ -74,6 +71,7 @@ JPA Entity에 이벤트가 발생할 때 콜백을 처리하고 코드를 실행
 </details>
 
 모든 엔티티에 대해 각 이벤트 별로 메서드를 지정하는 것은 매우 번거로운 일이다.
+
 이러한 번거로움을 처리한 게 `@EntityListeners` 어노테이션이다.
 @EntityListeners를 통해 해당 Listener class를 호출하여 사용하면 코드의 가독성이 증가하고 코드의 중복도 크게 줄일 수 있다.
 
@@ -82,6 +80,10 @@ JPA Entity에 이벤트가 발생할 때 콜백을 처리하고 코드를 실행
 
 - AuditingEntityListener
 
-JPA에서는 `Audit`이라는 기능을 제공하고 있습니다. Audit은 `감시하다, 감사하다`라는 뜻으로 Spring Data JPA에서 시간에 대해서 자동으로 값을 넣어주는 기능입니다. 도메인을 영속성 컨텍스트에 저장하거나 조회를 수행한 후에 update를 하는 경우 매번 시간 데이터를 입력하여 주어야 하는데, audit을 이용하면 자동으로 시간을 매핑하여 데이터베이스의 테이블에 넣어주게 됩니다.
+JPA에서는 `Audit`이라는 기능을 제공하고 있습니다.
+
+Audit은 `감시하다, 감사하다`라는 뜻으로 Spring Data JPA에서 시간에 대해서 자동으로 값을 넣어주는 기능입니다.
+
+도메인을 영속성 컨텍스트에 저장하거나 조회를 수행한 후에 update를 하는 경우 매번 시간 데이터를 입력하여 주어야 하는데, audit을 이용하면 자동으로 시간을 매핑하여 데이터베이스의 테이블에 넣어주게 됩니다.
 
 [https://webcoding-start.tistory.com/53](https://webcoding-start.tistory.com/53)

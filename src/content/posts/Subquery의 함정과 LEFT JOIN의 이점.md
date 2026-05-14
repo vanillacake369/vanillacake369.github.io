@@ -1,24 +1,23 @@
 ---
 title: "Subquery의 함정과 LEFT JOIN의 이점"
-description: "https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50"
+description: "HAVING 절에서 Subquery를 잘못 사용하는 함정을 짚고, LEFT JOIN으로 미매칭 행을 더 명확하게 처리하는 방법을 비교 설명한다."
 date: 2024-05-31
 tags: [database]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Problem
 
----
 
 [https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50](https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50)
 
 # Solution
 
----
 
-## 1. CTE & Sub-Qeury 사용
+## 1.
+
+CTE & Sub-Qeury 사용
 
 ```sql
 WITH t_visit_group AS (
@@ -41,7 +40,9 @@ having not in t_visit_group;
 > **HAVING 은 aggregate functions 에 대한 filter group**
 
 GROUP BY 로 묶은 뒤, HAVING 을 CTE 에 대한 처리를 하였다.
+
 하지만 HAVING 은 GROUP BY 이후 적용된 aggregate functions 에 대한 filter group 이다.
+
 따라서 아래와 같이 고쳐야한다.
 
 ```sql
@@ -73,13 +74,16 @@ Datagrip 을 통해 Execute Plan 확인해보자.
 
 > Table Schema
 
-
 왜 Table Full Scan 을 5번이나 할까???
 
 이유는 아래와 같다.
 
-1. WHERE 절에 대한 Subquery가 실행되어서.
-2. Index 가 존재하지 않아서.
+1.
+
+WHERE 절에 대한 Subquery가 실행되어서.
+2.
+
+Index 가 존재하지 않아서.
 
 ```sql
 SELECT (select)					
@@ -101,14 +105,16 @@ SELECT (select)
 
 ![](/images/notion/aab43ea497ec33b2.png)
 
-
 어떻게 하면 개선할 수 있을까??
 
 ### Subquery 에서 DISTINCT 를 사용하여 개선
 
 동일쿼리 내에서 개선할 수 있는 방법이 있다.
+
 바로 id 에 대한 `DISTINCT` 처리를 하는 것이다.
+
 아래와 같이 visit_id 에 대해 `DISTINCT` 를 처리하여 range 를 좁혔다.
+
 과연 얼마나 빨라질까??
 
 ```sql
@@ -129,9 +135,8 @@ GROUP BY
     customer_id;
 ```
 
-
-
 그렇다면 왜 빨라졌을까???
+
 Datagrip 에서 Explain 을 처리해보자
 
 ```sql
@@ -152,15 +157,24 @@ SELECT (select)
 										SEQ_SCAN (Table scan)	 table: Transactions;	5	0.75		
 ```
 
+아예 바뀐 게 없었다.
 
-아예 바뀐 게 없었다. 
-사실 distinct 는 데이터를 줄여주는 역할만 수행해주었을 뿐이다. 그래서 최적화가 되는 것처럼 속도가 빨라진 것이다.
+사실 distinct 는 데이터를 줄여주는 역할만 수행해주었을 뿐이다.
+
+그래서 최적화가 되는 것처럼 속도가 빨라진 것이다.
+
 Stackoverflow 에서는 SubQuery 의 IN 절 에서 DISTINCT 를 쓰는 것은 일반적인 최적화가 되지 않는다고 한다.
 
-> The `SELECT DISTINCT` in the `IN` subquery does nothing. Nothing at all. The `IN` implicitly does a `SELECT DISTINCT` because if something is in `(1, 2, 3)`, then that something is in `(1, 1, 1, 2, 2, 3)`.
-> [https://stackoverflow.com/questions/47379281/sql-distinct-subquery](https://stackoverflow.com/questions/47379281/sql-distinct-subquery)
+> The `SELECT DISTINCT` in the `IN` subquery does nothing.
 
-## 2. LEFT JOIN 사용
+Nothing at all.
+
+The `IN` implicitly does a `SELECT DISTINCT` because if something is in `(1, 2, 3)`, then that something is in `(1, 1, 1, 2, 2, 3)`.
+> [https://stackoverflow.com/questions/47379281/sql-distinct-subquery](https://stackoverflow.com/questions/47379281/sql-distinct-subquery[^3])
+
+## 2.
+
+LEFT JOIN 사용
 
 ```sql
 SELECT V.customer_id, COUNT(V.visit_id) AS count_no_trans
@@ -186,12 +200,9 @@ SELECT (select)
 ```
 
 LEFT hash join 을 함으로써 Full Scan 횟수를 줄일 수 있었다.
+
 이로써 SubQuery 는 Join 보다 일반적인 성능이 좋지 않다는 것을 또 다시금 느낄 수 있었다.
 
-# Reference
-
----
-
-- [https://mariadb.com/kb/en/optimizing-group-by/](https://mariadb.com/kb/en/optimizing-group-by/)
-- [https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN](https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN)
-- [https://stackoverflow.com/questions/47379281/sql-distinct-subquery](https://stackoverflow.com/questions/47379281/sql-distinct-subquery)
+[^1]: https://mariadb.com/kb/en/optimizing-group-by/ <https://mariadb.com/kb/en/optimizing-group-by/>
+[^2]: https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN <https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN>
+[^3]: https://stackoverflow.com/questions/47379281/sql-distinct-subquery <https://stackoverflow.com/questions/47379281/sql-distinct-subquery>

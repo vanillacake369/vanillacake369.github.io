@@ -1,20 +1,30 @@
 ---
 title: "값이 없는 경우를 처리할 때의 Best Practice? (feat.아이템 54,55)"
-description: "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html"
+description: "null 반환, 빈 컬렉션, Optional 중 값이 없는 경우의 베스트 프랙티스를 이펙티브 자바 아이템 54·55 기반으로 정리했다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "Effective Java", order: 8 }
 ---
 
-# Why? 왜 배움?
+# Why?
+
+왜 배움?
 
 ---
 
-> ***비즈니스 로직 상, 값이 없는 경우를 어떻게 처리해주어야할까? 과연 어떤 방법이 best practice일까?? ***
+---
 
-# What? 뭘 배움?
+> ***비즈니스 로직 상, 값이 없는 경우를 어떻게 처리해주어야할까?
+
+과연 어떤 방법이 best practice일까?? ***
+
+# What?
+
+뭘 배움?
+
+---
 
 ---
 
@@ -51,10 +61,18 @@ draft: false
 
 ## 옵셔널 사용주의점
 
-1. 컬렉션,스트림,배열,옵셔널 같은 컨테이너타입은 옵셔널로 감싸면 안 됨!
-2. 결과가 없을 수 있으며, 클라이언트가 이 상황을 특별하게 처리해야하는 경우 Optional<T>를 반환
-3. 박싱된 기본타입에 대해서는 OptionalInt와 같은 타입이 존재하므로 유념하자.
-4. 인스턴스의 키 값으로 옵셔널 사용을 “지양”하자.
+1.
+
+컬렉션,스트림,배열,옵셔널 같은 컨테이너타입은 옵셔널로 감싸면 안 됨!
+2.
+
+결과가 없을 수 있으며, 클라이언트가 이 상황을 특별하게 처리해야하는 경우 Optional<T>를 반환
+3.
+
+박싱된 기본타입에 대해서는 OptionalInt와 같은 타입이 존재하므로 유념하자.
+4.
+
+인스턴스의 키 값으로 옵셔널 사용을 “지양”하자.
 
 ## QueryDSL에 비어있는 값들에 대한 핸들링 
 
@@ -62,6 +80,7 @@ draft: false
 
 동적 쿼리 핸들링을 위해서
 Querydsl의 `where `에 조건문을 쓰되 파라미터가 비어있다면, 해당 파라미터의 조건절에서 생략되었으면 한다.
+
 Querydsl에서는 이럴땔 대비해서 `BooleanExpression`을 지원하여 null이 파라미터로 올 경우 조건문에서 제외해준다.
 
 - 방법1

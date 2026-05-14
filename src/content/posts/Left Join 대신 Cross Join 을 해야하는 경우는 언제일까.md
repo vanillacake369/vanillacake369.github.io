@@ -1,22 +1,19 @@
 ---
 title: "Left Join 대신 Cross Join 을 해야하는 경우는 언제일까?"
-description: "https://leetcode.com/problems/students-and-examinations/description/?envType=study-plan-v2&envId=top-sql-50"
+description: "모든 조합의 행을 기준으로 집계해야 할 때 LEFT JOIN 대신 CROSS JOIN이 필요한 이유를 SQL 문제 풀이로 설명한다."
 date: 2024-05-27
 tags: [database]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Problem
 
----
 
 [https://leetcode.com/problems/students-and-examinations/description/?envType=study-plan-v2&envId=top-sql-50](https://leetcode.com/problems/students-and-examinations/description/?envType=study-plan-v2&envId=top-sql-50)
 
 # My Attempt
 
----
 
 처음에는 아래와 같이 작성하였다.
 
@@ -45,9 +42,10 @@ order by
     , subject_name
 ```
 
-
 이에 따라 잘못된 결과가 나왔다.
+
 우리가 원하는 결과에서는, 지원자가 접수하지 않은 과목에 대해 그룹핑을 하고 0으로 count 해야한다.
+
 즉 아래와 같이 나와야한다.
 `Expected`
 
@@ -66,7 +64,6 @@ order by
 | 13 | John | Physics | 1 |
 | 13 | John | Programming | 1 |
 
-
 하지만 위 쿼리는 접수하지 않은 과목은 무시하므로 아래와 같은 결과가 나온다.
 `Outcome`
 
@@ -81,12 +78,11 @@ order by
 | 13 | John | Physics | 1 |
 | 13 | John | Programming | 1 |
 
-
 # Solution
 
----
 
 그렇다면 어떻게 풀어야할까?
+
 정답은 아래와 같다.
 
 ```sql
@@ -104,18 +100,14 @@ ORDER BY Students.student_id, Subjects.subject_name;
 
 # What was the difference of two queries ?
 
----
-
 
 # Used Query
 
----
 
 > **CROSS JOIN**
 
 - Cartesian Product (카테시안 곱)을 처리한다.
 - ON 절이 필요없다. ( ← 카테시안 곱을 처리하기 때문 )
-
 
 가령 아래와 같이 학생과 과목 테이블이 있다고 해보자.
 
@@ -127,7 +119,6 @@ ORDER BY Students.student_id, Subjects.subject_name;
 | 2 | Bob |
 | 13 | John |
 | 6 | Alex |
-
 
 ### Subjects Table:
 
@@ -146,7 +137,6 @@ Physics
 Programming
 
 ---
-
 
 cross join 을 하게되면 결과는 아래와 같다.
 
@@ -167,11 +157,6 @@ cross join 을 하게되면 결과는 아래와 같다.
 | 6 | Alex | Physics |
 | 6 | Alex | Programming |
 
-
-# Reference
-
----
-
-[https://www.sqlshack.com/sql-cross-join-with-examples/](https://www.sqlshack.com/sql-cross-join-with-examples/)
-[https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations](https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations)
-[https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0](https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0)
+[^1]: https://www.sqlshack.com/sql-cross-join-with-examples/ <https://www.sqlshack.com/sql-cross-join-with-examples/>
+[^2]: https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations <https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations>
+[^3]: https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0 <https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0>

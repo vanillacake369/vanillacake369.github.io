@@ -1,20 +1,24 @@
 ---
 title: "아이템 65. 리플렉션보다는 인터페이스를 사용하라(feat. Spring 에서의 리플렉션 활용)"
-description: "https://www.oracle.com/technical-resources/articles/java/javareflection.html"
+description: "리플렉션의 동작 원리와 단점을 살펴보고, 이펙티브 자바 아이템 65에서 인터페이스 사용을 권장하는 이유를 정리했다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
+series: { id: "Effective Java", order: 5 }
 ---
 
-# Why? 왜 쓰나요?
+# Why?
+
+왜 쓰나요?
 
 ---
 
 > Effective Java의 아이템 65에 대한 내용들을 정리함과 동시에 아래 내용들을 소개해보고자 한다.
 
-# What? 뭘 배웠나요?
+# What?
+
+뭘 배웠나요?
 
 ---
 
@@ -23,7 +27,9 @@ draft: false
 ![](/images/notion/fba3bf326a22af22.png)
 
 > Reflection is a feature in the Java programming language. 
-> **그렇다. 여기서 reflection과 introspect는 동일한 어원으로 쓰였다. **
+> **그렇다.
+
+여기서 reflection과 introspect는 동일한 어원으로 쓰였다. **
 
 [https://www.oracle.com/technical-resources/articles/java/javareflection.html](https://www.oracle.com/technical-resources/articles/java/javareflection.html)
 

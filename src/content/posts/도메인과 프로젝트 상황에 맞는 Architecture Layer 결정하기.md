@@ -1,16 +1,14 @@
 ---
 title: "도메인과 프로젝트 상황에 맞는 Architecture Layer 결정하기"
-description: ""
+description: "프로젝트의 Service 레이어가 비대해질 때, 도메인 분리 기준과 Architecture Layer 설계 방법을 정리한다."
 date: 2026-02-25
 tags: [java]
-category: uncategorized
 lang: ko
 draft: false
 ---
 
 # Why(What For?) 🤷‍♂️
 
----
 
 ### Service라는 이름으로 다양한 역할과 책임
 
@@ -22,15 +20,12 @@ draft: false
 
 # What(What should I know?) 👇
 
----
 
 ### Service ⇒ Provider 와 Service로 분리 !
 
 - 유스케이스 제어 핸들러 / 비즈니스로직처리 핸들러 로 구분하기로 하였다.
 
 ![](/images/notion/4fe62f4a4257999c.png)
-
-
 
 ### 속성값으로 가지는 값이라면 서브셋 , 아니라면 분리 !
 
@@ -41,5 +36,3 @@ draft: false
 - `API 당 Controller가 1:1이면 Overhead가 너무 큼`
 
 # How(How to apply to code?) ✍️
-
----
