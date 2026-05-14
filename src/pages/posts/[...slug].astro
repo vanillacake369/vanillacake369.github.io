@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 
-const { description, date, updatedDate, tags, category, lang, heroImage } = entry.data;
+const { description, date, updatedDate, tags, series, lang, heroImage } = entry.data;
 const title = entry.data.title || titleFromId(entry.id);
 ---
 
@@ -25,7 +25,7 @@ const title = entry.data.title || titleFromId(entry.id);
   date={date}
   updatedDate={updatedDate}
   tags={tags}
-  category={category}
+  series={series}
   lang={lang}
   heroImage={heroImage}
   currentSlug={entry.id}

@@ -5,52 +5,91 @@
 ---
 
 <style is:global>
-  pre.astro-code {
+  pre.astro-code,
+  pre.shiki {
     position: relative;
+    /* Ensure space for the header (label & button) */
+    padding-top: 3rem !important;
+  }
+
+  pre.shiki.monokai-pro-light,
+  pre.astro-code.monokai-pro-light {
+    --code-chrome-bg: #fff9f1;
+    --code-chrome-fg: #8d8077;
+    --code-chrome-border: #eadfd4;
+    --code-chrome-accent: #ff5f87;
+    --code-chrome-success-bg: #eef8e6;
+    --code-chrome-success-fg: #4f7a00;
+  }
+
+  pre.shiki.monokai-deep-dark,
+  pre.astro-code.monokai-deep-dark {
+    --code-chrome-bg: #000000;
+    --code-chrome-fg: #8f8b7a;
+    --code-chrome-border: #1a1a1a;
+    --code-chrome-accent: #a6e22e;
+    --code-chrome-success-bg: rgba(166, 226, 46, 0.14);
+    --code-chrome-success-fg: #a6e22e;
   }
 
   .code-copy-btn {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.2rem 0.55rem;
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.25rem 0.6rem;
     font-size: 0.7rem;
     font-family: var(--font-sans);
-    line-height: 1.4;
-    border: 1px solid rgba(128, 128, 128, 0.3);
+    font-weight: 500;
+    line-height: 1;
+    border: 1px solid var(--code-chrome-border);
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.15);
-    color: var(--color-text-secondary);
+    background: var(--code-chrome-bg);
+    color: var(--code-chrome-fg);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.15s ease, background 0.15s ease;
+    transition: all 0.2s ease;
     z-index: 2;
     user-select: none;
-    backdrop-filter: blur(4px);
   }
 
-  pre.astro-code:hover .code-copy-btn {
+  .code-lang-label {
+    position: absolute;
+    top: 0.85rem;
+    left: 1rem;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--code-chrome-fg);
+    opacity: 0.4;
+    user-select: none;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.2s ease;
+    letter-spacing: 0.1em;
+  }
+
+  pre.astro-code:hover .code-copy-btn,
+  pre.shiki:hover .code-copy-btn {
     opacity: 1;
   }
 
+  pre.astro-code:hover .code-lang-label,
+  pre.shiki:hover .code-lang-label {
+    opacity: 0.7;
+  }
+
   .code-copy-btn:hover {
-    background: rgba(0, 0, 0, 0.35);
-    color: var(--color-text);
+    background: var(--code-chrome-bg);
+    color: var(--code-chrome-accent);
+    border-color: var(--code-chrome-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
   .code-copy-btn.copied {
-    color: #22c55e;
-    border-color: #22c55e;
-  }
-
-  [data-theme='dark'] .code-copy-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--color-text-secondary);
-  }
-
-  [data-theme='dark'] .code-copy-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--color-text);
+    color: var(--code-chrome-success-fg);
+    border-color: var(--code-chrome-success-fg);
+    background: var(--code-chrome-success-bg);
   }
 </style>
 
@@ -62,6 +101,16 @@
     if (!code) return false;
     const text = code.textContent?.trim() ?? '';
     return MERMAID_RE.test(text);
+  }
+
+  function addLanguageLabel(pre: HTMLElement): void {
+    const lang = pre.getAttribute('data-language');
+    if (!lang || lang === 'plaintext' || lang === 'text') return;
+
+    const label = document.createElement('span');
+    label.className = 'code-lang-label';
+    label.textContent = lang;
+    pre.appendChild(label);
   }
 
   function addCopyButton(pre: HTMLElement): void {
@@ -91,18 +140,19 @@
     });
   }
 
-  function initCopyButtons(): void {
-    const preTags = Array.from(document.querySelectorAll('pre.astro-code')) as HTMLElement[];
+  function initCodeBlocks(): void {
+    const preTags = Array.from(document.querySelectorAll('pre.astro-code, pre.shiki')) as HTMLElement[];
     for (const pre of preTags) {
       if (!isMermaidPre(pre)) {
+        addLanguageLabel(pre);
         addCopyButton(pre);
       }
     }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCopyButtons);
+    document.addEventListener('DOMContentLoaded', initCodeBlocks);
   } else {
-    initCopyButtons();
+    initCodeBlocks();
   }
 </script>

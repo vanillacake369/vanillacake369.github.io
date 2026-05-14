@@ -51,7 +51,7 @@ const ONBOARDING_GROUPS: WhichKeyGroup[] = [
     label: 'Shortcuts',
     prefix: '',
     entries: [
-      { key: '/', description: 'Search posts' },
+      { key: '/', description: 'Search in page' },
       { key: 'Ctrl+K', description: 'Search posts' },
       { key: 'g', description: 'Go to...' },
       { key: 'G', description: 'Bottom of page' },
@@ -286,8 +286,8 @@ function handleKeydown(e: KeyboardEvent): void {
   // ─── Normal mode ──────────────────────────────────────────────────────
   switch (e.key) {
     case '/':
-      fuzzyFinder.open('files', resetToNormal);
-      mode = 'fuzzy';
+      vimSearch.open(resetToNormal);
+      mode = 'search';
       e.preventDefault();
       break;
 

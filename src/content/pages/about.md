@@ -4,8 +4,6 @@ description: "About Me"
 lang: ko
 ---
 
-# About Me
-
 세상을 이롭게 하는 개발을 지향하는 사람입니다.
 
 부끄럽지만 배운 것을 기록하고 공유하는 것을 좋아합니다.
@@ -13,9 +11,3 @@ lang: ko
 Kubernetes, Go, Nix, 분산 시스템, AI, 클라우드 등 다양한 주제에 관심을 가지고 있습니다
 
 부디 이 블로그의 글이 당신의 귀감이 되었으면 좋겠습니다
-
-## Contact
-
-- [GitHub](https://github.com/vanillacake369)
-- [lonelynight1026@gmail.com](mailto:lonelynight1026@gmail.com)
-- [LinkedIn](https://www.linkedin.com/in/vanillacake369/)
