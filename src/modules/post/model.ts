@@ -1,17 +1,34 @@
-import type { Post, TagInfo, CalendarDay } from './types';
+export type Lang = 'ko' | 'en';
 
-/**
- * Derive a human-readable title from a file ID.
- * The file name IS the title — just strip the extension.
- */
+export interface Post {
+  slug: string;
+  title: string;
+  description: string;
+  date: Date;
+  updatedDate?: Date;
+  tags: string[];
+  lang: Lang;
+  draft: boolean;
+  heroImage?: string;
+  series?: { id: string; order: number };
+}
+
+export interface TagInfo {
+  name: string;
+  count: number;
+  slug: string;
+}
+
+export interface CalendarDay {
+  date: string;
+  count: number;
+  posts: Pick<Post, 'slug' | 'title'>[];
+}
+
 export function titleFromId(id: string): string {
   return id.replace(/\.mdx?$/, '').trim();
 }
 
-/**
- * Convert a file ID to a URL-safe slug.
- * "NixOS 는 어떤 원리로 커널패키지를 관리할까" → "nixos-는-어떤-원리로-커널패키지를-관리할까"
- */
 export function slugify(id: string): string {
   return id
     .replace(/\.mdx?$/, '')
@@ -23,10 +40,6 @@ export function slugify(id: string): string {
     .trim();
 }
 
-/**
- * Map a content collection entry to a domain Post.
- * If title is missing in frontmatter, derives it from the file ID.
- */
 export function entryToPost(entry: {
   id: string;
   data: {
@@ -60,15 +73,24 @@ export function sortPostsByDate(posts: Post[]): Post[] {
 }
 
 export function filterPublished(posts: Post[]): Post[] {
-  return posts.filter((p) => !p.draft);
+  return posts.filter((post) => !post.draft);
 }
 
 export function filterByLang(posts: Post[], lang: Post['lang']): Post[] {
-  return posts.filter((p) => p.lang === lang);
+  return posts.filter((post) => post.lang === lang);
 }
 
 export function filterByTag(posts: Post[], tag: string): Post[] {
-  return posts.filter((p) => p.tags.includes(tag));
+  return posts.filter((post) => post.tags.includes(tag));
+}
+
+export function slugifyTag(tag: string): string {
+  return tag
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
 }
 
 export function extractTags(posts: Post[]): TagInfo[] {
@@ -78,12 +100,12 @@ export function extractTags(posts: Post[]): TagInfo[] {
       tagMap.set(tag, (tagMap.get(tag) ?? 0) + 1);
     }
   }
+
   return Array.from(tagMap.entries())
     .map(([name, count]) => ({ name, count, slug: slugifyTag(name) }))
     .sort((a, b) => b.count - a.count);
 }
 
-/** Format a Date as YYYY-MM-DD in the local timezone (avoids UTC date shift for KST) */
 export function toLocalDateString(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -93,27 +115,27 @@ export function toLocalDateString(date: Date): string {
 
 export function groupByCalendarDay(posts: Post[]): CalendarDay[] {
   const dayMap = new Map<string, CalendarDay>();
+
   for (const post of posts) {
     const dateStr = toLocalDateString(post.date);
     const existing = dayMap.get(dateStr);
+
     if (existing) {
-      existing.count++;
+      existing.count += 1;
       existing.posts.push({ slug: post.slug, title: post.title });
-    } else {
-      dayMap.set(dateStr, {
-        date: dateStr,
-        count: 1,
-        posts: [{ slug: post.slug, title: post.title }],
-      });
+      continue;
     }
+
+    dayMap.set(dateStr, {
+      date: dateStr,
+      count: 1,
+      posts: [{ slug: post.slug, title: post.title }],
+    });
   }
+
   return Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/**
- * Extract a plain-text excerpt from raw markdown body.
- * Strips frontmatter, code blocks, images, links, and syntax characters.
- */
 export function excerptFromBody(body: string, maxLength = 300): string {
   return body
     .replace(/^---[\s\S]*?---\n*/m, '')
@@ -124,13 +146,4 @@ export function excerptFromBody(body: string, maxLength = 300): string {
     .replace(/\n+/g, ' ')
     .trim()
     .slice(0, maxLength);
-}
-
-export function slugifyTag(tag: string): string {
-  return tag
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
 }

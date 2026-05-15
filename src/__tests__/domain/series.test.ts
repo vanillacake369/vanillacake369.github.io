@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { extractSeries, slugifySeries } from '../../domain/series';
-import type { Post } from '../../domain/types';
+import { extractSeries, slugifySeries } from '../../modules/taxonomy/model';
+import type { Post } from '../../modules/post/model';
 
 function makePost(overrides: Partial<Post> = {}) {
   return {

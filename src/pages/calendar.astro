@@ -4,8 +4,8 @@ import '../styles/typography/page.css';
 import '../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { filterPublished, groupByCalendarDay, sortPostsByDate, entryToPost } from '../domain/post';
-import { generateCalendarGrid } from '../domain/calendar';
+import { filterPublished, groupByCalendarDay, sortPostsByDate, entryToPost } from '../modules/post/model';
+import { generateCalendarGrid } from '../modules/taxonomy/model';
 import { translations } from '../i18n/translations';
 
 const rawEntries = await getCollection('posts');

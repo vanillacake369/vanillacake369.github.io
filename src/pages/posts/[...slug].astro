@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import TOC from '../../components/TOC.astro';
-import { titleFromId, slugify } from '../../domain/post';
+import { titleFromId, slugify } from '../../modules/post/model';
 
 export async function getStaticPaths() {
   const entries = await getCollection('posts');

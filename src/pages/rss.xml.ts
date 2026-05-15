@@ -1,7 +1,7 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { getCollection } from "astro:content";
-import { filterPublished, sortPostsByDate, entryToPost } from "../domain/post";
+import { filterPublished, sortPostsByDate, entryToPost } from "../modules/post/model";
 import { SITE_CONFIG } from "../config";
 
 export async function GET(context: APIContext) {

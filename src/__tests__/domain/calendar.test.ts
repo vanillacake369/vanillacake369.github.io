@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generateCalendarGrid, countToLevel } from '../../domain/calendar';
-import type { Post } from '../../domain/types';
+import { generateCalendarGrid, countToLevel } from '../../modules/taxonomy/model';
+import type { Post } from '../../modules/post/model';
 
 function makePost(overrides: Partial<Post> = {}): Post {
   return {

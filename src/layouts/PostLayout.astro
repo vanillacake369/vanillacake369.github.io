@@ -9,8 +9,8 @@ import CodeCopyButton from '../components/CodeCopyButton.astro';
 import Comments from '../components/Comments.astro';
 import RelatedPosts from '../components/RelatedPosts.astro';
 import { getCollection } from 'astro:content';
-import { entryToPost } from '../domain/post';
-import { extractSeries } from '../domain/series';
+import { entryToPost } from '../modules/post/model';
+import { extractSeries } from '../modules/taxonomy/model';
 import { translations } from '../i18n/translations';
 
 interface Props {

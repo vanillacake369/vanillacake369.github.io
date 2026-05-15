@@ -49,7 +49,7 @@ export const translations = {
   },
 } as const;
 
-import type { Lang } from '../domain/types';
+import type { Lang } from '../modules/post/model';
 export type { Lang };
 export type TranslationKey = keyof typeof translations.ko;
 

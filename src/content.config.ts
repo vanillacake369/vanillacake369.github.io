@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { TAGS } from './domain/tags';
+import { TAGS } from './modules/taxonomy/model';
 
 const tagsEnum = z.enum(TAGS);
 

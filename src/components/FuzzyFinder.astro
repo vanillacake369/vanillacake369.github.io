@@ -2,23 +2,10 @@
 // FuzzyFinder.astro — Telescope-style modal for navigating posts by title
 // Page list is injected at build time via define:vars inline script.
 import { getCollection } from 'astro:content';
-import { entryToPost, filterPublished, sortPostsByDate, slugify, excerptFromBody } from '../domain/post';
+import { buildSearchPageList } from '../modules/search/model';
 
 const rawEntries = await getCollection('posts');
-
-const bodyMap = new Map<string, string>();
-for (const entry of rawEntries) {
-  bodyMap.set(slugify(entry.id), excerptFromBody(entry.body ?? ''));
-}
-
-const posts = sortPostsByDate(filterPublished(rawEntries.map(entryToPost)));
-const pageList = posts.map((p) => ({
-  url: `/posts/${p.slug}/`,
-  title: p.title,
-  excerpt: p.description,
-  body: bodyMap.get(p.slug) ?? '',
-  tags: p.tags,
-}));
+const pageList = buildSearchPageList(rawEntries);
 ---
 
 <div id="vim-fuzzy-overlay" hidden role="dialog" aria-modal="true" aria-label="Fuzzy file finder">

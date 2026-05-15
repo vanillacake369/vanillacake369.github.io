@@ -5,7 +5,7 @@ import '../../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostListItem from '../../components/PostListItem.astro';
-import { filterPublished, filterByTag, sortPostsByDate, extractTags, entryToPost } from '../../domain/post';
+import { filterPublished, filterByTag, sortPostsByDate, extractTags, entryToPost } from '../../modules/post/model';
 
 export async function getStaticPaths() {
   const rawEntries = await getCollection('posts');

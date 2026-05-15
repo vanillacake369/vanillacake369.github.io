@@ -11,8 +11,8 @@ import {
   extractTags,
   groupByCalendarDay,
   slugifyTag,
-} from '../../domain/post';
-import type { Post } from '../../domain/types';
+} from '../../modules/post/model';
+import type { Post } from '../../modules/post/model';
 
 function makePost(overrides: Partial<Post> = {}): Post {
   return {

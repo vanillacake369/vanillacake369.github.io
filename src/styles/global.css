@@ -43,8 +43,8 @@ select {
   --color-tag-text: #596155;
   --color-hover-bg: #ece7dc;
 
-  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, system-ui, sans-serif;
-  --font-serif: 'Pretendard Variable', 'Pretendard', Georgia, serif;
+  --font-sans: 'Google Sans Flex', 'Google Sans', 'Google Sans Text', 'Pretendard Variable', 'Pretendard', -apple-system, system-ui, sans-serif;
+  --font-serif: 'Google Sans Flex', 'Google Sans', 'Google Sans Text', 'Pretendard Variable', 'Pretendard', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   --max-width: 48rem;
