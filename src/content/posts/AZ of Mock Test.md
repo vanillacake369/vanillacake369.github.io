@@ -8,11 +8,11 @@ draft: false
 
 # About Mock Test
 
-# Inject Mock
+# Inject Mock 💉
 
 [https://velog.io/@yyong3519/Mockito](https://velog.io/@yyong3519/Mockito)
 
-# `@Mock` vs `@MockBean`
+# `@Mock` vs `@MockBean` 🆚
 
 > 세 줄 요약
 
@@ -21,29 +21,25 @@ draft: false
 
 [https://www.baeldung.com/java-spring-mockito-mock-mockbean](https://www.baeldung.com/java-spring-mockito-mock-mockbean)
 
-# `@ExtendWith(MockitoExtension.`_`class`_`)` vs `@ExtendWith(SpringExtension.class)`
+# `@ExtendWith(MockitoExtension.`_`class`_`)` vs `@ExtendWith(SpringExtension.class)` ⚙️
 
 > 세 줄 요약
 
 **When involving Spring**:
-If you want to use Spring test framework features in your tests like for example `@MockBean`, then you have to use `@ExtendWith(SpringExtension.class)`.
+If you want to use Spring test framework features in your tests like for example `@MockBean`, then you have to use `@ExtendWith(SpringExtension.class)`.
 
-It replaces the deprecated JUnit4 `@RunWith(SpringJUnit4ClassRunner.class)`
-**When NOT involving Spring**:
-If you just want to involve Mockito and don't have to involve Spring, for example, when you just want to use the `@Mock` / `@InjectMocks` annotations, then you want to use `@ExtendWith(MockitoExtension.class)`, as it doesn't load in a bunch of unneeded Spring stuff.
+It replaces the deprecated JUnit4 `@RunWith(SpringJUnit4ClassRunner.class)`. **When NOT involving Spring**: If you just want to involve Mockito and don't have to involve Spring, for example, when you just want to use the `@Mock` / `@InjectMocks` annotations, then you want to use `@ExtendWith(MockitoExtension.class)`, as it doesn't load in a bunch of unneeded Spring stuff.
 
-It replaces the deprecated JUnit4 `@RunWith(MockitoJUnitRunner.class)`.
-**To answer your question**:
-Yes you can just use `@ExtendWith(SpringExtension.class)`, but if you're not involving Spring test framework features in your tests, then you probably want to just use `@ExtendWith(MockitoExtension.class)`.
+It replaces the deprecated JUnit4 `@RunWith(MockitoJUnitRunner.class)`. **To answer your question**: Yes you can just use `@ExtendWith(SpringExtension.class)`, but if you're not involving Spring test framework features in your tests, then you probably want to just use `@ExtendWith(MockitoExtension.class)`.
 
 [https://stackoverflow.com/questions/60308578/what-is-the-difference-between-extendwithspringextension-class-and-extendwit](https://stackoverflow.com/questions/60308578/what-is-the-difference-between-extendwithspringextension-class-and-extendwit)
 [https://www.baeldung.com/junit-springrunner-vs-mockitojunitrunner](https://www.baeldung.com/junit-springrunner-vs-mockitojunitrunner)
 
-# **@DataJpaTest**
+# **@DataJpaTest** 🗄️
 
 [https://jiminidaddy.github.io/dev/2021/05/20/dev-spring-단위테스트-Repository/](https://jiminidaddy.github.io/dev/2021/05/20/dev-spring-단위테스트-Repository/)
 
-# Don’t mock instance having dependecy of `@Configuration`
+# Don't mock instance having dependecy of `@Configuration` ⚠️
 
 > 세 줄 요약
 
@@ -84,11 +80,11 @@ class YourTestClass {
 }
 ```
 
-# Test yml 따로 설정하기
+# Test yml 따로 설정하기 📄
 
 [https://stay-hungry.tistory.com/17](https://stay-hungry.tistory.com/17)
 
-# ContextConfiguration은 조심해서 사용해주자.
+# ContextConfiguration은 조심해서 사용해주자. 🔧
 
 > 만약 Test에 관련된 Config나 Bean들을 주입해주고자 할 때 사용하자.
 
@@ -107,3 +103,13 @@ class ErrorCaseResolverTest {
 ```
 
 [https://tlatmsrud.tistory.com/36](https://tlatmsrud.tistory.com/36)
+
+[^1]: Mockito @Mock vs @MockBean. <https://www.baeldung.com/java-spring-mockito-mock-mockbean>
+
+[^2]: MockitoExtension vs SpringExtension. <https://stackoverflow.com/questions/60308578/what-is-the-difference-between-extendwithspringextension-class-and-extendwit>
+
+[^3]: JUnit SpringRunner vs MockitoJUnitRunner. <https://www.baeldung.com/junit-springrunner-vs-mockitojunitrunner>
+
+[^4]: @DataJpaTest 단위 테스트 Repository. <https://jiminidaddy.github.io/dev/2021/05/20/dev-spring-단위테스트-Repository/>
+
+[^5]: ContextConfiguration 사용법. <https://tlatmsrud.tistory.com/36>

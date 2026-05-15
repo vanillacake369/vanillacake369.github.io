@@ -1,4 +1,6 @@
 ---
+import '../styles/typography/tokens.css';
+import '../styles/typography/page.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { entryToPost, filterPublished } from '../domain/post';
@@ -19,7 +21,7 @@ function formatDate(date: Date): string {
   description="Browse writing series with progress, tags, and reading order."
 >
   <section class="series-page">
-    <header class="series-header">
+    <header class="page-header series-header">
       <h1
         class="page-title"
         data-i18n="series.title"
@@ -87,23 +89,7 @@ function formatDate(date: Date): string {
 
   /* Header */
   .series-header {
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: var(--spacing-lg);
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    letter-spacing: -0.02em;
-    margin-bottom: 0.25rem;
-  }
-
-  .page-desc {
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    color: var(--color-text-secondary);
-    letter-spacing: 0.02em;
+    margin-bottom: 0;
   }
 
   /* Series list */
@@ -152,7 +138,7 @@ function formatDate(date: Date): string {
   }
 
   .series-name {
-    font-size: 1.15rem;
+    font-size: var(--font-size-list-title);
     font-weight: 700;
     color: var(--color-text);
     line-height: 1.3;
@@ -168,7 +154,7 @@ function formatDate(date: Date): string {
 
   .series-tag {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: var(--font-size-meta-compact);
     color: var(--color-text-secondary);
     letter-spacing: 0.02em;
     text-decoration: none;
@@ -214,7 +200,7 @@ function formatDate(date: Date): string {
 
   .series-post-num {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: var(--font-size-meta-compact);
     color: var(--color-text-secondary);
     width: 1.6rem;
     flex-shrink: 0;
@@ -224,7 +210,7 @@ function formatDate(date: Date): string {
   .series-post-title {
     flex: 1;
     min-width: 0;
-    font-size: 0.92rem;
+    font-size: var(--font-size-list-title-compact);
     color: var(--color-text-secondary);
     text-decoration: none;
     overflow: hidden;
@@ -239,7 +225,7 @@ function formatDate(date: Date): string {
 
   .series-post-date {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: var(--font-size-meta-compact);
     color: var(--color-text-secondary);
     opacity: 0.5;
     white-space: nowrap;
@@ -248,7 +234,7 @@ function formatDate(date: Date): string {
 
   .no-series {
     color: var(--color-text-secondary);
-    font-size: 0.92rem;
+    font-size: var(--font-size-list-title-compact);
   }
 
   /* Responsive */

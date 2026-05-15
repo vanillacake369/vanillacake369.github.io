@@ -1,5 +1,5 @@
 ---
-description: "변수를 캐싱하면 호출을 줄일 수 있다고??"
+description: "반복문 내 불필요한 메서드 호출과 객체 생성을 변수 캐싱으로 줄이는 방법을 다룬다. loop 조건식, toArray() 변환, Pattern 컴파일 등 실전 사례를 통해 성능 개선 포인트를 정리한다."
 date: 2024-04-07
 tags: [journal]
 lang: ko
@@ -8,13 +8,11 @@ draft: false
 
 ![](/images/velog/0317730064a920ff.png)
 
-# Intro
+# Intro 🚀
 
-최근 기업과제를 수행하며 “잘못 구현된 부분이 있을까?” 하고 돌아보던 중, REGEX 에 대한 Pattern 객체를 적용 시, 성능적인 Degration 을 체감했던 순간이 있었다.
+최근 기업과제를 수행하며 "잘못 구현된 부분이 있을까?" 하고 돌아보던 중, REGEX 에 대한 Pattern 객체를 적용 시, 성능적인 Degration 을 체감했던 순간이 있었다. 이번 포스트에서는 "자바 성능 튜닝 이야기" 를 기반으로 변수 캐싱을 통해 성능개선할 수 있는 방법에 대해 기술해보고자 한다.
 
-이번 포스트에서는 “자바 성능 튜닝 이야기” 를 기반으로 변수 캐싱을 통해 성능개선할 수 있는 방법에 대해 기술해보고자 한다.
-
-# TL;DR
+# TL;DR 📋
 
 > **이 글의 무엇보다도, Stream 이 언제나 빠른 것이 아니라는 것을 강조하고 싶어서 서두에 이렇게 적는다.**
 > **스트림은 주요 목적은 성능을 극대화하고자 사용하는 게 아니다는 것을 알았으면 좋겠다.**
@@ -75,11 +73,9 @@ draft: false
   }
   ```
 
-# loop 의 target logic 과 관련없다면 캐싱을 해두자.
+# loop 의 target logic 과 관련없다면 캐싱을 해두자 ♻️
 
-책에서 나와있는 내용을 그대로 인용하고자 한다.
-
-매 번 반복하는 loop 문에서 메서드 호출을 최대한 자제하자.
+책에서 나와있는 내용을 그대로 인용하고자 한다. 매 번 반복하는 loop 문에서 메서드 호출을 최대한 자제하자.
 
 이게 무슨 말이냐
 
@@ -96,13 +92,9 @@ int listSize = list.size();
 for (int loop = 0; loop < listSize; loop++){ ,,, }
 ```
 
-# target logic 동일한 생성자 및 변환을 수행 중이라면 캐싱처리를 하자.
+# target logic 동일한 생성자 및 변환을 수행 중이라면 캐싱처리를 하자 🗃️
 
-loop 를 통해 처리되어야할 비즈니스 로직을 target logic 이라고 하는데,
-
-이 target logic 을 실행할 때마다 불필요한 생성자 및 변환을 호출하는 경우가 있다.
-
-이 때, 동일한 logic 수행임에도 생성자 및 변환로직을 계속 호출하여 heap 에 계속 참조값이 쌓이게 된다.
+loop 를 통해 처리되어야할 비즈니스 로직을 target logic 이라고 하는데, 이 target logic 을 실행할 때마다 불필요한 생성자 및 변환을 호출하는 경우가 있다. 이 때, 동일한 logic 수행임에도 생성자 및 변환로직을 계속 호출하여 heap 에 계속 참조값이 쌓이게 된다.
 
 ```java
 // ❌
@@ -124,11 +116,9 @@ for (int i=0; i< treeSetSize; i++) {
 }
 ```
 
-# +) Pattern 사용 시 Pattern 객체를 캐싱처리 하자
+# +) Pattern 사용 시 Pattern 객체를 캐싱처리 하자 🔍
 
-String.matches() 를 호출, Pattern.matches() 를 호출하는 모두의 경우에서 Pattern 인스턴스를 생성한다.
-
-즉, 내부적으로 생성자를 호출한다.
+String.matches() 를 호출, Pattern.matches() 를 호출하는 모두의 경우에서 Pattern 인스턴스를 생성한다. 즉, 내부적으로 생성자를 호출한다.
 
 ```java
 // String
@@ -160,9 +150,7 @@ public class ValidNickNameValidator implements ConstraintValidator<ValidNickName
 }
 ```
 
-1. Pattern 을 캐싱하여 재사용하거나 2) 싱글톤 인스턴스로 만들어두거나 3) 불변객체로 지정해두도록하자.
-
-아무래도 1번 처리 방법을 간단하게 구현하여 적용해주는 게 편하다.
+1. Pattern 을 캐싱하여 재사용하거나 2) 싱글톤 인스턴스로 만들어두거나 3) 불변객체로 지정해두도록하자. 아무래도 1번 처리 방법을 간단하게 구현하여 적용해주는 게 편하다.
 
 ```java
 // ✅
@@ -177,10 +165,14 @@ public class ValidNickNameValidator implements ConstraintValidator<ValidNickName
 }
 ```
 
-# +) 과연 Stream 은 빠를까
+# +) 과연 Stream 은 빠를까 ⚡
 
-이 주제는 이 포스트의 코어와 벗어나므로 따로 포스트를 분리하였다.
-
-아래를 참고하자.
+이 주제는 이 포스트의 코어와 벗어나므로 따로 포스트를 분리하였다. 아래를 참고하자.
 
 [Stream is not superior than for loops](https://www.notion.so/Stream-is-not-superior-than-for-loops-6e28630b26dd4e54a02b85db091a6f16?pvs=21)
+
+[^1]: JMH(Java Microbenchmark Harness)를 사용하면 JVM 워밍업 효과를 제거하고 정확한 성능 수치를 측정할 수 있다. 단순 `System.currentTimeMillis()` 비교보다 신뢰도가 높다.
+[^2]: `Pattern.compile()`은 정규식을 NFA(비결정적 유한 오토마톤)로 컴파일하는 비용이 있다. 이를 static final 필드로 선언해 클래스 로드 시점에 한 번만 수행하면 반복 비용을 완전히 제거한다.
+[^3]: `toArray()`는 내부 배열을 복사하여 새 `Object[]`를 생성한다. 루프마다 호출하면 GC 압박이 높아진다. 루프 전에 한 번 호출해 참조를 유지하면 불필요한 복사를 피할 수 있다.
+[^4]: JIT(Just-In-Time) 컴파일러는 자주 호출되는 메서드를 인라인 최적화하지만, 조건식 내 메서드 호출은 최적화 범위를 벗어날 수 있다. 변수 캐싱은 컴파일러 최적화 여부와 무관하게 안전한 개선 방법이다.
+[^5]: Stream API는 내부적으로 Spliterator와 파이프라인 체인을 구성하는 오버헤드가 있다. 소규모 컬렉션이나 단순 순회에서는 전통적인 for 루프가 더 빠른 경우가 많다.

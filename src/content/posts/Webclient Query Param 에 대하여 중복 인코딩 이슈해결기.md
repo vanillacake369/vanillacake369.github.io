@@ -14,9 +14,7 @@ draft: false
 
 ~~이상하게도 인증키를 쿼리파라미터로 넣는다.~~
 
-이를 호출하기 위해 Webflux & Webclient 를 사용 중에 있었는데,
-
-인증키값이 이상하게 인코딩되는 것을 발견했다.
+이를 호출하기 위해 Webflux & Webclient 를 사용 중에 있었는데, 인증키값이 이상하게 인코딩되는 것을 발견했다.
 
 ```java
 public <T> T get(
@@ -55,21 +53,19 @@ Cohg%3D%3D"
 
 Cohg%253D%253D"
 
-왜일까?
+왜일까? 이유인 즉슨 WebClient 의 인코딩 정책과 UriBuilder 이다.
 
-이유인 즉슨 WebClient 의 인코딩 정책과 UriBuilder 이다.
-
-## WebClient 인코딩 정책
+## WebClient 인코딩 정책 🔍
 
 https://www.baeldung.com/webflux-webclient-parameters
 
-> If the default behavior doesn’t fit our requirements, we can change it.
+> If the default behavior doesn't fit our requirements, we can change it.
 
 We need to provide a UriBuilderFactory implementation while building a WebClient instance.
 
-In this case, we’ll use the DefaultUriBuilderFactory class.
+In this case, we'll use the DefaultUriBuilderFactory class.
 
-To set encoding, we’ll call the setEncodingMode() method.
+To set encoding, we'll call the setEncodingMode() method.
 
 The following modes are available:
 
@@ -91,9 +87,7 @@ The following modes are available:
 > - For the URI template replace only non-ASCII and illegal (within a given URI component type) characters with escaped octets.
 > - For URI variables do the same and also replace characters with reserved meaning.
 
-요컨대 strict uri encoding 을 지원한다는 것이다.
-
-여기서 reserved 는 uri reserved characters 이다.
+요컨대 strict uri encoding 을 지원한다는 것이다. 여기서 reserved 는 uri reserved characters 이다.
 
 uri reserved characters 는 아래와 같다.
 
@@ -113,15 +107,13 @@ RFC 3986 section 2.3 Unreserved Characters (January 2005)
 
 하지만 나의 케이스인 `....
 
-Cohg%3D%3D` 에는 예약캐릭터가 없다.
-
-즉, 이미 인코딩된 값으로 보여진다.
+Cohg%3D%3D` 에는 예약캐릭터가 없다. 즉, 이미 인코딩된 값으로 보여진다.
 
 근데 왜 `....
 
 Cohg%253D%253D` 으로 나올까?
 
-## 중복 인코딩 이슈
+## 중복 인코딩 이슈 ⚠️
 
 [WebClient 사용할때 주의 (3편)](https://yangbongsoo.tistory.com/34#:~:text=uri%20%EB%A9%94%EC%84%9C%EB%93%9C%20%EB%9E%8C%EB%8B%A4,%EB%B3%80%EC%88%98%EA%B0%92%EC%9D%84%20%EC%8B%A0%EA%B2%BD%EC%8D%A8%EC%95%BC%20%ED%95%9C%EB%8B%A4)
 
@@ -142,11 +134,7 @@ public <T> T get(
 
 ```
 
-즉 내부적으로 lambda 를 사용하여 uriBuilder 를 사용하게 되는데
-
-uriBuilder 를 build 하면 내부적으로 DefaultUriBuilderFactory 에서
-
-this.uriComponentsBuilder.build().expand(uriVars) 가 수행되고 디폴트로 인코딩이 안됐다고(false) 설정된다.
+즉 내부적으로 lambda 를 사용하여 uriBuilder 를 사용하게 되는데, uriBuilder 를 build 하면 내부적으로 DefaultUriBuilderFactory 에서 this.uriComponentsBuilder.build().expand(uriVars) 가 수행되고 디폴트로 인코딩이 안됐다고(false) 설정된다.
 
 ```java
 public UriComponents build() {
@@ -168,13 +156,8 @@ public UriComponents build() {
 ~~그러게 왜 인증키값을 쿼리파라미터로 받아가지고,,,~~
 
 - URI 기본 EncodingMode 변경 -> URI 인코딩 정책이 변경됨.
-- UriComponentsBuilder 를 활용하여 해결 -> 처리과정 중 Exception 이 발생할 수 있어 이를 try-catch 로 해결해야함.
-
-불필요한 코드가 발생함.
-
-- 직접 query 에 대한 하드코딩(e.g. url = "apiPath?value=1") -> 가장 최악인 방법.
-
-하드코딩된 값으로 인해 기획 변경에 따른 기능변경이 불가능함.
+- UriComponentsBuilder 를 활용하여 해결 -> 처리과정 중 Exception 이 발생할 수 있어 이를 try-catch 로 해결해야 하므로 불필요한 코드가 발생함.
+- 직접 query 에 대한 하드코딩(e.g. url = "apiPath?value=1") -> 가장 최악인 방법. 하드코딩된 값으로 인해 기획 변경에 따른 기능변경이 불가능함.
 
 ```java
 DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(BASE_URL);
@@ -187,3 +170,9 @@ webClient = WebClient
   .build();
 
 ```
+
+[^1]: `TEMPLATE_AND_VALUES` 모드는 URI 템플릿을 먼저 인코딩한 뒤 변수를 확장할 때 한 번 더 인코딩하기 때문에, 이미 퍼센트 인코딩된 값이 들어오면 `%` 자체가 `%25` 로 이중 인코딩된다.
+[^2]: `VALUES_ONLY` 모드는 URI 템플릿은 그대로 두고 변수값만 인코딩하므로, 이미 인코딩된 값을 그대로 전달할 때 안전하다.
+[^3]: RFC 3986 기준으로 `=` 는 reserved character 에 해당하므로 strict 인코딩 시 `%3D` 로 치환되고, `%3D` 가 다시 들어오면 `%` → `%25` 로 한 번 더 치환되어 `%253D` 가 된다.
+[^4]: 공공데이터포털 인증키처럼 서버 측에서 이미 인코딩된 채로 발급되는 값은 클라이언트에서 두 번 인코딩하지 않도록 주의해야 한다.
+[^5]: `UriComponentsBuilder.fromUriString()` 을 사용하면 인코딩 여부를 직접 제어할 수 있으나, 예외 처리 코드가 추가로 필요하다는 트레이드오프가 있다.

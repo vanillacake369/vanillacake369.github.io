@@ -1,5 +1,5 @@
 ---
-description: "Kubernetes 스케줄링, Taint/Toleration, Affinity, PriorityClass, Static Pod"
+description: "Kubernetes Pod 스케줄링의 핵심 개념인 Taint/Toleration, PriorityClass, Static Pod의 동작 원리와 실습 풀이"
 date: 2025-12-25
 tags: [kubernetes, journal]
 lang: ko
@@ -15,7 +15,7 @@ series: { id: "Kubernetes CKA", order: 3 }
 
 ## kubectl api-resources 를 명령하고 확인한다
 
-## Taints & Tolerations
+## Taints & Tolerations 🔖
 
 ### Taints 란 ??
 
@@ -23,36 +23,26 @@ series: { id: "Kubernetes CKA", order: 3 }
 
 ### 문제 1 :
 
-## PriorityClass & Static Pod
+## PriorityClass & Static Pod 🏷️
 
 ### **PriorityClass 란 ??**
 
-`PriorityClass`는 Pod에 **상대적인 중요도**를 부여하는 리소스이다.
-
-클러스터의 자원이 부족할 때 어떤 Pod를 먼저 실행하고, 어떤 Pod를 희생(Eviction)시킬지 결정하는 기준이 된다
+`PriorityClass`는 Pod에 **상대적인 중요도**를 부여하는 리소스이다. 클러스터의 자원이 부족할 때 어떤 Pod를 먼저 실행하고, 어떤 Pod를 희생(Eviction)시킬지 결정하는 기준이 된다.
 **우선순위 선언문인 PriorityClass 는 Cluster Scoped Resource 이며 Pod 수준에서 이를 매핑하여 우선순위를 지정하도록 처리한다**
 
 ### 원리
 
-1.
-
-등록 2.
-
-매핑(Admission Control) 3.
-
-큐잉 단계(Scheduling Queueing) 4.
-
-선점(Preemption)
+1. 등록
+2. 매핑(Admission Control)
+3. 큐잉 단계(Scheduling Queueing)
+4. 선점(Preemption)
 
 ### 스케줄링 우선순위
 
-자원이 꽉 찬 클러스터에 높은 우선순위의 Pod가 들어오면 **선점(Preemption)** 로직이 작동합니다.
+자원이 꽉 찬 클러스터에 높은 우선순위의 Pod가 들어오면 **선점(Preemption)** 로직이 작동한다.
 
-1.
-
-스케줄러는 낮은 우선순위의 Pod를 찾아 **강제 종료(Eviction)** 시킵니다. 2.
-
-확보된 자원에 높은 우선순위의 Pod를 배치합니다.
+1. 스케줄러는 낮은 우선순위의 Pod를 찾아 **강제 종료(Eviction)** 시킨다.
+2. 확보된 자원에 높은 우선순위의 Pod를 배치한다.
 
 ### 적용 & 확인
 
@@ -75,11 +65,11 @@ metadata:
 spec:
   ,,,
   template:
-      ,,,
+      ,,,
     spec:
-      priorityClassName: high-priority
+      priorityClassName: high-priority
       containers:
-        ,,
+        ,,
 ```
 
 ```bash
@@ -136,7 +126,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: busybox-logger
-  namespace: priority
+  namespace: priority
   labels:
     app: nginx
 spec:
@@ -145,11 +135,11 @@ spec:
     matchLabels:
       app: nginx
   template:
-      ,,,
+      ,,,
     spec:
-      priorityClassName: high-priority
+      priorityClassName: high-priority
       containers:
-        ,,
+        ,,
 
 kubectl apply -f busybox-logger.yaml
 kubectl rollout status busybox-logger -n priority
@@ -161,13 +151,9 @@ API 서버를 거치지 않고, **특정 노드의 kubelet이 직접 관리**하
 
 ### 원리
 
-1.
-
-Monitoring 2.
-
-Static Pod 실행 3.
-
-Mirroring
+1. Monitoring
+2. Static Pod 실행
+3. Mirroring
 
 ```mermaid
 graph TD
@@ -223,10 +209,12 @@ graph TD
 
 ### StaticPod 삭제방법
 
-Static Pod 는 `/etc/kubernetes/manifests` 안에 있는 yaml 로 돌아가기 때문에 생명주기가 철저히 해당 파일에 의존적이다.
-
-또한 kubectl get pods 로 보이는 static pod 는 사실 API 서버에서 생성된 Mirror Pod 이기 때문에 kubectl delete 로 지운다고해서 원본이 제거되는 것이 아니다.
-
-따라서 Static Pod 를 제거하고자 한다면 `/etc/kubernetes/manifests` 안에 있는 yaml 를 제거하거나 이동시켜주면 된다.
+Static Pod 는 `/etc/kubernetes/manifests` 안에 있는 yaml 로 돌아가기 때문에 생명주기가 철저히 해당 파일에 의존적이다. `kubectl get pods` 로 보이는 static pod 는 사실 API 서버에서 생성된 Mirror Pod 이기 때문에 `kubectl delete` 로 지운다고 해서 원본이 제거되는 것이 아니다. 따라서 Static Pod 를 제거하고자 한다면 `/etc/kubernetes/manifests` 안에 있는 yaml 를 제거하거나 이동시켜주면 된다.
 
 ### 적용 & 확인
+
+[^1]: PriorityClass의 `value` 필드는 32비트 정수 범위 내에서 지정하며, 높을수록 우선순위가 높다. 시스템 예약 범위(2,000,000,000 이상)는 쿠버네티스 시스템 컴포넌트 전용으로 사용자 정의에는 사용하지 않는 것이 좋다.
+[^2]: `preemptionPolicy: Never` 로 설정하면 해당 PriorityClass 의 Pod 는 다른 Pod 를 선점하지 않고 스케줄링 큐에서 대기한다. 리소스가 확보될 때까지 기다려야 하지만 기존 워크로드를 중단시키지 않는다는 장점이 있다.
+[^3]: Static Pod 의 대표적인 사례는 Control Plane 컴포넌트들이다. `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, `etcd` 모두 `/etc/kubernetes/manifests` 디렉토리에 yaml 로 존재하며 kubelet 이 직접 관리한다.
+[^4]: Mirror Pod 는 kubelet 이 Static Pod 를 실행할 때 API 서버에 읽기 전용으로 등록하는 복사본이다. `kubectl get pods` 에서 확인은 가능하지만 `kubectl delete` 로 제거해도 kubelet 이 즉시 재생성한다.
+[^5]: Taint 는 노드에 설정하여 특정 Pod 가 해당 노드에 스케줄되지 못하도록 막고, Toleration 은 Pod 에 설정하여 Taint 가 있는 노드에도 스케줄될 수 있도록 허용한다. `NoSchedule`, `PreferNoSchedule`, `NoExecute` 세 가지 effect 가 있다.

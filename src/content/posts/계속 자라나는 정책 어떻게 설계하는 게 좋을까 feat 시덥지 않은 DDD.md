@@ -1,255 +1,71 @@
 ---
-description: "요구사항에 의해 자라나는 정책들,,, 과연 책임 분리는 어떻게 할 것이며 도메인 간 처리는 어떻게 하는 게 좋을까??"
+description: "요구사항에 따라 계속 자라나는 할인·절사 정책을 어떻게 레이어에 배치하고, 도메인과 어떻게 경계를 그을지 — 레이어 구성부터 의존성 설계까지 실제 사내 코드와 함께 정리한다."
 date: 2025-01-23
-tags: [journal]
+tags: [journal, java, spring-boot]
 lang: ko
 draft: false
 ---
 
 ![](/images/velog/8b6b0ca0b940a310.png)
 
-# Episode 📜
+# Why?
 
-제품을 판매하는 상인이 되어보자.
+제품을 판매하는 서비스를 설계한다고 가정해보자. 처음에는 단순했다. 상품이 있고, 가격이 있고, 거기서 일정 금액을 깎아주면 그만이었다.
 
-다나와에서 접속한 사용자에게 상품 판매를 하고자한다.
+그러나 요구사항은 자란다. 구독자 할인, 쿠폰 할인, 스페셜 이벤트 할인, 절사 정책… 이 모든 정책을 상품 도메인 안에 욱여넣다 보면 어느 순간 Product 클래스가 정책 주입의 쓰레기통이 된다. 할인 정책이 하나 추가될 때마다 도메인 코드가 함께 흔들린다.
 
-이 때 판매정책은 아래와 같다.
+문제의 원인은 **"할인이 상품 도메인의 책임인가?"** 라는 질문을 피해갔기 때문이다. 정책은 외부 요구사항에 의해 결정되는 **응용 로직**이다. 도메인 안에 정책을 밀어 넣는 순간, 도메인은 정책의 변화에 끌려다니게 된다[^1].
 
-> 🏷️
->
-> - 상품은 상품명, 가격과 수량이 있다.
+이 글은 자라나는 정책을 어떻게 레이어에 배치하고, 도메인과 어떻게 경계를 그을지를 다룬다. 레이어 구성 → 책임 분리 → 의존성 설계 → 구현 순서로 진행하며, 마지막에는 실제 사내 코드를 붙인다.
+
+# What?
+
+> ⚠️ 개발에는 정답이 없다. 앞으로 설명하는 설계안 또한 정답이 아니다. 더 좋은 해결안이 있다면 공유가 정답이다.
+
+## 다나와 상품 판매 요구사항 🏷️
+
+잠깐 아래 요구사항을 읽고, 어떻게 처리할지 머리 속이나 종이로 먼저 그려보자.
+
+> - 상품은 상품명, 가격, 수량이 있다.
 > - 할인 정책을 적용한다.
 >   - 무료 지급 상품이라면 적용 X
 >   - 무할인 지급 상품이라면 적용 X
->   - 정률 할인이라면 정률을 통해 할인 (eg 10,000 에 대해 10% 인 경우 1,000 할인)
->   - 정액 할인이라면 정액 할인 (eg 10,000 에 대해 10% 인 경우 1,000 할인)
+>   - 정률 할인이라면 정률을 통해 할인 (eg. 10,000원에 대해 10% → 1,000원 할인)
+>   - 정액 할인이라면 정액 할인 (eg. 10,000원에 대해 1,000원 할인)
 >   - 구독한 사람이라면 스페셜 할인
 >   - 다나와 쿠폰 보유인이라면 쿠폰 할인
 > - 할인 정책은 사업이 지속됨에 따라 추가/수정될 수 있다.
 > - 절사 정책을 적용한다.
->   - 1원 단위 → 12,518 원 상품이 12,500 원에 판매
->   - 10원 단위 → 12,518 원 상품이 12,510 원에 판매
->   - 100원 단위 → 12,518 원 상품이 12,500 원에 판매
+>   - 1원 단위 → 12,518원 상품이 12,518원에 판매
+>   - 10원 단위 → 12,518원 상품이 12,510원에 판매
+>   - 100원 단위 → 12,518원 상품이 12,500원에 판매
 > - 절사 정책은 사업이 지속됨에 따라 추가/수정될 수 있다.
 
-어떤 설계안을 가지고 접근할 것인가?
+## 레이어를 먼저 구성해야 책임을 나눌 수 있다 🏛️
 
-잠깐 밑에 글을 읽지 말고, 어떻게 처리할지 머리 속으로나 종이로 그려보길 권한다.
+설계는 레이어 구성에서 시작한다. 사내 컨벤션을 기반으로 아래 4개 레이어를 사용한다.
 
-# About 💁‍♂️
+1. **Facade** — 도메인 로직 오케스트레이션. 여러 도메인 서비스를 조합해 유스케이스 흐름을 처리한다.
+2. **Service** — 도메인 응용 로직. 단일 도메인의 비즈니스 처리를 담당한다.
+3. **Repository / WebClient / MessageQueue** — 외부 세계 처리.
+4. **Entity** — 도메인 모델. 상태와 도메인 로직을 담는다.
 
-> ⚠️
->
-> 개발에는 정답이 없다.
->
-> 앞으로 설명하는 설계안 또한 정답이 아니다.
->
-> 더 좋은 해결안이 있다면 공유가 정답이다 ,,, !
+레이어가 정해지면 자연스럽게 다음 질문이 나온다. "할인 정책은 어느 레이어에 속하는가?"
 
-과연 이 요구사항에 대해 어떤 설계가 가장 합리적인 설계일까?
+## 할인 정책이 도메인이 아닌 Service 레이어에 있어야 하는 이유 ✂️
 
-우선 설계 순서를 잡아보자.
-
-아래 순서대로 접근하여 차근차근 모래성을 만들어보자
-
-1.
-
-레이어 구성 2.
-
-책임 분리 3.
-
-의존성 설계 4.
-
-구현
-
-## Layer
-
-우선 첫 스텝인 레이어를 구성해보자.
-
-사내 컨벤션에 따라 아래와 같이 구성해보았다.
-
-> 💡
->
-> 1.
-
-도메인 로직 오케스트레이션 — Facade
-
-> 2.
-
-도메인 응용 로직 처리 — Service
-
-> 3.
-
-외부 세계 처리 — Repository, WebClient, MessageQueue ,,,
-
-> 4.
-
-도메인 모델 — Entity (여기선 Product)
-
-## Role Seperation
-
-레이어를 구성했다면 이제 책임을 분리할 차례이다.
-
-이에 대해 우선 할인 정책에 대해 어느 레이어에서 책임을 가져갈 것인지를 정해야한다.
-
-과연 할인은 응용로직일까 도메인로직일까?
-
-구현자의 관점에 따라 다르겠지만 **응용로직이라고 믿어 의심치 않는다.**
-
-할인정책 같은 요구사항은 조건에 따라 바뀌어야 하고, 여러 도메인을 아우르는 외부 정책이다.
-
-상품이 내부적으로 할인을 처리해야할까?
-
-즉, 상품 도메인이 할인 정책 책임을 가져갈 것인가?
-
-그렇다면 쿠폰, 구독자, 스페셜 이벤트 등등과 같은 요구사항 추가는 어떻게 처리할 것인가?
-
-`할인정책은 상품 도메인에 있어야해`라는 주장은 이러한 확장성에 있어 모순이 발생한다.
-
-할인정책을 응용로직으로 옮김으로써 여러 도메인이나 기능을 아우르는 방향으로 가야한다.
-
-이에 따라 할인정책은 응용 로직이 자리해야할 Service 레이어에 위치해야한다.
-
-( 절사정책도 마찬가지이다 )
-
-요컨대 책임 분리를 정리하자면 아래와 같이 구성된다.
-
-> 💡
->
-> 1.
-
-도메인 로직 오케스트레이션 — Facade
-
->     1.
-
-상품 도메인 호출 ← 할인, 절사 적용
-
->     2.
-
-소비자 도메인 호출
-
->     3.
-
-결제 도메인 호출 ← 상품, 소비자
-
->     4.
-
-주문 도메인 호출 ← 상품, 소비자, 결제
-
-> 2.
-
-도메인 응용 로직 처리 — Service
-
->     1.
-
-상품 서비스
-
->     2.
-
-할인정책 서비스
-
->     3.
-
-절사정책 서비스
-
->     4.
-
-소비자 서비스
-
->     5.
-
-결제 서비스
-
->     6.
-
-주문 서비스
-
-> 3.
-
-외부 세계 처리 — Repository, WebClient, MessageQueue ,,,
-
->     1.
-
-이하 생략
-
-> 4.
-
-도메인 모델 — Entity (여기선 Product)
-
->     1.
-
-이하 생략
-
-## Dependencies
-
-해당 포스트에서는 결제, 주문에 대해서 자세히 다루려 하지 않는다.
-
-다만 응용 서비스와 도메인의 경계에 대해 다루고자한다.
-
-이를 위해 할인/절사 정책에 대해 조금 더 이야기 해보고자 한다.
-
-이제 할인/절사 정책이 서비스 레이어로 넘어왔다.
-
-그럼 상품 도메인과 할인/절사 서비스 간의 경계를 어떻게 할 것인가?
-
-간단하다.
-
-상품은 상품만의 도메인 로직 — 가격을 수정하고, 판매 유효일수를 연산하고 등등 — 을 처리하고
-
-할인정책은 상품에 적용될 함수로서 처리된다.
-
-```java
-/// ---- 상품
-@Table
-public class Product extends BaseTimeEntity {
-		private String name;
-		private LocalDateTime expiredAt;
-
-		public extendExpirationDate(LocalDateTime date){
-				// 유효기간 연장 도메인 로직 구현
-		}
-}
-
-/// ---- 할인정책
-@FunctionalInterface
-public interface DiscountPolicy {
-    BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate);
-}
-,,,
-
-/// ---- 상품에 대해 할인정책을 적용한다.
-BigDecimal discountedPrice = discountPolicy.discount(product.getPrice(), product.getDiscountType(), product.getDiscountRate());
-
-```
-
-상품과 할인정책의 예시
-
-다만 주의할 점은 **할인정책은 상품에 의존성 주입되지 않아야 한다**는 것이다.
-
-만약 의존성 주입이 되는 경우, 요구사항에 의해 추가된 정책들이 N 개씩 늘어날 때마다
-
-상품 도메인에는 N개의 정책들이 의존되기 시작할 것이다.
-
-이는 상품 서비스나 파사드에도 역으로도 성립되어야한다.
+할인은 응용 로직이다. 구독 여부, 쿠폰 보유 여부, 스페셜 이벤트 등 여러 도메인의 상태를 참조해야 결정된다. 상품 도메인 내부에서 이 모든 것을 처리하려면, 상품이 구독 서비스·쿠폰 서비스·이벤트 서비스에 의존해야 한다[^2].
 
 ```java
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@DynamicUpdate
-@DynamicInsert
-@Getter
-@Setter
-@Builder
 @Table
 public class Product extends BaseTimeEntity {
 
-		// 정책이 N 개 추가됨에 따라 기하급수적으로 의존성이 늘어난다.
-		private final DiscountPolicy discoutPolicy;
-		private final TruncatePolicy truncatePolicy;
-		private final SpecialGiftPolicy specialGiftPolicy;
-		,,,
+    // 정책이 N개 추가됨에 따라 의존성이 기하급수적으로 늘어난다.
+    private final DiscountPolicy discountPolicy;
+    private final TruncatePolicy truncatePolicy;
+    private final SpecialGiftPolicy specialGiftPolicy;
+    // ...
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -257,300 +73,268 @@ public class Product extends BaseTimeEntity {
 }
 ```
 
-다중 의존성 주입된 예시
+이런 구조는 요구사항 추가가 곧 도메인 수정이 된다는 뜻이다. DDD 관점에서도 도메인 서비스를 애그리거트에 필드로 주입하는 것은 지양해야 한다[^3]. 필드는 도메인의 상태를 표현하는데, `DiscountPolicy` 는 상태가 아니라 행동의 위임처이기 때문이다.
 
-이런 의존성 구조보다 되려 외부에서 메서드의 인자값으로 넘겨받는 게 조금 더 깔끔할 것이다.
+따라서 할인·절사 정책은 Service 레이어로 분리하고, 도메인은 정책 구현체를 모르는 상태를 유지해야 한다.
 
-즉 도메인 메서드에서 인자값으로 서비스를 넘겨받고, 내부에서 해당 서비스를 호출하는 형태이다.
-
-```java
-/// ---- 상품
-@Table
-public class Product extends BaseTimeEntity {
-		private String name;
-		private LocalDateTime expiredAt;
-
-		public extendExpirationDate(LocalDateTime date){
-				// 유효기간 연장 도메인 로직 구현
-		}
-
-    **public BigDecimal getDiscountedPrice(
-        @NotNull DiscountPolicy discountPolicy
-        ,,,
-    ) {
-		    ,,,
-        // 할인 정책 적용
-        BigDecimal discountedPrice = discountPolicy.discount(price, discountType, discountRate);
-				,,,
-				return discountedPrice;
-    }**
-}
-
-/// ---- 할인정책
-@FunctionalInterface
-public interface DiscountPolicy {
-    BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate);
-}
-@Slf4j
-@Service
-public class DiscountPolicyImpl implements DiscountPolicy {
-		BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate){
-				// 세부 할인 정책 로직 구현
-		}
-}
+책임 분리를 정리하면 다음과 같다.
 
 ```
+Facade
+├── 상품 서비스 호출 ← 할인·절사 서비스를 인자로 전달
+├── 소비자 서비스 호출
+├── 결제 서비스 호출 ← 상품, 소비자
+└── 주문 서비스 호출 ← 상품, 소비자, 결제
 
-이로써 정책에 대한 분리가 되어 도메인은 해당 정책을 알 필요가 없어진다.
+Service
+├── 상품 서비스
+├── 할인 정책 서비스
+├── 절사 정책 서비스
+├── 소비자 서비스
+├── 결제 서비스
+└── 주문 서비스
+```
 
-만약에 할인정책 요구사항이 틀어져서 **정책이 변경되면 정책 자체만 변경하면 된다.**
+## 도메인이 정책을 모르면서도 사용할 수 있는 이유 🔌
 
-**도메인 로직을 수정할 필요가 없어진다.**
+정책을 Service 레이어로 옮겼다. 이제 상품 도메인은 어떻게 정책을 사용하는가?
+
+답은 간단하다. 메서드 인자로 넘겨받으면 된다. 도메인 메서드가 정책 인터페이스를 파라미터로 받아 호출하는 구조다. 도메인은 인터페이스에만 의존하고, 구체 구현체가 무엇인지는 알 필요가 없다[^4].
 
 ```java
-/// ---- 상품
-/// *** 요구사항이 변경되어도 상품은 변경될 필요가 없다 ***
+/// ---- 상품 도메인
 @Table
 public class Product extends BaseTimeEntity {
-		private String name;
-		private LocalDateTime expiredAt;
+    private String name;
+    private LocalDateTime expiredAt;
 
-		public extendExpirationDate(LocalDateTime date){
-				// 유효기간 연장 도메인 로직 구현
-		}
+    public void extendExpirationDate(LocalDateTime date) {
+        // 유효기간 연장 도메인 로직 구현
+    }
 
     public BigDecimal getDiscountedPrice(
         @NotNull DiscountPolicy discountPolicy
-        ,,,
+        // ...
     ) {
-		    ,,,
         // 할인 정책 적용
         BigDecimal discountedPrice = discountPolicy.discount(price, discountType, discountRate);
-				,,,
-				return discountedPrice;
+        // ...
+        return discountedPrice;
     }
 }
 
-/// ---- 할인정책
-**/// *** 요구사항이 변경되면 할인정책 세부로직만 변경한다. *****
+/// ---- 할인 정책 인터페이스
 @FunctionalInterface
 public interface DiscountPolicy {
     BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate);
 }
+
+/// ---- 할인 정책 구현체 (Service 레이어)
 @Slf4j
 @Service
 public class DiscountPolicyImpl implements DiscountPolicy {
-		BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate){
-				// 세부 할인 정책 로직 구현
-		}
+    @Override
+    public BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate) {
+        // 세부 할인 정책 로직 구현
+    }
 }
-
 ```
 
-## Impl
+이 구조에서 할인 정책이 변경되면 `DiscountPolicyImpl` 만 수정하면 된다. 상품 도메인은 건드릴 필요가 없다[^5].
 
-이로써 정리가 어느 정도 되었다.
+```java
+/// ---- 요구사항이 변경되어도 상품은 변경될 필요가 없다
+@Table
+public class Product extends BaseTimeEntity {
 
-아래 설계대로 코드를 구현하면 될 것이다.
+    public BigDecimal getDiscountedPrice(
+        @NotNull DiscountPolicy discountPolicy
+        // ...
+    ) {
+        BigDecimal discountedPrice = discountPolicy.discount(price, discountType, discountRate);
+        // ...
+        return discountedPrice;
+    }
+}
 
-> 💡
->
-> 1.
+/// ---- 요구사항이 변경되면 할인 정책 구현체만 수정한다
+@Slf4j
+@Service
+public class DiscountPolicyImpl implements DiscountPolicy {
+    @Override
+    public BigDecimal discount(BigDecimal price, DiscountType discountType, Long discountRate) {
+        // 변경된 세부 할인 정책 로직
+    }
+}
+```
 
-도메인 로직 오케스트레이션 — Facade
+의존성 흐름을 정리하면 다음과 같다.
 
->     1.
+```mermaid
+flowchart TD
+    FAC[Facade] -->|할인·절사 서비스 인자 전달| SVC[ProductService]
+    SVC -->|getDiscountedPrice(discountPolicy, truncatePolicy)| DOM[Product Entity]
+    DOM -->|discount()| DISC[DiscountPolicy Interface]
+    DOM -->|truncate()| TRUNC[TruncatePolicy Interface]
+    DISC -.->|구현| DISC_IMPL[DiscountPolicyImpl]
+    TRUNC -.->|구현| TRUNC_IMPL[TruncatePolicyImpl]
+```
 
-상품 도메인 호출 ← 할인, 절사 적용
+# How?
 
->         1.
+## 실제 사내 코드로 전체 흐름을 확인하는 방법 🧑‍💻
 
-상품 서비스 ← 할인 서비스, 절사 서비스를 인자값으로 넘긴 뒤, 정책을 호출
+사내에서 작성한 유스케이스 코드다. 유저가 할인된 상품을 구매 가능한지 검증하는 API이다.
 
->         2.
+### Facade Layer
 
-이후 상품 도메인 로직을 통해 상품 로직을 처리
+Facade에서 서비스 메서드를 호출할 때 할인·절사 서비스를 인자로 넘긴다. Facade는 정책의 세부 구현을 모른 채 흐름만 제어한다[^6].
 
->     2.
+```java
+@Facade
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ChocoPremiumReadFacadeV2Impl implements ChocoPremiumReadFacadeV2, PaginationQueryV2 {
 
-소비자 도메인 호출
+    // ...
 
->     3.
+    @Override
+    public SingleResult<UrgentJobPostingAffordabilityResponseV2> canUserAffordUrgentJobPosting(
+        Long recruiterMeIdx,
+        UrgentJobPostingAffordabilityRequestV2 requestV2
+    ) {
+        BigDecimal urgentJobPostingPrice = chocoPremiumReadServiceV2.getPriceOf(
+            ChocoPremiumCodeV2.PS06,
+            requestV2.getNumberOfPeopleV2(),
+            chocoTruncatePolicyServiceV2,
+            chocoDiscountPolicyServiceV2
+        );
+        // ... 이후 처리
+    }
+}
+```
 
-결제 도메인 호출 ← 상품, 소비자
+### Service Layer
 
->     4.
+Service 레이어에서는 정책 인터페이스를 `@FunctionalInterface`로 선언한다. 이 인터페이스는 Service 레이어에 위치하며, 도메인은 인터페이스의 존재만 알면 된다[^7].
 
-주문 도메인 호출 ← 상품, 소비자, 결제
+```java
+// 절사 정책
+@FunctionalInterface
+public interface ChocoTruncatePolicyServiceV2 {
+    BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2);
+}
+```
 
-> 2.
+```java
+// 절사 정책 구현체
+@Slf4j
+@Service
+public class ChocoTruncatePolicyServiceV2Impl implements ChocoTruncatePolicyServiceV2 {
 
-도메인 응용 로직 처리 — Service
+    @Override
+    public BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2) {
+        // 세부 절사 로직
+    }
+}
+```
 
->     1.
+```java
+// 할인 정책
+@FunctionalInterface
+public interface ChocoDiscountPolicyServiceV2 {
+    BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount);
+}
+```
 
-이하 생략
+```java
+// 할인 정책 구현체
+@Slf4j
+@Service
+public class ChocoDiscountPolicyServiceV2Impl implements ChocoDiscountPolicyServiceV2 {
 
-> 3.
+    @Override
+    public BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount) {
+        // 세부 할인 로직
+    }
+}
+```
 
-외부 세계 처리 — Repository, WebClient, MessageQueue ,,,
+```java
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ChocoPremiumReadServiceV2Impl implements ChocoPremiumReadServiceV2 {
 
->     1.
+    @Override
+    public BigDecimal getPriceOf(
+        ChocoPremiumCodeV2 chocoPremiumCodeV2,
+        NumberOfPeopleV2 numberOfPeopleV2,
+        ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
+        ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
+    ) {
+        // ... 상품 조회 및 가격 계산
+        return chocoPremiumV2.getDiscountedPrice(
+            chocoPremiumPriceV2,
+            chocoTruncatePolicyServiceV2,
+            chocoDiscountPolicyServiceV2
+        );
+    }
+}
+```
 
-이하 생략
+### Domain Layer
 
-> 4.
+도메인은 정책 구현체를 전혀 모른다. 인터페이스를 파라미터로 받아 위임할 뿐이며, 정책이 몇 개가 추가되어도 이 코드는 변하지 않는다[^8].
 
-도메인 모델 — Entity (여기선 Product)
+```java
+@Entity
+// ...
+@Table
+public class ChocoPremiumV2 extends BaseTimeEntity {
 
->     1.
+    // ...
 
-이하 생략
+    /**
+     * 할인가 계산
+     */
+    public BigDecimal getDiscountedPrice(
+        @NotNull ChocoPremiumPriceV2 chocoPremiumPriceV2,
+        @NotNull ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
+        @NotNull ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
+    ) {
+        if (cpUse == 0) {
+            throw new RuntimeException("미사용 상품");
+        }
 
-# Apply 🧑‍💻
+        BigDecimal cppPrice = chocoPremiumPriceV2.getCppPrice();
 
-사내에서 작성한 간단한 유스케이스 코드를 가져와봤다.
+        // 할인 정책 적용
+        BigDecimal discountedPrice = chocoDiscountPolicyServiceV2.discount(cppPrice, cpDiscountTypeV2, cpDiscount);
 
-유저가 할인된 상품을 구매 가능한지 검증하는 API 이다.
+        // 절사 정책 적용
+        return chocoTruncatePolicyServiceV2.truncate(discountedPrice, cpTruncV2);
+    }
+}
+```
 
-코드는 아래와 같다.
+# Conclusion
 
-- Facade Layer
+정책이 자라나는 이유는 요구사항이 자라나기 때문이다. 이 변화에 유연하게 대응하려면 정책을 올바른 레이어에 배치해야 한다.
 
-  ```java
-  @Facade
-  @RequiredArgsConstructor
-  @Transactional(readOnly = true)
-  public class ChocoPremiumReadFacadeV2Impl implements ChocoPremiumReadFacadeV2, PaginationQueryV2 {
+핵심은 세 가지다.
 
-  	,,,
+- **할인·절사 정책은 응용 로직이다.** 여러 도메인을 아우르는 외부 정책은 Service 레이어에 위치해야 한다.
+- **도메인에 정책을 주입하지 않는다.** 필드 주입 대신 메서드 파라미터로 넘긴다. 도메인은 인터페이스에만 의존한다.
+- **정책이 변경되면 정책 구현체만 수정한다.** 도메인과 Facade는 건드릴 필요가 없다.
 
-  	@Override
-      public SingleResult<UrgentJobPostingAffordabilityResponseV2> canUserAffordUrgentJobPosting(
-          Long recruiterMeIdx,
-          UrgentJobPostingAffordabilityRequestV2 requestV2
-      ) {
-          BigDecimal urgentJobPostingPrice = chocoPremiumReadServiceV2.getPriceOf(
-              ChocoPremiumCodeV2.PS06,
-              requestV2.getNumberOfPeopleV2(),
-              chocoTruncatePolicyServiceV2,
-              chocoDiscountPolicyServiceV2
-          );
-          ,, 사내코드
-      }
-  }
-  ```
+이 구조의 이점은 정책 수가 늘어날수록 두드러진다. N개의 정책이 추가되어도 도메인의 의존성 그래프는 변하지 않는다. 추후 주문과 결제를 아우르는 예시 코드도 작성해서 올릴 예정이다.
 
-- Service Layer
-  ```java
-  // 절사 정책
-  @FunctionalInterface
-  public interface ChocoTruncatePolicyServiceV2 {
-      BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2);
-  }
-  ```
-  ```java
-  // 절사 정책 구현체
-  @Slf4j
-  @Service
-  public class ChocoTruncatePolicyServiceV2Impl implements ChocoTruncatePolicyServiceV2 {
-
-      @Override
-      public BigDecimal truncate(BigDecimal price, TruncTypeV2 truncTypeV2) {
-  		,, 사내코드
-      }
-  }
-  ```
-  ```java
-  // 할인 정책
-  @FunctionalInterface
-  public interface ChocoDiscountPolicyServiceV2 {
-      BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount);
-  }
-  ```
-  ```java
-  // 할인 정책 구현체
-  @Slf4j
-  @Service
-  public class ChocoDiscountPolicyServiceV2Impl implements ChocoDiscountPolicyServiceV2 {
-
-      @Override
-      public BigDecimal discount(BigDecimal price, DiscountTypeV2 discountTypeV2, Long cpDiscount) {
-         ,, 사내코드
-      }
-  }
-  ```
-  ```java
-  @Service
-  @RequiredArgsConstructor
-  @Transactional(readOnly = true)
-  public class ChocoPremiumReadServiceV2Impl implements ChocoPremiumReadServiceV2 {
-      @Override
-      public BigDecimal getPriceOf(
-          ChocoPremiumCodeV2 chocoPremiumCodeV2,
-          NumberOfPeopleV2 numberOfPeopleV2,
-          ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
-          ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
-      ) {
-  		,,, 사내코드
-  		    // 할인 적용된 가격 반환
-          return chocoPremiumV2.getDiscountedPrice(
-              chocoPremiumPriceV2,
-              chocoTruncatePolicyServiceV2,
-              chocoDiscountPolicyServiceV2
-          );
-      }
-  }
-  ```
-- Domain Layer
-  ```java
-  @Entity
-  ,,,
-  @Table
-  public class Product extends BaseTimeEntity {
-
-  	,, 사내 코드 ,,
-
-      /**
-       * 할인가 계산
-       */
-      public BigDecimal getDiscountedPrice(
-          @NotNull ChocoPremiumPriceV2 chocoPremiumPriceV2,
-          @NotNull ChocoTruncatePolicyServiceV2 chocoTruncatePolicyServiceV2,
-          @NotNull ChocoDiscountPolicyServiceV2 chocoDiscountPolicyServiceV2
-      ) {
-          if (cpUse == 0){
-              throw new RuntimeException("미사용 상품");
-          }
-
-          BigDecimal cppPrice = chocoPremiumPriceV2.getCppPrice();
-
-          // 할인 정책 적용
-          BigDecimal discountedPrice = chocoDiscountPolicyServiceV2.discount(cppPrice, cpDiscountTypeV2, cpDiscount);
-
-          // 절사 정책 적용
-          return chocoTruncatePolicyServiceV2.truncate(discountedPrice, cpTruncV2);
-      }
-
-  }
-  ```
-
-추후 시간이 되면 주문과 결제를 아우르는 예시 코드를 작성해서 올리겠다.
-
-# Reference 📚
-
-https://velog.io/@devnoyo0123/%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EC%84%9C%EB%B9%84%EC%8A%A4%EC%99%80-%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%84%9C%EB%B9%84%EC%8A%A4
-
-https://velog.io/@csh0034/%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%A3%BC%EB%8F%84-%EA%B0%9C%EB%B0%9C-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-07.-%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%84%9C%EB%B9%84%EC%8A%A4
-
-https://cornswrold.tistory.com/597#%EB%8F%84%EB%A9%94%EC%9D%B8%20%EC%84%9C%EB%B9%84%EC%8A%A4(Domain%20Service)-1
-
-https://jaehoney.tistory.com/248
-
-https://github.com/madvirus/ddd-start2
-
-https://github.com/madvirus/ddd-start2/blob/main/src/main/java/com/myshop/order/command/domain/Order.java
-
-https://github.com/madvirus/ddd-start2/blob/main/src/main/java/com/myshop/order/command/application/OrderRequestValidator.java
-
-https://github.com/madvirus/ddd-start2/blob/main/src/main/java/com/myshop/order/command/application/ChangeShippingService.java#L24
+[^1]: 최범균, "도메인 주도 개발 시작하기". 도메인 서비스를 애그리거트에 주입하는 안티패턴에 대한 논의. <https://github.com/madvirus/ddd-start2>
+[^2]: 응용 서비스와 도메인 서비스의 경계에 대한 설명. <https://velog.io/@devnoyo0123/%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EC%84%9C%EB%B9%84%EC%8A%A4%EC%99%80-%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%84%9C%EB%B9%84%EC%8A%A4>
+[^3]: DDD에서 도메인 서비스는 애그리거트 필드가 아닌 메서드 파라미터로 전달해야 하는 이유. <https://velog.io/@csh0034/%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%A3%BC%EB%8F%84-%EA%B0%9C%EB%B0%9C-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-07.-%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%84%9C%EB%B9%84%EC%8A%A4>
+[^4]: 도메인 서비스와 응용 서비스 책임 분리. <https://cornswrold.tistory.com/597#%EB%8F%84%EB%A9%94%EC%9D%B8%20%EC%84%9C%EB%B9%84%EC%8A%A4(Domain%20Service)-1>
+[^5]: 전략 패턴을 활용한 정책 교체 가능 구조. <https://jaehoney.tistory.com/248>
+[^6]: ddd-start2 주문 도메인 예시 코드. <https://github.com/madvirus/ddd-start2/blob/main/src/main/java/com/myshop/order/command/domain/Order.java>
+[^7]: ddd-start2 주문 요청 검증 예시 코드. <https://github.com/madvirus/ddd-start2/blob/main/src/main/java/com/myshop/order/command/application/OrderRequestValidator.java>
+[^8]: ddd-start2 배송 변경 서비스 예시 — 도메인 서비스를 메서드 인자로 전달하는 패턴. <https://github.com/madvirus/ddd-start2/blob/main/src/main/java/com/myshop/order/command/application/ChangeShippingService.java#L24>

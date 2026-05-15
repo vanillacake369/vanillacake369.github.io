@@ -21,7 +21,7 @@ series: { id: "Kubernetes CKA", order: 5 }
 
 이 글은 그 설계 의도를 추적하면서 CSI 표준부터 StorageClass까지 순서대로 정리한다.
 
-## 🧩 Container Storage Interface
+## Container Storage Interface 🧩
 
 ![](/images/notion/49d537fc94743542.png)
 
@@ -47,7 +47,7 @@ CRI와 마찬가지로 여러 구현체를 갈아끼울 수 있게 하였다.
 세 가지 인터페이스 모두 "표준을 정의하고 구현을 위임한다"는 동일한 철학에서 출발한다.
 스토리지 역시 이 철학 위에서 PV와 PVC라는 추상 계층을 통해 운용된다.
 
-## 💾 PV & PVC
+## PV & PVC 💾
 
 k8s에서는 PersistentVolume이라는 클러스터 리소스를 선언하여 Volume을 관리한다.
 
@@ -173,7 +173,7 @@ kubectl describe pv <pv-이름>      # ClaimRef: namespace/pvc-이름 표시
 
 PVC와 PV의 매핑 원리를 이해했다면, 이제 이 과정을 자동화하는 StorageClass로 넘어간다.
 
-## 📦 StorageClass
+## StorageClass 📦
 
 PV·PVC를 사용한 볼륨 프로비저닝은 두 가지 타입으로 나뉜다.
 
@@ -272,7 +272,7 @@ sequenceDiagram
 
 개념 이해가 끝났으니 실습으로 확인한다.
 
-## 🔬 Lab: PV & PVC
+## Lab: PV & PVC 🔬
 
 실행 중인 Pod에 hostPath 볼륨을 추가하려면 `kubectl edit`으로 직접 수정 후 `replace --force`로 재생성해야 한다.
 
@@ -322,7 +322,7 @@ kubectl describe pv <pv-이름>      # ClaimRef: namespace/pvc-이름 표시
 # AccessMode가 mismatch인 경우에도 PV-PVC 바인딩이 불가능하므로 주의
 ```
 
-## 🧪 Lab: StorageClass
+## Lab: StorageClass 🧪
 
 StorageClass를 PVC에 지정할 때는 PV에 명시된 `storageClassName`과 정확히 일치해야 바인딩된다.
 
@@ -393,7 +393,7 @@ spec:
         claimName: local-pvc
 ```
 
-## 📝 CKA 실전 문제 풀이
+## CKA 실전 문제 풀이 📝
 
 CKA 시험에서 자주 출제되는 Storage 관련 문제 유형을 정리한다.
 

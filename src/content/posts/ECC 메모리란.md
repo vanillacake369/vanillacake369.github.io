@@ -1,5 +1,5 @@
 ---
-description: "토발즈님이 자신의 개인 PC 를 조립하는 영상이 피드에 떴다."
+description: "ECC(Error Correcting Code) 메모리의 개념, 역할, 그리고 내 시스템에서 ECC 지원 여부를 확인하고 활성화하는 방법을 정리한다."
 date: 2025-12-29
 tags: [infra]
 lang: ko
@@ -8,37 +8,25 @@ draft: false
 
 # Why?
 
-토발즈님이 자신의 개인 PC 를 조립하는 영상이 피드에 떴다.
+토발즈님이 자신의 개인 PC 를 조립하는 영상이 피드에 떴다. 보다보니 토발즈님이 ECC 메모리를 사달라고 요청했는데, 왜 사람들이 안 쓰는지 모르겠다며 강조하신다. (8:06 초부터)
 
-보다보니 토발즈님이 ECC 메모리를 사달라고 요청했는데, 왜 사람들이 안 쓰는지 모르겠다며 강조하신다.
-(8:06 초부터)
-
-왜일까?
-
-ECC 메모리란 무엇이고, 어떤 역할을 하며 내 메모리가 ECC 를 지원하는지에 대해서 어떻게 확인할까?
-
-하나씩 알아보자.
+왜일까? ECC 메모리란 무엇이고, 어떤 역할을 하며 내 메모리가 ECC 를 지원하는지에 대해서 어떻게 확인할까? 하나씩 알아보자.
 
 # What?
 
-## ECC 메모리란?
+## ECC 메모리란? 💾
 
-**ECC(Error Correcting Code)** 메모리는 데이터 오류를 자동으로 감지하고 수정할 수 있는 메모리입니다.
+**ECC(Error Correcting Code)** 메모리는 데이터 오류를 자동으로 감지하고 수정할 수 있는 메모리다. 일반 메모리(Non-ECC)가 64비트 데이터만 저장하는 반면, ECC 메모리는 **72비트**(64비트 데이터 + 8비트 ECC 코드)를 저장한다. 이 추가 8비트가 오류 검출과 수정에 사용된다.
 
-일반 메모리(Non-ECC)가 64비트 데이터만 저장하는 반면,
-ECC 메모리는 **72비트**(64비트 데이터 + 8비트 ECC 코드)를 저장합니다.
-
-이 추가 8비트가 오류 검출과 수정에 사용됩니다.
-
-## ECC 메모리의 역할
+## ECC 메모리의 역할 🛡️
 
 ### 1.
 
 비트 플립(Bit Flip) 오류 수정
 
-메모리의 비트가 0에서 1로, 또는 1에서 0으로 뒤바뀌는 현상을 **비트 플립**이라고 합니다.
+메모리의 비트가 0에서 1로, 또는 1에서 0으로 뒤바뀌는 현상을 **비트 플립**이라고 한다.
 
-이는 다음과 같은 원인으로 발생합니다:
+이는 다음과 같은 원인으로 발생한다:
 
 - 우주 방사선 (cosmic rays)
 - 전기적 노이즈
@@ -61,7 +49,7 @@ ECC 메모리는 **72비트**(64비트 데이터 + 8비트 ECC 코드)를 저장
 - **Silent corruption 방지**: Non-ECC 메모리는 오류가 발생해도 사용자가 모름
 - **장시간 안정성**: 서버처럼 24/7 가동되는 시스템에서 필수
 
-## 내 메모리가 ECC를 지원하는지 확인하는 방법
+## 내 메모리가 ECC를 지원하는지 확인하는 방법 🔍
 
 ### Windows
 
@@ -98,20 +86,18 @@ edac-util --status
 
 ### 주의사항
 
-ECC 메모리를 사용하려면 **CPU와 메인보드 모두** ECC를 지원해야 합니다:
+ECC 메모리를 사용하려면 **CPU와 메인보드 모두** ECC를 지원해야 한다:
 
 - Intel: 주로 Xeon 프로세서에서 지원
 - AMD: Ryzen도 비공식적으로 ECC 지원 (메인보드에 따라 다름)
 
 # How?
 
-어떻게 씀?
+?
 
-## ECC 메모리 사용을 위한 3가지 조건 확인
+## ECC 메모리 사용을 위한 3가지 조건 확인 ✅
 
-ECC 메모리를 사용하려면 **CPU, 메인보드, 메모리** 세 가지가 모두 ECC를 지원해야 합니다.
-
-하나라도 지원하지 않으면 ECC 기능이 작동하지 않습니다.
+ECC 메모리를 사용하려면 **CPU, 메인보드, 메모리** 세 가지가 모두 ECC를 지원해야 한다. 하나라도 지원하지 않으면 ECC 기능이 작동하지 않는다.
 
 ### CPU / 마더보드&칩셋 / 메모리 확인
 
@@ -144,14 +130,14 @@ dmidecode -t memory | grep -E "Type:|Size:|Total Width:|Data Width:|Error Correc
 - **Threadripper / EPYC**: 공식 지원
 - **확인 필요**: 메인보드 제조사 스펙시트에서 "ECC Support" 여부
 
-## BIOS 에서 ECC 활성화
+## BIOS 에서 ECC 활성화 ⚙️
 
 - 시스템 부팅 시 BIOS/UEFI 진입 (DEL 또는 F2)
 - **Advanced** → **Memory Configuration** 또는 **AMD CBS** 메뉴 찾기
 - **ECC Mode** 또는 **DRAM ECC Enable** 옵션을 **Enabled**로 설정
 - 저장 후 재부팅
 
-## **OS에서 ECC 모니터링하기**
+## **OS에서 ECC 모니터링하기** 📊
 
 ### **Linux**
 
@@ -176,4 +162,7 @@ sudo ras-mc-ctl --summary
 Get-WinEvent -LogName System | Where-Object {$_.ProviderName -eq "Microsoft-Windows-WHEA-Logger"}
 ```
 
-[^1]: https://www.geeksforgeeks.org/computer-organization-architecture/what-is-ecc-memory/ <https://www.geeksforgeeks.org/computer-organization-architecture/what-is-ecc-memory/>
+[^1]: <https://www.geeksforgeeks.org/computer-organization-architecture/what-is-ecc-memory/>
+[^2]: ECC 메모리는 일반적으로 Non-ECC 대비 약 2~3% 성능 오버헤드가 발생하나, 데이터 무결성이 중요한 서버·워크스테이션 환경에서는 이를 감수할 만하다. <https://en.wikipedia.org/wiki/ECC_memory>
+[^3]: AMD Ryzen에서의 ECC 비공식 지원 여부는 메인보드 제조사(ASUS, ASRock 등)의 펌웨어 구현에 따라 달라지며, 공식 지원이 아니므로 안정성 보장이 없다. <https://www.phoronix.com/news/AMD-Ryzen-ECC-Memory>
+[^4]: Linux EDAC(Error Detection And Correction) 서브시스템은 커널 2.6.16부터 포함되었으며, 하드웨어 메모리 오류를 커널 로그와 sysfs로 노출한다. <https://www.kernel.org/doc/html/latest/driver-api/edac.html>

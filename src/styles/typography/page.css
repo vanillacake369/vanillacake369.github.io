@@ -1,0 +1,66 @@
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.page-eyebrow,
+.page-back-link {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-page-eyebrow);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page-back-link {
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.page-back-link:hover {
+  color: var(--color-accent);
+}
+
+.page-title {
+  font-size: var(--font-size-page-title);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.page-desc {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-page-desc);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.post-title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-post-title);
+  font-weight: 700;
+  line-height: 1.18;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.post-meta {
+  font-size: 0.875rem;
+}
+
+.post-tag {
+  font-size: 0.78rem;
+}
+
+.post-list-title,
+.day-posts-title {
+  font-size: var(--font-size-section-title);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-text);
+}

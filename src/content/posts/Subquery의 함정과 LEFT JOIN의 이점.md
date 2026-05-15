@@ -6,11 +6,11 @@ lang: ko
 draft: false
 ---
 
-# Problem
+# Problem 🔍
 
 [https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50](https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/description/?envType=study-plan-v2&envId=top-sql-50)
 
-# Solution
+# Solution 💡
 
 ## 1.
 
@@ -36,11 +36,7 @@ having not in t_visit_group;
 
 > **HAVING 은 aggregate functions 에 대한 filter group**
 
-GROUP BY 로 묶은 뒤, HAVING 을 CTE 에 대한 처리를 하였다.
-
-하지만 HAVING 은 GROUP BY 이후 적용된 aggregate functions 에 대한 filter group 이다.
-
-따라서 아래와 같이 고쳐야한다.
+GROUP BY로 묶은 뒤, HAVING을 CTE에 대한 처리를 하였다. 하지만 HAVING은 GROUP BY 이후 적용된 aggregate functions에 대한 filter group이다.[^1] 따라서 아래와 같이 고쳐야 한다.
 
 ```sql
 WITH t_visit_group AS (
@@ -67,19 +63,14 @@ GROUP BY
 
 ### 왜 느릴까? → Full Scan 을 5 번을 한다.
 
-Datagrip 을 통해 Execute Plan 확인해보자.
+Datagrip을 통해 Execute Plan을 확인해보자.
 
 > Table Schema
 
-왜 Table Full Scan 을 5번이나 할까???
+왜 Table Full Scan을 5번이나 할까? 이유는 아래와 같다.
 
-이유는 아래와 같다.
-
-1.
-
-WHERE 절에 대한 Subquery가 실행되어서. 2.
-
-Index 가 존재하지 않아서.
+1. WHERE 절에 대한 Subquery가 실행되어서.
+2. Index가 존재하지 않아서.
 
 ```sql
 SELECT (select)
@@ -101,17 +92,11 @@ SELECT (select)
 
 ![](/images/notion/aab43ea497ec33b2.png)
 
-어떻게 하면 개선할 수 있을까??
+어떻게 하면 개선할 수 있을까?
 
 ### Subquery 에서 DISTINCT 를 사용하여 개선
 
-동일쿼리 내에서 개선할 수 있는 방법이 있다.
-
-바로 id 에 대한 `DISTINCT` 처리를 하는 것이다.
-
-아래와 같이 visit_id 에 대해 `DISTINCT` 를 처리하여 range 를 좁혔다.
-
-과연 얼마나 빨라질까??
+동일쿼리 내에서 개선할 수 있는 방법이 있다. 바로 id에 대한 `DISTINCT` 처리를 하는 것이다. 아래와 같이 visit_id에 대해 `DISTINCT`를 처리하여 range를 좁혔다. 과연 얼마나 빨라질까?
 
 ```sql
 WITH t_visit_group AS (
@@ -131,9 +116,7 @@ GROUP BY
     customer_id;
 ```
 
-그렇다면 왜 빨라졌을까???
-
-Datagrip 에서 Explain 을 처리해보자
+그렇다면 왜 빨라졌을까? Datagrip에서 Explain을 처리해보자.
 
 ```sql
 SELECT (select)
@@ -153,21 +136,15 @@ SELECT (select)
 										SEQ_SCAN (Table scan)	 table: Transactions;	5	0.75
 ```
 
-아예 바뀐 게 없었다.
+아예 바뀐 게 없었다. 사실 DISTINCT는 데이터를 줄여주는 역할만 수행해주었을 뿐이다. 그래서 최적화가 되는 것처럼 속도가 빨라진 것이다.[^2]
 
-사실 distinct 는 데이터를 줄여주는 역할만 수행해주었을 뿐이다.
+Stackoverflow에서는 SubQuery의 IN 절에서 DISTINCT를 쓰는 것은 일반적인 최적화가 되지 않는다고 한다.[^3]
 
-그래서 최적화가 되는 것처럼 속도가 빨라진 것이다.
-
-Stackoverflow 에서는 SubQuery 의 IN 절 에서 DISTINCT 를 쓰는 것은 일반적인 최적화가 되지 않는다고 한다.
-
-> The `SELECT DISTINCT` in the `IN` subquery does nothing.
+> The `SELECT DISTINCT` in the `IN` subquery does nothing.
 
 Nothing at all.
 
-The `IN` implicitly does a `SELECT DISTINCT` because if something is in `(1, 2, 3)`, then that something is in `(1, 1, 1, 2, 2, 3)`.
-
-> [https://stackoverflow.com/questions/47379281/sql-distinct-subquery](https://stackoverflow.com/questions/47379281/sql-distinct-subquery[^3])
+The `IN` implicitly does a `SELECT DISTINCT` because if something is in `(1, 2, 3)`, then that something is in `(1, 1, 1, 2, 2, 3)`.
 
 ## 2.
 
@@ -181,7 +158,7 @@ WHERE T.transaction_id IS NULL
 GROUP BY V.customer_id;
 ```
 
-### [Join X] Full Scan 5번 → [Join O] Full Scan 3번
+### [Join X] Full Scan 5번 → [Join O] Full Scan 3번 ⚡
 
 ![](/images/notion/d6038ce9f445ef26.png)
 
@@ -196,12 +173,10 @@ SELECT (select)
 						SEQ_SCAN (Table scan)	 table: T;	5	0.107
 ```
 
-LEFT hash join 을 함으로써 Full Scan 횟수를 줄일 수 있었다.
+LEFT hash join을 함으로써 Full Scan 횟수를 줄일 수 있었다.[^4] 이로써 SubQuery는 Join보다 일반적인 성능이 좋지 않다는 것을 다시금 느낄 수 있었다.[^5]
 
-이로써 SubQuery 는 Join 보다 일반적인 성능이 좋지 않다는 것을 또 다시금 느낄 수 있었다.
-
-[^1]: https://mariadb.com/kb/en/optimizing-group-by/ <https://mariadb.com/kb/en/optimizing-group-by/>
-
-[^2]: https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN <https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN>
-
-[^3]: https://stackoverflow.com/questions/47379281/sql-distinct-subquery <https://stackoverflow.com/questions/47379281/sql-distinct-subquery>
+[^1]: MariaDB HAVING 절과 GROUP BY 최적화: <https://mariadb.com/kb/en/optimizing-group-by/>
+[^2]: Quora — SubQuery에서 DISTINCT 사용 여부: <https://www.quora.com/Should-I-use-DISTINCT-in-a-subquery-when-using-IN>
+[^3]: Stack Overflow — SQL DISTINCT subquery: <https://stackoverflow.com/questions/47379281/sql-distinct-subquery>
+[^4]: MySQL LEFT JOIN 최적화: <https://dev.mysql.com/doc/refman/8.0/en/left-join-optimization.html>
+[^5]: MySQL Subquery 최적화 문서: <https://dev.mysql.com/doc/refman/8.0/en/subquery-optimization.html>

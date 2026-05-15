@@ -1,5 +1,5 @@
 ---
-description: "파일 시스템은 프로세스나 VM 이 실행되기 전에 가장 먼저 세팅해야하는 단계이다."
+description: "Proxmox 홈랩 구축 시 ZFS, ext4 등 파일시스템 선택 기준과 파티셔닝 실습 과정을 정리한다. VM 스토리지에 ZVOL(블록 레벨)을 권장하는 이유와 실제 fdisk 파티셔닝 명령까지 다룬다."
 date: 2025-12-29
 tags: [homelab]
 lang: ko
@@ -9,23 +9,19 @@ series: { id: "Proxmox Homelab", order: 5 }
 
 # Why?
 
-파일 시스템은 프로세스나 VM 이 실행되기 전에 가장 먼저 세팅해야하는 단계이다.
+파일 시스템은 프로세스나 VM 이 실행되기 전에 가장 먼저 세팅해야하는 단계이다. VM, ISO, 백업 모두 스토리지에 저장되기 때문에 데이터를 모두 구성하고 파일시스템을 구축하려면 전부 다 밀어야 하기 때문이다.
 
-VM, ISO, 백업 모두 스토리지에 저장되기 때문에
-데이터를 모두 구성하고 파일시스템을 구축하려면 전부 다 밀어야 하기 때문이다.
-
-본 포스트에서는 SSD 스토리지, 백업 스토리지, 백업 자동화, Ceph 설정 등등을 위해서
-어떤 파일시스템이 있고, 어떤 것을 구축해야하고, 어떻게 구축할 수 있는지 를 알아보고자 한다.
+본 포스트에서는 SSD 스토리지, 백업 스토리지, 백업 자동화, Ceph 설정 등등을 위해서 어떤 파일시스템이 있고, 어떤 것을 구축해야하고, 어떻게 구축할 수 있는지를 알아보고자 한다.
 
 # What?
 
 > 📖 [About ZFS](https://www.notion.so/2d919c39029080068574cda623cb459a) 에서 아키텍쳐와 처리과정에 대해 깊이 서술하였으니
 
-## Proxmox Filesystem 동작 원리
+## Proxmox Filesystem 동작 원리 🗂️
 
 ### **스토리지 유형 : File Level vs Block Level**
 
-Proxmox가 데이터를 저장하는 방식은 크게 두 가지로 나뉜다.
+Proxmox가 데이터를 저장하는 방식은 크게 두 가지로 나뉜다.[^2]
 
 1. **파일 수준 스토리지 (File-level)**
 2. **블록 수준 스토리지 (Block-level)**
@@ -72,9 +68,7 @@ graph TD
 
 ### qcow2 란 ?
 
-가상 머신을 사용하기 위해서는 가상 머신의 파일시스템을 저장하는 저장공간이 필요하다.
-
-리눅스에서는 이에 대한 별도의 파일 포맷을 제공하는데 이것이 바로 qcow2 이다.
+가상 머신을 사용하기 위해서는 가상 머신의 파일시스템을 저장하는 저장공간이 필요하다. 리눅스에서는 이에 대한 별도의 파일 포맷을 제공하는데 이것이 바로 qcow2 이다.
 
 - Qemu Conpy On Write 의 약자
 - 내부에 스냅샷 정보, 압축 정보, 실제 데이터 블록의 위치 정보를 담는 **자체적인 매핑 테이블**을 가지고 있다
@@ -141,18 +135,12 @@ graph TB
     style PHYSICAL fill:#1565c0,color:#fff
 ```
 
-### VM 사용 시 Block Level (ZVOL) 을 권장하는 이유
+### VM 사용 시 Block Level (ZVOL) 을 권장하는 이유 ⚡
 
-만약 파일시스템을 사용하여 VM 들을 관리하고자한다면 보통 Block Level (ZVOL) 을 권장된다.
+만약 파일시스템을 사용하여 VM 들을 관리하고자한다면 보통 Block Level (ZVOL) 을 권장된다.[^9]
 [https://www.netapp.com/data-storage/what-is-block-storage/#:~:text=The%20best%20example%20of%20block,than%20file%2Dbased%20storage%20solutions](https://www.netapp.com/data-storage/what-is-block-storage/#:~:text=The%20best%20example%20of%20block,than%20file%2Dbased%20storage%20solutions)
 
-이유는 Block Level (ZVOL)에서는 qcow2가 필요 없기 때문이다.
-
-블록 레벨 방식인 ZVOL은 파일이 아니라 가상적인 하드디스크 장치(/dev/zvol/...) 그 자체를 만들어낸다.
-
-ZVOL은 파일이 아니기 때문에 qcow2 같은 복잡한 파일 포맷이 필요 없다.
-
-데이터가 들어오면 ZFS가 즉시 자신의 블록에 기록한다.
+이유는 Block Level (ZVOL)에서는 qcow2가 필요 없기 때문이다. 블록 레벨 방식인 ZVOL은 파일이 아니라 가상적인 하드디스크 장치(/dev/zvol/...) 그 자체를 만들어낸다. ZVOL은 파일이 아니기 때문에 qcow2 같은 복잡한 파일 포맷이 필요 없다. 데이터가 들어오면 ZFS가 즉시 자신의 블록에 기록한다.
 
 ```mermaid
 graph LR
@@ -162,11 +150,7 @@ graph LR
     style B fill:#c8e6c9,stroke:#2e7d32
 ```
 
-반면 File Level 은 앞서 설명했다 싶이 VM 전용 파일 포맷인 qcow2 가 중간레이어에서 처리되어야 한다.
-
-여기서 qcow2 와 ZFS 각각에서 CoW 가 발생하여 이중 CoW 되고, 이에 따라 성능 저하가 발생한다.
-
-따라서 VM 을 저장할 스토리지를 구성할 계획이라면 File Level 보다 Block Level 로 처리되는 것이 좋다.
+반면 File Level 은 앞서 설명했다 싶이 VM 전용 파일 포맷인 qcow2 가 중간레이어에서 처리되어야 한다. 여기서 qcow2 와 ZFS 각각에서 CoW 가 발생하여 이중 CoW 되고, 이에 따라 성능 저하가 발생한다. 따라서 VM 을 저장할 스토리지를 구성할 계획이라면 File Level 보다 Block Level 로 처리되는 것이 좋다.
 
 ```mermaid
 graph LR
@@ -180,14 +164,13 @@ graph LR
 
 # How?
 
-어떻게 씀?
+?
 
 > ☝ TL;DR;
 
-## Proxmox ZFS 아키텍쳐
+## Proxmox ZFS 아키텍쳐 🏛️
 
-[VM 사용 시 Block Level (ZVOL) 을 권장하는 이유](https://www.notion.so/2d819c39029080429391e0ec3fbc1bd6#2da19c39029080cf86faf50cf01058f7) 에서 살펴보았듯이 VM 저장공간 구축 시에는 블록 레벨로 구성하는 것이 좋다
-다행히도 ZFS 는 블록 레벨의 ZVOL 을 제공하고 있다.
+[VM 사용 시 Block Level (ZVOL) 을 권장하는 이유](https://www.notion.so/2d819c39029080429391e0ec3fbc1bd6#2da19c39029080cf86faf50cf01058f7) 에서 살펴보았듯이 VM 저장공간 구축 시에는 블록 레벨로 구성하는 것이 좋다. 다행히도 ZFS 는 블록 레벨의 ZVOL 을 제공하고 있다.[^12]
 
 이에 따라 아래와 같이 구성하기로 하였다.
 
@@ -270,11 +253,9 @@ graph TB
 
 > ☝ 둘 다 ZFS 로 구성하지 않은 이유는 아래와 같은 단점이 발생하기 때문이다.
 
-그렇다면 Proxmox 에서 ZFS 구성은 어떻게 할까?
+그렇다면 Proxmox 에서 ZFS 구성은 어떻게 할까? 또 VM 들에 대한 ZVOL 구성은 어떻게 할까?
 
-또 VM 들에 대한 ZVOL 구성은 어떻게 할까?
-
-## Promox 에 ZFS 설치
+## Promox 에 ZFS 설치 🔧
 
 ### Proxmox 재설치
 
@@ -284,9 +265,7 @@ graph TB
 
 ### 디스크 파티셔닝
 
-앞서 [Proxmox ZFS 아키텍쳐 ](https://www.notion.so/2d819c39029080429391e0ec3fbc1bd6#2d919c39029080cbae06f8ff232925ce) 에서 우리는 아래와 같이 설정하고자 한다고 기술하였다.
-
-따라서 다음과 같이 파티셔닝을 생성하도록 하자.
+앞서 [Proxmox ZFS 아키텍쳐 ](https://www.notion.so/2d819c39029080429391e0ec3fbc1bd6#2d919c39029080cbae06f8ff232925ce) 에서 우리는 아래와 같이 설정하고자 한다고 기술하였다. 따라서 다음과 같이 파티셔닝을 생성하도록 하자.
 
 1. vmpool용 파티션 생성 (400GB)
 2. backup용 파티션 생성 (나머지)
@@ -352,7 +331,7 @@ nvme0n1     259:0    0 931.5G  0 disk
 └─nvme0n1p5 259:5    0 431.5G  0 part
 ```
 
-### ZFS 풀 생성 및 등록
+### ZFS 풀 생성 및 등록 💾
 
 1. local-zfs 해제 및 제거
 2. vmpool 용 파티션에 대해 ZFS 풀 생성
@@ -364,7 +343,7 @@ Proxmox 에 storage 등록 5.
 
 최종 상태 확인
 
-## 스냅샷 확인
+## 스냅샷 확인 📸
 
 1.
 
@@ -374,7 +353,7 @@ Proxmox 에 storage 등록 5.
 
 롤백/삭제
 
-## 압축 확인
+## 압축 확인 🗜️
 
 1.
 
@@ -384,24 +363,24 @@ Proxmox 에 storage 등록 5.
 
 디스크 교체 (장애 시)
 
-[^2]: https://www.reddit.com/r/linux4noobs/comments/158m5b/what_is_ext4_a_simple_descriptionexplanation/ <https://www.reddit.com/r/linux4noobs/comments/158m5b/what_is_ext4_a_simple_descriptionexplanation/>
+[^2]: <https://www.reddit.com/r/linux4noobs/comments/158m5b/what_is_ext4_a_simple_descriptionexplanation/>
 
-[^3]: https://phoenixnap.com/glossary/ext4 <https://phoenixnap.com/glossary/ext4>
+[^3]: <https://phoenixnap.com/glossary/ext4>
 
-[^5]: https://wiki.archlinux.org/title/XFS <https://wiki.archlinux.org/title/XFS>
+[^5]: <https://wiki.archlinux.org/title/XFS>
 
-[^6]: https://blog.purestorage.com/purely-educational/xfs-vs-ext4-which-linux-file-system-is-better/ <https://blog.purestorage.com/purely-educational/xfs-vs-ext4-which-linux-file-system-is-better/>
+[^6]: <https://blog.purestorage.com/purely-educational/xfs-vs-ext4-which-linux-file-system-is-better/>
 
-[^7]: https://www.oracle.com/linux/technologies/xfs-overview.html <https://www.oracle.com/linux/technologies/xfs-overview.html>
+[^7]: <https://www.oracle.com/linux/technologies/xfs-overview.html>
 
-[^9]: https://docs.oracle.com/cd/E19253-01/819-5461/zfsover-2/ <https://docs.oracle.com/cd/E19253-01/819-5461/zfsover-2/>
+[^9]: <https://docs.oracle.com/cd/E19253-01/819-5461/zfsover-2/>
 
-[^10]: https://www.reddit.com/r/linuxquestions/comments/3usjz8/what_is_zfs_and_why_should_i_want_to_use_it/ <https://www.reddit.com/r/linuxquestions/comments/3usjz8/what_is_zfs_and_why_should_i_want_to_use_it/>
+[^10]: <https://www.reddit.com/r/linuxquestions/comments/3usjz8/what_is_zfs_and_why_should_i_want_to_use_it/>
 
-[^11]: https://www.youtube.com/watch?v=fPqJEvgEDz0 <https://www.youtube.com/watch?v=fPqJEvgEDz0>
+[^11]: <https://www.youtube.com/watch?v=fPqJEvgEDz0>
 
-[^12]: https://pve.proxmox.com/wiki/ZFS_on_Linux <https://pve.proxmox.com/wiki/ZFS_on_Linux>
+[^12]: <https://pve.proxmox.com/wiki/ZFS_on_Linux>
 
-[^13]: https://pve.proxmox.com/wiki/Storage:_ZFS <https://pve.proxmox.com/wiki/Storage:_ZFS>
+[^13]: <https://pve.proxmox.com/wiki/Storage:_ZFS>
 
-[^14]: https://pve.proxmox.com/wiki/ZFS_on_Linux <https://pve.proxmox.com/wiki/ZFS_on_Linux>
+[^14]: <https://pve.proxmox.com/wiki/ZFS_on_Linux>

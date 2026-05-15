@@ -20,7 +20,7 @@ series: { id: "NixOS Ecosystem", order: 7 }
 | **Kubeconfig**    | 관리자나 컴포넌트가 API 서버에 접속하기 위한 **접속 정보 세트** | 출입문 열쇠 + 보안 카드         |
 | **CNI (Flannel)** | 노드 간, 포드(Pod) 간 통신을 가능하게 하는 **가상 네트워크망**  | 사무실 내 전화선/내선 번호 공사 |
 
-## Cluster Join 상세 프로세스 및 원리
+## Cluster Join 상세 프로세스 및 원리 🔗
 
 1.
 
@@ -32,38 +32,32 @@ Join 토큰 생성 및 검증 준비 4.
 
 Worker 노드 합류 (The "Join" Magic)
 
-## 왜 CNI 가 활성화 되어있어야지만 될까?
+## 왜 CNI 가 활성화 되어있어야지만 될까? 🌐
 
 ### ① 통신 인프라 준비 (Physical/Virtual Network)
 
-CNI가 없어도 노드 간의 **기본적인 IP 통신**(L3 네트워크)은 가능해야 합니다.
-
-워커 노드가 마스터 노드의 IP(예: `10.0.20.10`)로 패킷을 보낼 수 있어야 `kubeadm join` 요청을 보낼 수 있기 때문입니다.
+CNI가 없어도 노드 간의 **기본적인 IP 통신**(L3 네트워크)은 가능해야 한다.[^1] 워커 노드가 마스터 노드의 IP(예: `10.0.20.10`)로 패킷을 보낼 수 있어야 `kubeadm join` 요청을 보낼 수 있기 때문이다.
 
 ### ② 토큰 기반 인증 및 TLS Bootstrap (인증 단계)
 
-워커 노드가 토큰을 들고 마스터에게 접근하여 인증서를 발급받는 과정입니다.
-
-이 시점에서는 아직 **CNI가 작동하지 않습니다.** 노드는 `NotReady` 상태로 보이지만, 제어 평면(Control Plane)과는 인증서를 통해 안전하게 연결된 상태입니다.
+워커 노드가 토큰을 들고 마스터에게 접근하여 인증서를 발급받는 과정이다.[^2] 이 시점에서는 아직 **CNI가 작동하지 않는다.** 노드는 `NotReady` 상태로 보이지만, 제어 평면(Control Plane)과는 인증서를 통해 안전하게 연결된 상태이다.
 
 ### ③ CNI 포드 배포 및 활성화 (네트워크 단계)
 
-인증이 완료되어 노드가 정식으로 등록되면, 마스터는 해당 노드에 **CNI(Flannel 등)용 포드**를 스케줄링합니다.
+인증이 완료되어 노드가 정식으로 등록되면, 마스터는 해당 노드에 **CNI(Flannel 등)용 포드**를 스케줄링한다.
 
-- CNI 포드가 워커 노드에 설치되고 나서야 노드 내부의 가상 네트워크(veth, bridge 등)가 뚫립니다.
-- 이때 비로소 노드의 상태가 `NotReady`에서 \**`Ready`*로 변합니다.
+- CNI 포드가 워커 노드에 설치되고 나서야 노드 내부의 가상 네트워크(veth, bridge 등)가 뚫린다.
+- 이때 비로소 노드의 상태가 `NotReady`에서 `Ready`로 변한다.
 
 # How?
 
-어떻게 씀?
+?
 
-## The NixOS Way
+## The NixOS Way 🐧
 
-nixos 에서는 easyCert 를 통해 인증서 생성 및 CSR 승인과정을 자동으로 처리하는 서비스를 지원한다
-[https://wiki.nixos.org/wiki/Kubernetes](https://wiki.nixos.org/wiki/Kubernetes) 를 참고해서 구현해보자
-다만 해당 참고문서에서 유의해야할 부분들을 모두 유의해서 구현해야만 작동한다
+nixos 에서는 easyCert 를 통해 인증서 생성 및 CSR 승인과정을 자동으로 처리하는 서비스를 지원한다.[^3] [https://wiki.nixos.org/wiki/Kubernetes](https://wiki.nixos.org/wiki/Kubernetes) 를 참고해서 구현해보자. 다만 해당 참고문서에서 유의해야할 부분들을 모두 유의해서 구현해야만 작동한다.
 
-## The Vanilla K8S Way
+## The Vanilla K8S Way ☸️
 
 Host
 
@@ -180,7 +174,7 @@ root@k8s-worker1:~/ > kubeadm join 10.0.20.10:6443 --token 3vchjq.fdkfgo301t2za3
 # Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 ```
 
-## 트러블슈팅 : 확인순서 및 처리방법
+## 트러블슈팅 : 확인순서 및 처리방법 🩺
 
 1.
 
@@ -194,7 +188,7 @@ Kubelet 서비스 엔진 상태 분석 3.
 
 커널 및 하드웨어 레벨 장애 검증
 
-## 실제 겪어봤던 문제와 해결법
+## 실제 겪어봤던 문제와 해결법 🐛
 
 1. /var/lib/kubelet을 virtiofs로 마운트하면 안 됨
 2.
@@ -204,3 +198,9 @@ KUBELET_KUBEADM_ARGS="" 빈 문자열 에러 3. kubelet PATH에 mount가 없음 
 VM 스토리지 shares 중복 6.
 
 DNS nameserver 초과 경고
+
+[^1]: <https://kubernetes.io/docs/concepts/cluster-administration/networking/>
+[^2]: <https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/>
+[^3]: <https://wiki.nixos.org/wiki/Kubernetes>
+[^4]: <https://github.com/flannel-io/flannel>
+[^5]: <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/>

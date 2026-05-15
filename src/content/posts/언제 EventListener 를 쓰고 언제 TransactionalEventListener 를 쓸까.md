@@ -1,5 +1,5 @@
 ---
-description: "스프링 애플리케이션에서 이벤트를 발행하고 처리할 때, 두 가지 타입의 어노테이션을 사용할 수 있다."
+description: "스프링 애플리케이션에서 이벤트를 발행하고 처리할 때 @EventListener와 @TransactionalEventListener의 차이점과 올바른 사용 시점을 정리한다."
 date: 2025-05-21
 tags: [java]
 lang: ko
@@ -17,7 +17,7 @@ draft: false
 
 # What?
 
-## @EventListener 란 ?
+## @EventListener 란 ? 🎧
 
 ### How it works
 
@@ -149,13 +149,11 @@ class CreateOrderUsecaseImplTest {
 
 ```
 
-해당 테스트가 통과하는 것을 볼 수 있다.
-
-즉, 이벤트 수신자의 예외가 이벤트 발행하는 응용 계층까지 전파되는 것을 확인할 수 있었다.
+해당 테스트가 통과하는 것을 볼 수 있다. 즉, 이벤트 수신자의 예외가 이벤트 발행하는 응용 계층까지 전파되는 것을 확인할 수 있었다.
 
 ![](/images/notion/73f2fd1f3bd3573f.png)
 
-## @TransactionalEventListener 란 ?
+## @TransactionalEventListener 란 ? 🔒
 
 - 트랜잭션 동기화 콜백에 등록
 - 지정한 트랜잭션 단계에서만 이벤트를 처리.
@@ -163,13 +161,9 @@ class CreateOrderUsecaseImplTest {
 
 ### How it works
 
-1.
-
-애플리케이션 코드에서 `ApplicationEventPublisher.publishEvent(...)` 호출 2.
-
-스프링은 이벤트와 함께 현재 트랜잭션 동기화에 `TransactionSynchronization` 을 등록 3.
-
-트랜잭션 커밋 또는 롤백 시점에, `phase` 에 맞는 리스너만 호출
+1. 애플리케이션 코드에서 `ApplicationEventPublisher.publishEvent(...)` 호출
+2. 스프링은 이벤트와 함께 현재 트랜잭션 동기화에 `TransactionSynchronization` 을 등록
+3. 트랜잭션 커밋 또는 롤백 시점에, `phase` 에 맞는 리스너만 호출
 
 ### 언제 @TransactionalEventListener 쓸까?
 
@@ -179,12 +173,11 @@ class CreateOrderUsecaseImplTest {
 
 ### @TransactionalEventListener 사용 시 유의사항
 
-- 이벤트 발행 쪽의 Tx 와 이벤트 수신 쪽의 Tx 는 다른 스레드에서 돌아간다.
-- 이에 따라 아래 옵션을 취사선택하여 처리하여야한다.
+이벤트 발행 쪽의 Tx 와 이벤트 수신 쪽의 Tx 는 다른 스레드에서 돌아간다. 이에 따라 아래 옵션을 취사선택하여 처리하여야한다.
 
 # How?
 
-어떻게 씀?
+?
 
 ### @EventListener
 
@@ -232,3 +225,9 @@ public class TxListener {
 [^1]: Spring Framework 공식 레퍼런스 – 이벤트 모델 <https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#context-functionality-events>
 
 [^2]: Spring 공식 javadoc – TransactionalEventListener <https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/event/TransactionalEventListener.html>
+
+[^3]: `SimpleApplicationEventMulticaster` 소스 – `multicastEvent` 구현 <https://github.com/spring-projects/spring-framework/blob/main/spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java>
+
+[^4]: Spring 공식 레퍼런스 – Transaction Synchronization <https://docs.spring.io/spring-framework/docs/current/reference/html/data-access.html#transaction-declarative-applying-more-than-just-tx-advice>
+
+[^5]: Baeldung – Spring Events <https://www.baeldung.com/spring-events>

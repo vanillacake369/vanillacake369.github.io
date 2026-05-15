@@ -1,5 +1,5 @@
 ---
-description: "1. **로그인** – 슬랙 가입한 사내 이메일만 허용 2. **JWT 발급** – 짧은 만료(액세스), 장기 리프레시 토큰 관리."
+description: "Slack OAuth 를 이용해 사내 이메일 기반 로그인을 구현하고 JWT 액세스/리프레시 토큰을 발급·관리하는 전체 흐름을 정리한다."
 date: 2025-08-13
 tags: [java]
 lang: ko
@@ -8,7 +8,7 @@ draft: false
 
 # 요구사항
 
-## 기능
+## 기능 📋
 
 1. **로그인** – 슬랙 가입한 사내 이메일만 허용
 2. **JWT 발급** – 짧은 만료(액세스), 장기 리프레시 토큰 관리.
@@ -16,7 +16,7 @@ draft: false
 4. **로그아웃** – 액세스/리프레시 토큰 무효화 및 세션 종료.
 5. **역할/권한 매핑** – Slack 워크스페이스·채널 기준으로 내부 권한 부여.
 
-## 비기능
+## 비기능 🔒
 
 1. **보안** – TLS, PKCE, 쿠키 보안(HttpOnly/Secure), 최소 스코프.
 2. **확장성** – stateless 토큰 검증, 수평 확장 가능.
@@ -26,7 +26,7 @@ draft: false
 
 # 로그인
 
-## 전체 프로세스
+## 전체 프로세스 🔄
 
 1.
 
@@ -142,19 +142,10 @@ sequenceDiagram
 
 사용자 토큰은 저장 및 리프레쉬 토큰 사용법은 아래를 참조
 
-- Access Token: 수명이 짧음(약 12시간).
-
-만료 전·후에는 반드시 Refresh Token으로 갱신.
-
+- Access Token: 수명이 짧음(약 12시간). 만료 전·후에는 반드시 Refresh Token으로 갱신.
 - Refresh Token: 사용할 때마다 회전(rotate) → 항상 DB에 최신값으로 교체 저장.
-- TTL은 직접 설정하지 않는다.
-
-토큰 만료는 “로테이션” 방식으로 관리(로그아웃/강제차단 시만 `auth.revoke` 사용).
-
-- 저장소는 영속 DB(MySQL 등).
-
-애플리케이션은 API 호출 전마다 유효성 확인 → 필요 시 갱신 패턴 유지.
-
+- TTL은 직접 설정하지 않는다. 토큰 만료는 "로테이션" 방식으로 관리(로그아웃/강제차단 시만 `auth.revoke` 사용).
+- 저장소는 영속 DB(MySQL 등). 애플리케이션은 API 호출 전마다 유효성 확인 → 필요 시 갱신 패턴 유지.
 - DB 저장 시 **암호화(at-rest)** 필수, 암호 키는 **환경변수/비밀관리자**에 보관.
 - 사용자 매핑: **`authed_user.id`(slack_user_id)**를 기본키로 사용, **이메일은 보조 식별용**으로만 활용(SSO·변경 가능성 고려).
 
@@ -201,3 +192,9 @@ sequenceDiagram
 [https://api.slack.com/authentication/rotation](https://api.slack.com/authentication/rotation)
 [https://api.slack.com/authentication/best-practices](https://api.slack.com/authentication/best-practices)
 [https://docs.slack.dev/tools/java-slack-sdk/guides/app-distribution](https://docs.slack.dev/tools/java-slack-sdk/guides/app-distribution)
+
+[^1]: PKCE(Proof Key for Code Exchange)는 Authorization Code 를 탈취당하더라도 토큰 교환을 막아주는 추가 보안 계층으로, 공개 클라이언트에서 특히 권장된다.
+[^2]: `state` 파라미터는 CSRF 방지용 nonce 역할을 한다. 콜백에서 세션에 저장한 값과 일치하는지 반드시 검증해야 한다.
+[^3]: Refresh Token Rotation 은 리프레시 토큰을 한 번 사용할 때마다 새 토큰으로 교체하는 방식으로, 탈취된 토큰의 재사용을 감지할 수 있다.
+[^4]: `authed_user.id`(slack_user_id)를 기본 식별자로 사용하는 이유는 이메일이 변경될 수 있는 반면, Slack 내부 사용자 ID 는 불변이기 때문이다.
+[^5]: 토큰을 DB에 저장할 때 AES-256 등 대칭키 암호화를 적용하고 키는 AWS Secrets Manager 나 Vault 같은 비밀관리자에 분리 보관하는 것이 권장 방식이다.

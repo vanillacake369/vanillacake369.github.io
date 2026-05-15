@@ -1,133 +1,99 @@
 ---
-description: "프로그램을 만들다 보면 수없이 많은 오류가 발생한다."
+description: "자바는 왜 예외를 별도의 타입 계층으로 설계했을까? try-catch-finally 구조부터 throws 위임, 트랜잭션 경계 설계까지, 예외를 '어디서 잡느냐'가 프로그램의 원자성을 결정하는 이유를 다룬다."
 date: 2026-02-25
 tags: [java]
 lang: ko
 draft: false
 ---
+# Why?
 
-프로그램을 만들다 보면 수없이 많은 오류가 발생한다.
+자바로 파일을 읽거나, 0으로 나누거나, 배열 범위를 벗어나는 코드를 작성한다고 가정해보자. 이 세 가지 상황은 모두 런타임에 문제가 생긴다는 공통점이 있지만, 자바는 이를 하나의 `if` 문으로 처리하게 두지 않는다. 대신 예외(Exception)라는 전용 타입 계층을 설계했다[^1].
 
-물론 오류가 발생하는 이유는 프로그램이 오동작을 하지 않기 하기 위한 자바의 배려이다.
+그 이유는 오류를 **발생시키는 곳**과 **처리하는 곳**을 분리할 수 있기 때문이다. 이 분리가 가능해질 때 비로소 트랜잭션처럼 "하나라도 실패하면 전체를 취소해야 하는" 로직을 깔끔하게 구현할 수 있다. 자바는 이 메커니즘을 `try-catch-finally`와 `throws` 키워드로 구현한다[^2].
 
-하지만 때로는 이러한 오류를 무시하고 싶을 때도 있고, 오류가 날 때 그에 맞는 적절한 처리를 하고 싶을 때도 있다.
+이 글은 자바 예외 처리의 기본 구조부터 Checked/Unchecked 예외의 차이, 그리고 **예외를 어디서 잡느냐가 트랜잭션 원자성을 어떻게 결정하는지**까지를 순서대로 다룬다.
 
-이에 자바는 try ... catch, throw 구문을 이용해 오류를 처리 한다.
+## 예외는 언제 발생하는가 🧨
 
-예외를 처리하는 방법에 대해서 알게 되면 보다 안전하고 유연한 프로그래밍을 구사 할 수 있을 것이다.
+오류를 처리하는 방법을 알기 전에, 실제 프로그램에서 어떤 상황에서 예외가 발생하는지 살펴본다. 구문 오타가 아닌, 런타임에 빈번하게 마주치는 세 가지 예외를 먼저 짚는다.
 
-## 예외는 언제 발생하는가?
+**존재하지 않는 파일을 열려고 시도할 때**
 
-오류를 처리하는 방법을 알기 전에 어떤 상황에서 오류가 발생하는지 살펴보자.
-
-오타로 인해 발생하는 구문 오류 말고 실제 프로그램에서 잘 발생하는 오류들에 대해서 알아보자.
-
-다음처럼 존재하지 않는 파일을 열려고 시도해 보자.
-
-```
+```java
 BufferedReader br = new BufferedReader(new FileReader("나없는파일"));
 br.readLine();
 br.close();
-
 ```
-
-위 코드를 실행하면 다음과 같은 오류가 발생한다.
 
 ```
 Exception in thread "main" java.io.FileNotFoundException: 나없는파일 (지정된 파일을 찾을 수 없습니다)
     at java.io.FileInputStream.open(Native Method)
     at java.io.FileInputStream.<init>(Unknown Source)
-    at java.io.FileInputStream.<init>(Unknown Source)
     at java.io.FileReader.<init>(Unknown Source)
     ...
-
 ```
 
-존재하지 않는 파일을 열려고 시도하면 `FileNotFoundException`라는 이름의 예외가 발생한다.
+존재하지 않는 파일을 열려고 시도하면 `FileNotFoundException`이 발생한다[^3].
 
-이번에는 0으로 다른 숫자를 나누는 경우를 살펴보자.
+**0으로 나눌 때**
 
-위 코드가 실행되면 다음과 같은 오류가 발생한다.
+```java
+int c = 4 / 0;
+```
 
 ```
 Exception in thread "main" java.lang.ArithmeticException: / by zero
     at Test.main(Test.java:14)
-
 ```
 
-4를 0으로 나누면 `ArithmeticException` 예외가 발생한다.
+4를 0으로 나누면 `ArithmeticException`이 발생한다.
 
-마지막으로 한가지 오류만 더 들어 보자.
+**배열 범위를 벗어날 때**
 
-다음의 오류는 정말 빈번하게 일어난다.
-
-```
+```java
 int[] a = {1, 2, 3};
 System.out.println(a[3]);
-
 ```
-
-오류의 내용은 다음과 같다.
 
 ```
 Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 3
     at Test.main(Test.java:17)
-
 ```
 
-a[3]은 a 배열의 4번째 값이므로 a 배열에서 구할 수 없는 값이다.
+`a[3]`은 길이 3인 배열에서 존재하지 않는 4번째 원소를 가리키므로 `ArrayIndexOutOfBoundsException`이 발생한다. 자바는 이런 예외가 발생하면 프로그램을 중단하고 스택 트레이스를 출력한다[^4].
 
-그래서 `ArrayIndexOutOfBoundsException` 오류가 발생했다.
+## try-catch 구조로 예외를 처리하는 이유 🛡️
 
-자바는 이와같은 예외가 발생하면 프로그램을 중단하고 오류메시지를 보여준다.
+예외 처리의 기본 구문은 `try-catch`이다.
 
-## 예외 처리하기
-
-이제 예외처리의 기법에 대해서 살펴보자.
-
-다음은 예외처리를 위한 try, catch문의 기본 구조이다.
-
-```
+```java
 try {
-    ...
-} catch(예외1) {
-    ...
-} catch(예외2) {
-    ...
-...
+    // 예외가 발생할 수 있는 코드
+} catch(예외1 e) {
+    // 예외1이 발생했을 때 처리
+} catch(예외2 e) {
+    // 예외2가 발생했을 때 처리
 }
-
 ```
 
-try 문안의 수행할 문장들에서 예외가 발생하지 않는다면 catch문 다음의 문장들은 수행이 되지 않는다.
+`try` 블록 안의 코드가 정상적으로 실행되면 `catch` 블록은 건너뛴다. `try` 블록 실행 중 예외가 발생하면 해당 예외 타입과 일치하는 `catch` 블록이 실행된다. 숫자를 0으로 나눌 때 발생하는 예외를 처리하는 예를 보면 다음과 같다.
 
-하지만 try 문안의 문장을 수행하는 도중에 예외가 발생하면 예외에 해당되는 catch문이 수행된다.
-
-숫자를 0으로 나누었을 때 발생하는 예외를 처리하려면 다음과 같이 할 수 있다.
-
-```
+```java
 int c;
 try {
     c = 4 / 0;
-} catch(ArithmeticException e) {
+} catch (ArithmeticException e) {
     c = -1;  // 예외가 발생하여 이 문장이 수행된다.
 }
-
 ```
 
-ArithmeticException이 발생하면 c에 -1을 대입하도록 예외를 처리한 것이다. `ArithmeticException e`에서 `e`는 ArithmeticException 클래스의 객체, 즉 오류 객체에 해당한다.
+`ArithmeticException`이 발생하면 `c`에 `-1`을 대입하는 방식으로 예외를 처리한다. `catch(ArithmeticException e)`의 `e`는 해당 예외 클래스의 객체이며, `e.getMessage()`나 `e.printStackTrace()` 같은 메서드를 통해 예외 정보를 조회할 수 있다[^5].
 
-이 오류 객체를 통해 해당 예외 클래스의 메서드를 호출할수 있다.
+## 예외 발생 여부와 무관하게 실행되어야 할 코드가 있다 — finally 🔒
 
-## finally
+예외가 발생하더라도 반드시 실행해야 하는 코드가 있다. 대표적으로 파일 닫기, 커넥션 반납, 잠금 해제 등이 있다. 아래 코드에서 `shouldBeRun()` 메서드는 `4/0`으로 인해 `ArithmeticException`이 발생하면 절대 실행되지 않는다.
 
-프로그램 수행 도중 예외가 발생하면 프로그램이 중지되거나 예외 처리에 의해 catch 구문이 실행된다.
-
-하지만 어떤 예외가 발생하더라도 반드시 실행되어야 하는 부분이 있어야 한다면 어떻게 해야 할까?
-
-다음의 예제를 보도록 하자.
-
-```
+```java
 public class Sample {
     public void shouldBeRun() {
         System.out.println("ok thanks.");
@@ -144,19 +110,11 @@ public class Sample {
         }
     }
 }
-
 ```
 
-위 예를 보면 `sample.shouldBeRun()` 메소드는 절대로 실행될 수 없을 것이다.
+이 문제를 해결하기 위해 자바는 `finally` 구문을 제공한다. `finally` 블록은 예외 발생 여부와 무관하게 항상 실행된다[^6].
 
-왜냐하면 `4/0`에 의해 ArithmeticException이 발생하여 catch구문으로 넘어가기 때문이다.
-shouldBeRun() 메소드는 반드시 실행되어야 하는 메소드라고 가정해 보자.
-
-이런 경우를 처리하기 위해 자바는 finally 구문을 제공한다.
-
-다음의 예를 보자.
-
-```
+```java
 public class Sample {
     public void shouldBeRun() {
         System.out.println("ok thanks.");
@@ -174,63 +132,39 @@ public class Sample {
         }
     }
 }
-
 ```
 
-finally 구문은 try 문장 수행 중 예외발생 여부에 상관없이 무조건 실행된다.
+`finally`가 실행되므로 위 코드를 실행하면 `"ok thanks."` 문장이 반드시 출력된다. Java 7 이후에는 `try-with-resources` 구문을 사용하면 `AutoCloseable`을 구현한 자원을 `finally` 없이도 자동으로 닫을 수 있다[^7].
 
-따라서 위 코드를 실행하면 `sample.shouldBeRun()` 메소드가 수행되어 "ok, thanks" 문장이 출력될 것이다.
+## RuntimeException 과 Exception — 어떤 기준으로 구분하는가 ⚠️
 
-## RuntimeExeption과 Exception
-
-이번에는 예외를 직접 만들어 보고 어떻게 활용할 수 있는지 알아보자.
-
-이전 챕터에서 보았던 다음 예제를 보자.
+자바의 예외는 크게 두 계층으로 나뉜다.
 
 ```
-public class Sample {
-    public void sayNick(String nick) {
-        if("fool".equals(nick)) {
-            return;
-        }
-        System.out.println("당신의 별명은 "+nick+" 입니다.");
-    }
-
-    public static void main(String[] args) {
-        Sample sample = new Sample();
-        sample.sayNick("fool");
-        sample.sayNick("genious");
-    }
-}
-
+Throwable
+├── Error              (JVM 수준 오류, 복구 불가)
+└── Exception
+    ├── RuntimeException     (Unchecked Exception)
+    └── Exception 직접 상속  (Checked Exception)
 ```
 
-sayNick 메소드는 fool이라는 문자열이 입력되면 return 으로 메소드를 종료해 별명이 출력되지 못하도록 하고 있다.
+- **RuntimeException** — 실행 시점에 발생하며, 컴파일러가 예외 처리를 강제하지 않는다. `NullPointerException`, `ArrayIndexOutOfBoundsException`, `ArithmeticException` 등이 해당한다. 발생할 수도, 발생하지 않을 수도 있는 상황에 사용한다.
+- **Exception** — 컴파일 시점에 예측 가능한 예외로, 컴파일러가 반드시 `try-catch` 또는 `throws` 선언을 요구한다. `IOException`, `SQLException` 등이 해당한다.
 
-### RuntimeException
+이 차이를 커스텀 예외로 직접 확인해본다. 먼저 `RuntimeException`을 상속한 경우다.
 
-이제 "fool" 문자열이 입력되면 단순히 return으로 종료하지 말고 적극적으로 예외를 발생시켜 보자.
+### RuntimeException 을 상속하면 처리가 선택 사항이다
 
-다음과 같은 FoolException 클래스를 Sample.java 파일에 작성하자.
-
-```
-class FoolException extends RuntimeException {
-}
-
-```
-
-그리고 다음과 같이 예제를 변경 해 보자.
-
-```
+```java
 class FoolException extends RuntimeException {
 }
 
 public class Sample {
     public void sayNick(String nick) {
-        if("fool".equals(nick)) {
+        if ("fool".equals(nick)) {
             throw new FoolException();
         }
-        System.out.println("당신의 별명은 "+nick+" 입니다.");
+        System.out.println("당신의 별명은 " + nick + " 입니다.");
     }
 
     public static void main(String[] args) {
@@ -239,66 +173,34 @@ public class Sample {
         sample.sayNick("genious");
     }
 }
-
 ```
 
-단순히 return 했던 부분을 `throw new FoolException()` 이라는 문장으로 변경하였다.
-
-이제 위 프로그램을 실행하면 "fool"이라는 입력값으로 sayNick 메소드 실행시 다음과 같은 예외가 발생한다.
+`"fool"` 입력 시 다음 예외가 발생한다.
 
 ```
 Exception in thread "main" FoolException
     at Sample.sayNick(Sample.java:7)
     at Sample.main(Sample.java:14)
-
 ```
 
-FoolException이 상속받은 클래스는 RuntimeException이다.
+`FoolException`이 `RuntimeException`을 상속하므로 컴파일러는 예외 처리를 강제하지 않는다.
 
-Exception은 크게 두가지로 구분된다.
+### Exception 을 상속하면 처리가 강제된다
 
-1.
+`FoolException`을 `Exception`을 상속하도록 바꾸면 컴파일 오류가 발생한다. 예측 가능한 Checked Exception으로 변경되었기 때문에 컴파일러가 처리를 강제한다.
 
-RuntimeException 2.
-
-Exception
-
-RuntimeException은 실행시 발생하는 예외이고 Exception은 컴파일시 발생하는 예외이다.
-
-즉, Exception은 프로그램 작성시 이미 예측가능한 예외를 작성할 때 사용하고 RuntimeException은 발생 할수도 발생 안 할수도 있는 경우에 작성한다.
-
-그래서 Exception을 Checked Exception, RuntimeException을 Unchecked Exception 이라고도 한다.
-
-### Exception
-
-그렇다면 이번에는 FoolException을 다음과 같이 변경해 보자.
-
-```
-class FoolException extends Exception {
-}
-
-```
-
-RuntimeException을 상속하던 것을 Exception을 상속하도록 변경했다.
-
-이렇게 하면 Sample 클래스에서 컴파일 오류가 발생할 것이다.
-
-예측 가능한 Checked Exception이기 때문에 예외처리를 컴파일러가 강제하기 때문이다.
-
-다음과 같이 변경해야 정상적으로 컴파일이 될 것이다.
-
-```
+```java
 class FoolException extends Exception {
 }
 
 public class Sample {
     public void sayNick(String nick) {
         try {
-            if("fool".equals(nick)) {
+            if ("fool".equals(nick)) {
                 throw new FoolException();
             }
-            System.out.println("당신의 별명은 "+nick+" 입니다.");
-        }catch(FoolException e) {
+            System.out.println("당신의 별명은 " + nick + " 입니다.");
+        } catch (FoolException e) {
             System.err.println("FoolException이 발생했습니다.");
         }
     }
@@ -309,54 +211,24 @@ public class Sample {
         sample.sayNick("genious");
     }
 }
-
 ```
 
-sayNick 메소드에서 `try... catch` 문으로 FoolException을 처리했다.
+`sayNick` 메서드 안에서 `try-catch`로 `FoolException`을 처리해야 컴파일이 통과된다[^8].
 
-## 예외 던지기 (throws)
+## throws 로 예외를 위임하면 처리 책임이 이동한다 📤
 
-위 예제를 보면 sayNick 메서드에서 FoolException을 발생시키고 예외처리도 sayNick 메서드에서 했는데 이렇게 하지 않고 sayNick을 호출한 곳에서 FoolException을 처리하도록 예외를 위로 던질 수 있는 방법이 있다.
+`sayNick` 메서드가 예외를 직접 처리하는 대신, 호출한 쪽으로 예외를 던지는 방법이 있다. `throws` 키워드를 메서드 시그니처에 선언하면 된다. ("예외를 뒤로 미루기"라고도 한다.)
 
-다음의 예제를 보자.
-
-```
-public class Sample {
-    public void sayNick(String nick) throws FoolException {
-        try {
-            if("fool".equals(nick)) {
-                throw new FoolException();
-            }
-            System.out.println("당신의 별명은 "+nick+" 입니다.");
-        }catch(FoolException e) {
-            System.err.println("FoolException이 발생했습니다.");
-        }
-    }
-
-    public static void main(String[] args) {
-        Sample sample = new Sample();
-        sample.sayNick("fool");
-        sample.sayNick("genious");
-    }
-}
-
-```
-
-sayNick 메소드 뒷부분에 **throws** 라는 구문을 이용하여 FoolException을 위로 보낼 수가 있다. ("예외를 뒤로 미루기"라고도 한다.)
-위와 같이 sayNick 메소드를 변경하면 main 메소드에서 컴파일 에러가 발생할 것이다. throws 구문 때문에 FoolException의 예외를 처리해야 하는 대상이 sayNick 메소드에서 main 메소드(sayNick 메소드를 호출하는 메소드)로 변경되었기 때문이다.
-
-따라서 컴파일 오류를 해결하려면 다음과 같이 main 메소드를 변경해야 한다.
-
-```
+```java
 class FoolException extends Exception {
 }
 
 public class Sample {
     public void sayNick(String nick) throws FoolException {
-        if("fool".equals(nick)) {
+        if ("fool".equals(nick)) {
             throw new FoolException();
         }
-        System.out.println("당신의 별명은 "+nick+" 입니다.");
+        System.out.println("당신의 별명은 " + nick + " 입니다.");
     }
 
     public static void main(String[] args) {
@@ -369,69 +241,55 @@ public class Sample {
         }
     }
 }
-
 ```
 
-main 메소드에서 `try... catch`로 sayNick 메소드에 대한 FoolException 예외를 처리하였다.
+`throws FoolException`을 선언하면 `FoolException` 처리 의무가 `sayNick`에서 `main`으로 이동한다. 이제 `main`이 `try-catch`로 처리하지 않으면 컴파일 오류가 발생한다.
 
-자, 이제 한가지 고민이 남아있다.
+**처리 위치에 따라 동작이 달라진다는 점이 핵심이다.** `sayNick` 내부에서 처리하면 두 호출이 모두 실행된다.
 
-FoolException 처리를 sayNick 메소드에서 하는것이 좋을까?
-
-아니면 main 메소드에서 하는것이 좋을까? sayNick 메소드에서 처리하는 것과 main 메소드에서 처리하는 것에는 아주 큰 차이가 있다.
-sayNick 메소드에서 예외를 처리하는 경우에는 다음의 두 문장이 모두 수행이된다.
-
-```
-sample.sayNick("fool");
-sample.sayNick("genious");
-
+```java
+sample.sayNick("fool");    // FoolException 발생 → catch에서 처리 → 계속 진행
+sample.sayNick("genious"); // 정상 실행됨
 ```
 
-물론 `sample.sayNick("fool");` 문장 수행 시에는 FoolException이 발생하겠지만 그 다음 문장인 `sample.sayNick("genious");` 역시 수행이 된다.
+반면 `main`에서 처리하면 첫 번째 호출에서 예외가 발생하는 순간 `catch`로 빠지므로 두 번째 호출은 실행되지 않는다.
 
-하지만 main 메소드에서 예외 처리를 한 경우에는 두번 째 문장인 `sample.sayNick("genious");`가 수행되지 않는다.
-
-왜냐하면 이미 첫번 째 문장에서 예외가 발생하여 catch 문으로 빠져버리기 때문이다.
-
-```
+```java
 try {
-    sample.sayNick("fool");
-    sample.sayNick("genious");  // 이 문장은 수행되지 않는다.
-}catch(FoolException e) {
+    sample.sayNick("fool");    // FoolException 발생 → catch로 이동
+    sample.sayNick("genious"); // 이 문장은 수행되지 않는다.
+} catch (FoolException e) {
     System.err.println("FoolException이 발생했습니다.");
 }
-
 ```
 
-이러한 이유로 프로그래밍시 Exception을 처리하는 위치는 대단히 중요하다.
+예외 처리 위치는 프로그램 수행 여부를 결정하며, 트랜잭션 처리와 직접 연결된다.
 
-프로그램의 수행여부를 결정하기도 하고 트랜잭션 처리와도 밀접한 관계가 있기 때문이다.
+## 예외 처리 위치가 트랜잭션 원자성을 결정한다 🔄
 
-## 트랜잭션 (Transaction)
+"트랜잭션"은 하나의 작업 단위이다. 쇼핑몰의 "상품발송" 트랜잭션을 예로 들면 포장, 영수증발행, 발송 세 가지 단계가 있으며, 하나라도 실패하면 세 가지 모두 취소해야 한다.
 
-갑자기 "트랜잭션"이라는것이 나와서 뜬금 없다고 생각할 수도 있겠지만 트랜잭션과 예외처리는 매우 밀접한 관련이 있다.
+> 아래는 동작을 간략하게 표현한 수도(pseudocode)이다. 수도코드는 특정 프로그래밍 언어의 문법을 따르지 않고 알고리즘을 자연어로 표현한 코드로, 실제 컴파일·실행은 되지 않는다.
 
-트랜잭션과 예외처리가 서로 어떤 관련이 있는지 알아보도록 하자.
+다음과 같이 각 단계 메서드가 예외를 `throws`로 위임하고 `상품발송` 메서드가 한 곳에서 예외를 잡으면 원자성이 보장된다.
 
-트랜잭션은 하나의 작업 단위를 뜻한다.
+```
+상품발송() {
+    try {
+        포장();
+        영수증발행();
+        발송();
+    } catch(예외) {
+        모두취소();  // 하나라도 실패하면 모두 취소한다.
+    }
+}
 
-예를들어 쇼핑몰의 "상품발송"이라는 트랜잭션을 가정해 보자. "상품발송" 이라는 트랜잭션에는 다음과 같은 작업들이 있을 수 있다.
+포장() throws 예외 { ... }
+영수증발행() throws 예외 { ... }
+발송() throws 예외 { ... }
+```
 
-- 포장
-- 영수증발행
-- 발송
-
-쇼핑몰의 운영자는 이 3가지 일들 중 하나라도 실패하면 3가지 모두 취소하고 "상품발송" 전의 상태로 되돌리고 싶을 것이다.
-
->
-
-프로그램이 다음과 같이 작성되어 있다고 가정 해 보자.
-
-아래는 실제 코드가 아니라 어떻게 동작하는지를 간략하게 표현한 수도(pseudo) 코드이다.
-**수도코드란?**
-수도코드(슈도코드, pseudocode)는 특정 프로그래밍 언어의 문법을 따라 씌여진 것이 아니라, 일반적인 언어로 코드를 흉내내어 알고리즘을 써놓은 코드를 말한다.
-
-수도코드는 말그대로 흉내만 내는 코드이기 때문에, 실제적인 프로그래밍 언어로 작성된 코드처럼 컴퓨터에서 실행할 수 없으며, 특정 언어로 프로그램을 작성하기 전에 알고리즘의 모델을 대략적으로 모델링하는 데에 쓰인다.
+반면 각 단계 메서드가 예외를 각자 처리하면 원자성이 깨진다.
 
 ```
 상품발송() {
@@ -441,95 +299,48 @@ try {
 }
 
 포장() {
-   ...
+    try { ... } catch(예외) { 포장취소(); }
 }
 
 영수증발행() {
-   ...
+    try { ... } catch(예외) { 영수증발행취소(); }
 }
 
 발송() {
-   ...
+    try { ... } catch(예외) { 발송취소(); }
 }
-
 ```
 
-쇼핑몰 운영자는 포장, 영수증발행, 발송이라는 세가지 중 1가지라도 실패하면 모두 취소하고 싶어한다.
+포장은 됐는데 발송은 안 되고, 포장도 안 됐는데 발송이 되는 뒤죽박죽 상황이 연출된다. 실제 프로젝트에서도 두 번째 패턴처럼 트랜잭션 관리를 잘못하여 고생하는 경우가 많은데, 이는 일종의 재앙에 가깝다[^9].
 
-이런경우 어떻게 예외처리를 하는 것이 좋을까?
+다음 다이어그램은 올바른 트랜잭션 예외 처리 흐름을 나타낸다.
 
-다음과 같이 포장, 영수증발행, 발송 메서드에서는 예외를 throw하고 상품발송 메서드에서 throw된 예외를 처리하여 모두 취소하는 것이 완벽한 트랜잭션 처리 방법이다.
-
-```
-상품발송() {
-    try {
-        포장();
-        영수증발행();
-        발송();
-    }catch(예외) {
-        모두취소();  // 하나라도 실패하면 모두 취소한다.
-    }
-}
-
-포장() throws 예외 {
-   ...
-}
-
-영수증발행() throws 예외 {
-   ...
-}
-
-발송() throws 예외 {
-   ...
-}
-
+```mermaid
+flowchart TD
+    A[상품발송 시작] --> B[포장]
+    B -->|throws 예외| E
+    B --> C[영수증발행]
+    C -->|throws 예외| E
+    C --> D[발송]
+    D -->|throws 예외| E
+    D --> F[완료]
+    E[catch 예외] --> G[모두취소]
 ```
 
-위와 같이 코드를 작성하면 포장, 영수증발행, 발송이라는 세개의 단위작업 중 하나라도 실패할 경우 "예외"가 발생되어 상품발송이 모두 취소 될 것이다.
+## 마치며 🎯
 
-만약 위 처럼 "상품발송" 메서드가 아닌 포장, 영수증발행, 발송메소드에 각각 예외처리가 되어 있다고 가정 해 보자.
+자바 예외 처리의 핵심은 세 가지로 요약된다.
 
-```
-상품발송() {
-    포장();
-    영수증발행();
-    발송();
-}
+첫째, `try-catch-finally`는 예외 발생·처리·정리를 역할별로 분리한다. 둘째, `RuntimeException`(Unchecked)은 처리가 선택 사항이고, `Exception`(Checked)은 컴파일러가 처리를 강제한다. 셋째, `throws`로 예외를 위임하면 처리 책임이 호출 스택 위로 이동하며, 어디서 잡느냐에 따라 트랜잭션 원자성이 결정된다.
 
-포장(){
-    try {
-       ...
-    }catch(예외) {
-       포장취소();
-    }
-}
+보통 프로그래머의 실력을 평가할 때 예외 처리 방식을 보면 그 사람의 실력을 어느 정도 가늠할 수 있다고 한다. 예외 처리는 부분만 알아서는 안 되고, 발생부터 처리 위치, 트랜잭션 경계까지 전체를 관통해야 정확히 할 수 있기 때문이다.
 
-영수증발행() {
-    try {
-       ...
-    }catch(예외) {
-       영수증발행취소();
-    }
-}
-
-발송() {
-    try {
-       ...
-    }catch(예외) {
-       발송취소();
-    }
-}
-
-```
-
-이렇게 각각의 메소드에 예외가 처리되어 있다면 포장은 되었는데 발송은 안되고 포장도 안되었는데 발송이 되고 이런 뒤죽 박죽의 상황이 연출될 것이다.
-
-실제 프로젝트에서도 두번째 경우처럼 트랜잭션관리를 잘못하여 고생하는 경우를 많이 보았는데 이것은 일종의 재앙에 가깝다.
-
-이번 챕터에서는 자바의 예외처리에 대해서 알아보았다.
-
-사실 예외처리는 자바에서 좀 난이도가 있는 부분에 속한다.
-
-보통 프로그래머의 실력을 평가할때 이 예외처리를 어떻게 하고 있는지를 보면 그 사람의 실력을 어느정도 가늠해 볼 수 있다고들 말한다.
-
-예외처리는 부분만 알아서는 안되고 전체를 관통하여 모두 알아야만 정확히 할 수 있기 때문이다.
+[^1]: [Java Exceptions — Oracle Docs](https://docs.oracle.com/javase/tutorial/essential/exceptions/index.html)
+[^2]: [점프 투 자바 — 07장 예외처리](https://wikidocs.net/229)
+[^3]: [FileNotFoundException — Java SE 21 API Docs](https://docs.oracle.com/en/java/docs/api/java.base/java/io/FileNotFoundException.html)
+[^4]: [ArrayIndexOutOfBoundsException — Java SE 21 API Docs](https://docs.oracle.com/en/java/docs/api/java.base/java/lang/ArrayIndexOutOfBoundsException.html)
+[^5]: [Throwable.getMessage — Java SE 21 API Docs](https://docs.oracle.com/en/java/docs/api/java.base/java/lang/Throwable.html#getMessage())
+[^6]: [The finally Block — Oracle Java Tutorial](https://docs.oracle.com/javase/tutorial/essential/exceptions/finally.html)
+[^7]: [try-with-resources — Oracle Java Tutorial](https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html)
+[^8]: [Checked vs Unchecked Exceptions in Java — Baeldung](https://www.baeldung.com/java-checked-unchecked-exceptions)
+[^9]: [Exception Handling Best Practices — Baeldung](https://www.baeldung.com/java-exceptions)

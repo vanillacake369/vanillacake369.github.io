@@ -1,5 +1,5 @@
 ---
-description: "DBUnit 이 말을 안 듣는다고요? auto-commit이 범인이었습니다"
+description: "DBRider + Testcontainers 환경에서 목업 데이터가 INSERT 후 롤백되던 원인을 HikariCP auto-commit 설정으로 추적하고 해결한 과정을 기록한다."
 date: 2025-04-20
 tags: [journal]
 lang: ko
@@ -24,11 +24,7 @@ DBUnit 은 쿼리에 대한 호출만 처리, commit() 은 호출하지 않음
 # Episode 📜
 
 필자는 사내에서 Testcontainer 와 유스케이스에 대한 테스트 환경을 격리하고, [DBUnit 기반 DBRider](https://github.com/database-rider/database-rider) 를 사용하여 테스트 데이터를 주입 및 초기화를 하고 있다.
-
-그러던 중 새로운 프로젝트에 동일한 환경을 적용하여 사용 중에 있었는데,
-
-갑자기 목업 테스트데이터들이 저장되지 않는 이상현상을 발견하게 되었다.
-
+그러던 중 새로운 프로젝트에 동일한 환경을 적용하여 사용 중에 있었는데, 갑자기 목업 테스트데이터들이 저장되지 않는 이상현상을 발견하게 되었다.
 당시 상황을 재현하기 위해 [PoC](https://github.com/vanillacake369/dbrider-demo) 를 진행하였다.
 
 우선 프로젝트 설정에 아래와 같이 test-container 와 dbrider 를 추가해주자.
@@ -176,9 +172,7 @@ public class Admin extends BaseEntity {
 ```
 
 이후 Admin 에 대해 목업데이터를 구성해주었다.
-
 DBRider 는 테스트데이터를 처리하기 위해 개발자로부터 목업데이터 파일을 요구한다.
-
 포맷은 json, csv, yml 이며 -- sql 지원이 없어 PR 을 올리고자 실험 중에 있다 -- 내부적으로 DBUnit 의 IDataSet 를 활용한다.
 
 이 때 IDataSet 을 생성하기 위해 DBRider 는
@@ -262,9 +256,7 @@ class AdminRepositoryTest {
 }
 ```
 
-요골 그대로 가져다가 테스트를 돌려보면
-
-insert 는 나가는데 데이터는 조회가 안 되는 신비로운 현상을 볼 수가 있다.
+요골 그대로 가져다가 테스트를 돌려보면 insert 는 나가는데 데이터는 조회가 안 되는 신비로운 현상을 볼 수가 있다.
 
 ![](/images/velog/d7b7c4a1a2d4fb5a.png)
 
@@ -293,7 +285,6 @@ insert 는 나가는데 데이터는 조회가 안 되는 신비로운 현상을
 => X json 데이터셋에 대한 파싱 테스트 시 통과했다.
 
 보시는 것과 같이 모든 가설이 다 들어맞지 않았음을 테스트 코드를 통해 확인할 수 있었다.
-
 아래는 위 가설들에 대한 필자가 확인했었던 테스트 코드이다.
 
 ```java
@@ -376,16 +367,13 @@ while (iterator.next()) {
 }
 ```
 
-stackoverflow 에도 질문을 올려보는 둥, 무엇이 문제인지 한참 고민을 하던 와중에
-
-DBRider 측에서 작성해주신 [스프링부트 example code](https://github.com/database-rider/database-rider/blob/master/rider-examples/spring-boot-dbunit-sample/src/test/java/com/github/database/rider/springboot/SpringBootDBUnitTest.java) 로부터 힌트를 얻을 수 있었다.
+stackoverflow 에도 질문을 올려보는 둥, 무엇이 문제인지 한참 고민을 하던 와중에 DBRider 측에서 작성해주신 [스프링부트 example code](https://github.com/database-rider/database-rider/blob/master/rider-examples/spring-boot-dbunit-sample/src/test/java/com/github/database/rider/springboot/SpringBootDBUnitTest.java) 로부터 힌트를 얻을 수 있었다.
 
 # Reason 🤷‍♂️
 
-## HikariCP auto-commit
+## HikariCP auto-commit 🔍
 
 DBRider 는 아래와 같은 맥락으로 호출하여 데이터를 저장하고, 롤백한다.
-
 ( 긴 이야기를 짧게 줄이기 위해 자세한 동작과정은 생략하겠다 )
 
 ```java
@@ -403,23 +391,16 @@ DBRiderTestExecutionListener extends AbstractTestExecutionListener
 <span style="color:yellowgreen">
 
 중요한 건 DBUnit 안에서 execute() 처리한 해당 쿼리에 대해 commit() 을 호출하지 않는다는 것이다.
-
-왜 이것이 문제가 되느냐,
-
-**HikariCP 는 커넥션 종료 시점에 commit 여부를 확인하여 , commit 이 실행되지 않았고 autocommit 이 false 라면 rollback** 을 시키기 때문이다.
+왜 이것이 문제가 되느냐, **HikariCP 는 커넥션 종료 시점에 commit 여부를 확인하여 , commit 이 실행되지 않았고 autocommit 이 false 라면 rollback** 을 시키기 때문이다.
 
 </span>
 
 ![](/images/velog/d0e863aadd1e44c2.png)
 
 필자는 커넥션을 줄이고자 HikariCP 의 auto-commit 을 false 로 두었다.
-
 ( auto-commit 을 true 로 두면 커넥션을 잡아먹기 때문이다. [참고1](https://netmarble.engineering/hikaricp-options-optimization-for-game-server/#:~:text=%EC%86%8D%EC%84%B1%EC%9D%84%20%EC%82%AC%EC%9A%A9%ED%95%B4%EC%95%BC%20%ED%95%A9%EB%8B%88%EB%8B%A4.-,autoCommit,-autoCommit%20%EC%98%B5%EC%85%98%EC%9D%80%20%ED%92%80) 과 [참고2](https://helloworld.kurly.com/blog/commit-mvcc-set-autocommit/#:~:text=HikariCP%20%EB%8A%94%20Connection%20%EC%A2%85%EB%A3%8C%20%EC%8B%9C%EC%97%90%20COMMIT%20%EC%97%AC%EB%B6%80%EB%A5%BC%20%EC%B2%B4%ED%81%AC%ED%95%B4%EC%9A%94.) 를 확인해보자 )
-
 스프링부트의 `@Transactional` 이 내부적으로 알아서 begin/commit 을 호출하고 있어 걱정할 필요가 없었기 때문이다.
-
 하지만 Test Method 에는 `@Transactional` 도, 명시적인 commit 도 없었다.
-
 더군다나 DBUnit 내부적으로도 쿼리만 호출할 뿐, commit 은 하고 있지 않았다.
 
 ![](/images/velog/1cc80b6301a1528f.png)
@@ -441,19 +422,14 @@ static void overrideProps(DynamicPropertyRegistry registry) {
 ```
 
 Hikari 의 auto-commit 에 대한 옵션은 커넥션 점유를 줄여 성능상의 이점을 가져가기위한 설정이다.
-
 따라서 이와 같은 설정은 유스케이스에 대한 로직 확인을 하는 유닛테스트에서는 필요가 없다.
-
-만약 성능 테스트를 해야한다면 해당 옵션은 논외이다.
-
-성능 테스트는 아예 동일한 환경을 미러링해야하기 때문이다.
+만약 성능 테스트를 해야한다면 해당 옵션은 논외인데, 성능 테스트는 아예 동일한 환경을 미러링해야하기 때문이다.
 
 # Remark on 'Why DBRider?' 💬
 
 ### 테스트 목업 생성 방법론
 
 저마다 각기 다른 포맷의 데이터와 다양한 주입방법이 있겠지만 DBRider 를 사용한 이유는 독립성 유지와 간편성이다.
-
 우선 테스트에 대해서 아래와 같은 기준을 충족해야만 했다.
 
 0.
@@ -469,27 +445,26 @@ Hikari 의 auto-commit 에 대한 옵션은 커넥션 점유를 줄여 성능상
 목업 및 Assertion 이 알아보기 쉬울 것
 
 이에 따라 `DBUnit` , `@Sql & @Transactional` 이 거론되었으나, DBUnit 은 XML 과 데이터셋 구성이 너무 복잡하였고, `@Sql` 은 `@Transactional` 이외에는 데이터를 롤백하는 방법을 찾기가 어려웠다.
-
 더군다나 필자는 테스트에 대해 `@Transactional` 사용을 지양하는 편인데, 이유인 즉슨 비즈니스 로직에 영향을 줄 수 있기 때문이다.
-
 ( 이에 대해 [향로님의 좋은 의견](https://jojoldu.tistory.com/761) 이 있어 덧붙여 본다 )
 
 이를 모두 보완하는 라이브러리가 DBRider 였다.
-
 데이터 저장과정에 대한 tx 또한 따로 잡을 수 있고, cleanBefore, cleanAfter 를 지원하여 목업 데이터 처리 전처리를 지원할 수 있다.
-
 다만 아직 SQL 문에 대해 미지원중에 있는데 이에 대한 PR 을 진행 중에 있다.
-
 진척도나 특이한 이슈가 있으면 해당 포스트에 공유하도록 하겠다 :-)
 
 > 2025.04.01
 >
 > 돌아보니 원작자의 의도를 간과하였다.
 >
-> executeBefore 를 통해 SQL 문들을 처리하고, IDataSet 구조체를 통해 데이터 상태를 선언하여
->
-> 멱등성을 보장하는 구조로 짜여져있었다.
+> executeBefore 를 통해 SQL 문들을 처리하고, IDataSet 구조체를 통해 데이터 상태를 선언하여 멱등성을 보장하는 구조로 짜여져있었다.
 >
 > 따라서 Input/Output 에 대해 파일형태로 관리하게끔 한 것이다.
 >
 > 결과적으로 SQL 파일은 IDataSet 에 적합하지 않다.
+
+[^1]: DBRider 공식 GitHub 저장소 — https://github.com/database-rider/database-rider
+[^2]: HikariCP autoCommit 옵션 설명 (넷마블 엔지니어링) — https://netmarble.engineering/hikaricp-options-optimization-for-game-server/
+[^3]: HikariCP Connection 종료 시 COMMIT 체크 메커니즘 (컬리 기술 블로그) — https://helloworld.kurly.com/blog/commit-mvcc-set-autocommit/
+[^4]: 테스트에서 @Transactional 을 지양해야 하는 이유 (향로 블로그) — https://jojoldu.tistory.com/761
+[^5]: DBRider 스프링부트 예제 코드 — https://github.com/database-rider/database-rider/blob/master/rider-examples/spring-boot-dbunit-sample/src/test/java/com/github/database/rider/springboot/SpringBootDBUnitTest.java

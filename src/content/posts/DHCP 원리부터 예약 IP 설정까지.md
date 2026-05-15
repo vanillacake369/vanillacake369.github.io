@@ -1,5 +1,5 @@
 ---
-description: "ISP 에서 보안 상의 이유로 IP 를 계속 바꾼다."
+description: "홈랩 서버에 고정 IP를 부여하기 위해 DHCP 동작 원리(DORA), Linux에서의 실제 흐름, 라우터 예약 IP 설정까지 단계별로 정리한다."
 date: 2025-12-19
 tags: [network, linux]
 lang: ko
@@ -9,7 +9,6 @@ draft: false
 # Why?
 
 ISP 에서 보안 상의 이유로 IP 를 계속 바꾼다.
-
 이에 따라 홈랩 운영을 위해 IP 를 고정하고자 DHCP 를 배우게 되었다.
 
 # What?
@@ -30,7 +29,7 @@ ISP 에서 보안 상의 이유로 IP 를 계속 바꾼다.
 
 > 🤷‍♂️ 정적 IP 한계점 ( ≈ 동적 IP 사용 이유 )
 
-## 사용자부터 ISP 를 거쳐서 대상 호스트까지의 접근 원리
+## 사용자부터 ISP 를 거쳐서 대상 호스트까지의 접근 원리 🌐
 
 > ✅ TL;DR;
 
@@ -129,20 +128,15 @@ flowchart TB
     class WEB internet
 ```
 
-## DHCP 란 ?
+## DHCP 란 ? 📡
 
-Dynamic Host Configuration Protocol
-클라이언트에게 일정 기간 임대를 하는 동적 주소 할당 프로토콜이다.
-
-PC의 수가 많거나 PC 자체 변동사항이 많은 경우 IP 설정이 자동으로 되기 때문에 효율적으로 사용 가능하고
-IP를 자동으로 할당해주기 때문에 IP 충돌을 막을 수 있다.
-
+Dynamic Host Configuration Protocol — 클라이언트에게 일정 기간 임대를 하는 동적 주소 할당 프로토콜이다.
+PC의 수가 많거나 PC 자체 변동사항이 많은 경우 IP 설정이 자동으로 되기 때문에 효율적으로 사용 가능하고, IP를 자동으로 할당해주기 때문에 IP 충돌을 막을 수 있다.
 하지만, DHCP 서버에 의존하기 때문에 서버가 다운되면 ip 할당이 제대로 이루어지지 않는다.
 
-## DHCP 처리 과정
+## DHCP 처리 과정 🔄
 
 DORA(Discover,Offer,Request,Ack) 의 과정을 거친다.
-
 TCP 의 3 Handshake 를 떠오르면 기억하기 쉽다.
 
 ### Discover
@@ -160,9 +154,7 @@ DHCP Client 는 주기적으로 IP 주소를 사용하겠다고 요청한다.
 ### Ack
 
 DHCP Server 는 임대시간 정책에 따라 ACK 및 기타설정값들을 담아 ACK 한다.
-
-이후 임대 기간 50% 도달 시 클라이언트가 서버에 **유니캐스트** DHCP Request를 보내 갱신 시도한다.
-
+이후 임대 기간 50% 도달 시 클라이언트가 서버에 **유니캐스트** DHCP Request를 보내 갱신 시도한다.
 실패하면 87.5%에 브로드캐스트 Rebind를 시도한다.
 
 ```mermaid
@@ -209,13 +201,12 @@ sequenceDiagram
     end
 ```
 
-## Linux 에서의 DHCP 실제 흐름
+## Linux 에서의 DHCP 실제 흐름 🐧
 
 > 🤷‍♂️ 아래 과정을 직접 눈으로 확인하려면 어떻게 해야할까,,,?
 > 💡 linux 기반으로 설명하며,
 
 전체 프로세스는 아래와 같다.
-
 하나씩 살펴보자.
 
 ```bash
@@ -370,9 +361,9 @@ dhclient-script가 기본 게이트웨이 설정
 
 # How?
 
-어떻게 씀?
+?
 
-## DHCP 적용 실습
+## DHCP 적용 실습 🛠️
 
 ### 1.
 
@@ -415,7 +406,7 @@ DHCP 적용 확인
 - [ ] DHCP client & server 송수신 로그 확인
 - [ ] 실시간 패킷 캡처로 DHCP 트래픽 확인
 
-## 서버 운영을 위해 고정 IP 를 사용해야한다면 ?
+## 서버 운영을 위해 고정 IP 를 사용해야한다면 ? 📌
 
 두 가지 방법이 있다.
 
@@ -424,22 +415,16 @@ DHCP 적용 확인
 DHCP 사용 & 라우터에서 DHCP 예약 주소 관리 2. static IP 사용
 
 차이점은 무엇이냐.
-
 바로 IP 고정을 라우터에서 할 것이냐, 서버에서 할 것이냐이다.
 
 DHCP 예약 주소란 DHCP Client 가 DHCP 요청 시 예약된 IP 를 내려주는 것을 의미한다.
-
 원리는 라우터에 MAC 주소 : 사설 IP(예: `192.168.45.69`) 를 저장해두는 것이다.
-
 즉, 라우터에서 DHCP Client 에 전달해줄 주소를 미리 선점하여 예약해둔다는 것이다.
 
-DHCP 예약 주소를 관리하게되면 IP 고정을 라우터에서 하게된다.
-static 을 사용하여 서버에서 고정된 IP 를 사용하게하면 IP 고정을 서버에서 하게된다.
+DHCP 예약 주소를 관리하게되면 IP 고정을 라우터에서 하게된다. static 을 사용하여 서버에서 고정된 IP 를 사용하게하면 IP 고정을 서버에서 하게된다.
 
 그렇다면 권장되는 가이드라인은 무엇일까?
-
 그것은 바로 DHCP 예약이다.
-
 이유는 무엇일까?
 
 세 가지 정도된다.
@@ -454,8 +439,7 @@ IP 충돌 위험성 2.
 
 트러블슈팅
 
-물론 공유기 변경 시에는 또 다시 설정해줘야한다는 번거로움이 있지만
-공유기 변경은 흔한 일이 아니기에 DHCP 기반 예약 주소를 사용해보고자 한다.
+물론 공유기 변경 시에는 또 다시 설정해줘야한다는 번거로움이 있지만 공유기 변경은 흔한 일이 아니기에 DHCP 기반 예약 주소를 사용해보고자 한다.
 
 ### DHCP 사용 & 라우터에서 DHCP 예약 주소 관리
 
@@ -469,20 +453,20 @@ DHCP 적용 확인](https://www.notion.so/2ce19c3902908024b792f01b2a42e9eb#2d819
 
 라우터 포트포워딩을 통해 LAN IP 퍼블릭하게 열기
 
-[^2]: https://hail2y.tistory.com/92 <https://hail2y.tistory.com/92>
+[^2]: <https://hail2y.tistory.com/92>
 
-[^3]: https://www.fortinet.com/kr/resources/cyberglossary/static-vs-dynamic-ip <https://www.fortinet.com/kr/resources/cyberglossary/static-vs-dynamic-ip>
+[^3]: <https://www.fortinet.com/kr/resources/cyberglossary/static-vs-dynamic-ip>
 
-[^5]: https://bezzang2.tistory.com/117 <https://bezzang2.tistory.com/117>
+[^5]: <https://bezzang2.tistory.com/117>
 
-[^6]: https://www.reddit.com/r/HomeNetworking/comments/sklvql/how_does_data_flow_from_end_device_to_isp/?tl=ko <https://www.reddit.com/r/HomeNetworking/comments/sklvql/how_does_data_flow_from_end_device_to_isp/?tl=ko>
+[^6]: <https://www.reddit.com/r/HomeNetworking/comments/sklvql/how_does_data_flow_from_end_device_to_isp/?tl=ko>
 
-[^7]: https://m.blog.naver.com/j2ymoon/222351209989 <https://m.blog.naver.com/j2ymoon/222351209989>
+[^7]: <https://m.blog.naver.com/j2ymoon/222351209989>
 
-[^9]: https://5kyc1ad.tistory.com/254 <https://5kyc1ad.tistory.com/254>
+[^9]: <https://5kyc1ad.tistory.com/254>
 
-[^10]: https://www.fortinet.com/kr/resources/cyberglossary/network-address-translation <https://www.fortinet.com/kr/resources/cyberglossary/network-address-translation>
+[^10]: <https://www.fortinet.com/kr/resources/cyberglossary/network-address-translation>
 
-[^12]: https://ujia.tistory.com/71 <https://ujia.tistory.com/71>
+[^12]: <https://ujia.tistory.com/71>
 
-[^14]: https://ojing2.tistory.com/entry/%EB%A7%88%EC%9D%B8%ED%81%AC%EB%9E%98%ED%94%84%ED%8A%B8%EB%A5%BC-%EC%9C%84%ED%95%9C-SKSKB-%EA%B3%B5%EC%9C%A0%EA%B8%B0-%ED%8F%AC%ED%8A%B8%ED%8F%AC%EC%9B%8C%EB%94%A9-%EB%B0%A9%EB%B2%95-2025 <https://ojing2.tistory.com/entry/%EB%A7%88%EC%9D%B8%ED%81%AC%EB%9E%98%ED%94%84%ED%8A%B8%EB%A5%BC-%EC%9C%84%ED%95%9C-SKSKB-%EA%B3%B5%EC%9C%A0%EA%B8%B0-%ED%8F%AC%ED%8A%B8%ED%8F%AC%EC%9B%8C%EB%94%A9-%EB%B0%A9%EB%B2%95-2025>
+[^14]: <https://ojing2.tistory.com/entry/%EB%A7%88%EC%9D%B8%ED%81%AC%EB%9E%98%ED%94%84%ED%8A%B8%EB%A5%BC-%EC%9C%84%ED%95%9C-SKSKB-%EA%B3%B5%EC%9C%A0%EA%B8%B0-%ED%8F%AC%ED%8A%B8%ED%8F%AC%EC%9B%8C%EB%94%A9-%EB%B0%A9%EB%B2%95-2025>

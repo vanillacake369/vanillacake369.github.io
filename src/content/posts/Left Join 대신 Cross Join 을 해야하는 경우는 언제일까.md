@@ -39,9 +39,7 @@ order by
     , subject_name
 ```
 
-이에 따라 잘못된 결과가 나왔다.
-
-우리가 원하는 결과에서는, 지원자가 접수하지 않은 과목에 대해 그룹핑을 하고 0으로 count 해야한다.
+이에 따라 잘못된 결과가 나왔다. 우리가 원하는 결과에서는, 지원자가 접수하지 않은 과목에 대해 그룹핑을 하고 0으로 count 해야한다.
 
 즉 아래와 같이 나와야한다.
 `Expected`
@@ -94,9 +92,9 @@ ORDER BY Students.student_id, Subjects.subject_name;
 
 그렇다면 정답과 내 접근은 무엇이 달랐을까?
 
-# What was the difference of two queries ?
+# What was the difference of two queries ? 🔍
 
-# Used Query
+## Used Query
 
 > **CROSS JOIN**
 
@@ -143,8 +141,8 @@ cross join 을 하게되면 결과는 아래와 같다.
 | 6          | Alex         | Physics      |
 | 6          | Alex         | Programming  |
 
-[^1]: https://www.sqlshack.com/sql-cross-join-with-examples/ <https://www.sqlshack.com/sql-cross-join-with-examples/>
+[^1]: <https://www.sqlshack.com/sql-cross-join-with-examples/>
 
-[^2]: https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations <https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations>
+[^2]: <https://velog.io/@leejy1046/SQL-LeetCode-1280.-Students-and-Examinations>
 
-[^3]: https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0 <https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0>
+[^3]: <https://bmmahmud.medium.com/leetcode-1280-students-and-examinations-analyzing-and-optimising-a-sql-query-ba45b4a6f9b0>

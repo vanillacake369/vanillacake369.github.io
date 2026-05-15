@@ -8,26 +8,17 @@ draft: false
 
 # Why?
 
-사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다.
-linx distro 에서는 흔히 open vpn 에 대해 systemd service 를 선언하여 사용한다.
-
-필자가 사용하는 nixos 환경에서 이를 구축해보았다.
+사내에서는 vpn 을 사용하여 gitlab 에 연결하는데 이 때 .ovpn 파일을 통해 연결을 할 수 있다. linx distro 에서는 흔히 open vpn 에 대해 systemd service 를 선언하여 사용한다. 필자가 사용하는 nixos 환경에서 이를 구축해보았다.
 
 # What?
 
-## How OpenVPN works
+## How OpenVPN works 🔒
 
-OpenVPN 에서는 내부적으로 TUN/TAP 인터페이스를 활용하여 클라이언트와 호스트 간의 연결을 수행한다.
-
-그렇다면 TUN/TAP 인터페이스는 무엇일까?
-
-간단하게 살펴넘어가보자.
+OpenVPN 에서는 내부적으로 TUN/TAP 인터페이스를 활용하여 클라이언트와 호스트 간의 연결을 수행한다. 그렇다면 TUN/TAP 인터페이스는 무엇일까? 간단하게 살펴넘어가보자.
 
 ### What is TUN/TAP ?
 
-linux 에서는 virtual device 개념이 있는데 이는 hardware 와 연결되지 않았지만 파일선언, 즉 코드를 통해 실제로 하드웨어 장치가 수행하는 것처럼 할 수 있게 한다.
-
-이 개념이 사용되는 것이 바로 가상 연결을 형성할 수 있는 커널 내의 네트워크 인터페이스인 TUN/TAP 이다.
+linux 에서는 virtual device 개념이 있는데 이는 hardware 와 연결되지 않았지만 파일선언, 즉 코드를 통해 실제로 하드웨어 장치가 수행하는 것처럼 할 수 있게 한다. 이 개념이 사용되는 것이 바로 가상 연결을 형성할 수 있는 커널 내의 네트워크 인터페이스인 TUN/TAP 이다.[^5]
 
 TUN
 
@@ -43,7 +34,7 @@ TUN
 
 ![](/images/notion/ed75ff92b20196a9.png)
 
-## Init Manually
+## Init Manually 🛠️
 
 **Install**
 필자는 home-manager 를 활용하여 설치하였다.
@@ -63,10 +54,7 @@ TUN
 ```
 
 **Run**
-필자의 사내에서는 ca certificat 와 private key password 를 요구한다.
-ca certificat 는 .ovpn 파일 안에 있으며
-private key password 는 각 개발자 별로 부여하게된다.
-openvpn 은 private key password 에 대한 파일을 선언, askpass 명령어를 통해 자동으로 기입할 수 있게 한다.
+필자의 사내에서는 ca certificat 와 private key password 를 요구한다. ca certificat 는 .ovpn 파일 안에 있으며 private key password 는 각 개발자 별로 부여하게된다. openvpn 은 private key password 에 대한 파일을 선언, askpass 명령어를 통해 자동으로 기입할 수 있게 한다.
 
 따라서 .ovpn 파일을 아래와 같이 수정하였다.
 
@@ -107,13 +95,7 @@ resolv-retry infinite
 askpass ${비밀번호파일 절대경로}/${파일명}
 ```
 
-OpenVPN 은 내부적으로 TUN or TAP adaptor 를 생성한다고 하였다.
-
-이 때 sudo 권한이 있어야만한다.
-
-따라서 sudo 권한을 획득하여 openvpn 을 호출한다.
-
-이후에 아래와 같이 호출하면 openvpn 연결에 성공하는 걸 볼 수 있다.
+OpenVPN 은 내부적으로 TUN or TAP adaptor 를 생성한다고 하였다. 이 때 sudo 권한이 있어야만한다.[^2] 따라서 sudo 권한을 획득하여 openvpn 을 호출한다. 이후에 아래와 같이 호출하면 openvpn 연결에 성공하는 걸 볼 수 있다.
 
 > ⚠️ **주의점 : Restart Session**
 
@@ -127,9 +109,9 @@ OpenVPN 은 내부적으로 TUN or TAP adaptor 를 생성한다고 하였다.
 2025-06-14 13:17:48 Timers: ping 10, ping-restart 120
 ```
 
-## Declare Systemd
+## Declare Systemd ⚙️
 
-필자는 nix 를 활용하여 아래와 같이 systemd 를 선언하였다.
+필자는 nix 를 활용하여 아래와 같이 systemd 를 선언하였다.[^6]
 
 ```nix
 services = {
@@ -148,7 +130,7 @@ services = {
 ```nix
 [Unit]
 After=network.target
-Description=OpenVPN instance ‘hamaVPN’
+Description=OpenVPN instance 'hamaVPN'
 
 [Service]
 Environment="LOCALE_ARCHIVE=/nix/store/wkvhpndx0lxadcbjj18w7k8rf0f6nii2-glibc-locales-2.40-66/lib/locale/locale-archive"
@@ -167,7 +149,7 @@ Type=notify
 
 ~/my-nixos/openvpn main
 ❯ sudo systemctl status openvpn-hamaVPN.service
-● openvpn-hamaVPN.service - OpenVPN instance ‘hamaVPN’
+● openvpn-hamaVPN.service - OpenVPN instance 'hamaVPN'
      Loaded: loaded (/etc/systemd/system/openvpn-hamaVPN.service; linked; preset: i>
      Active: active (running) since Sat 2025-06-14 13:13:51 KST; 4s ago
  Invocation: e2031b5a4ead4a0cbca9992e9a3c6f35
@@ -175,14 +157,14 @@ Type=notify
      Status: "Initialization Sequence Completed"
 ```
 
-[^1]: https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/ <https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/>
+[^1]: <https://liujunming.top/2022/07/31/Notes-about-TUN-TAP-Interface/>
 
-[^2]: https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con <https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con>
+[^2]: <https://serverfault.com/questions/647231/getting-cannot-ioctl-tunsetiff-tun-operation-not-permitted-when-trying-to-con>
 
-[^3]: https://www.baeldung.com/linux/tun-interface-purpose <https://www.baeldung.com/linux/tun-interface-purpose>
+[^3]: <https://www.baeldung.com/linux/tun-interface-purpose>
 
-[^4]: https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking# <https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#>
+[^4]: <https://developers.redhat.com/blog/2018/10/22/introduction-to-linux-interfaces-for-virtual-networking#>
 
-[^5]: https://en.wikipedia.org/wiki/Virtual_device <https://en.wikipedia.org/wiki/Virtual_device>
+[^5]: <https://en.wikipedia.org/wiki/Virtual_device>
 
-[^6]: https://nixos.wiki/wiki/OpenVPN <https://nixos.wiki/wiki/OpenVPN>
+[^6]: <https://nixos.wiki/wiki/OpenVPN>

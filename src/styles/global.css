@@ -190,6 +190,36 @@ hr {
   margin: var(--spacing-2xl) 0;
 }
 
+/* ── Footnote tooltip ── */
+#fn-tooltip {
+  z-index: 1100;
+  max-width: 360px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--vim-panel-bg, var(--color-bg));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--vim-panel-border, var(--color-border));
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  word-break: keep-all;
+}
+
+#fn-tooltip a {
+  color: var(--color-accent);
+  pointer-events: none;
+}
+
+#fn-tooltip code {
+  font-size: 0.78rem;
+  padding: 0.1em 0.3em;
+  background: var(--color-code-bg);
+  border-radius: 3px;
+}
+
 /* Shiki dual theme — dark mode uses the second theme */
 [data-theme='dark'] .astro-code,
 [data-theme='dark'] .astro-code span,

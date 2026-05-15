@@ -1,12 +1,8 @@
 ---
-description: "아래와 같은 의문점을 해결해보고자 한다.
-
-- 언제 `BETWEEN` 을 쓰는 게 적합하고,
-- 언제 `IN` 을 쓰는 게 적합한지
-- 각각의 Operation Plan 이 무엇인지
-- 어떤 것이 더 성능이 좋은지"
+description: 언제 `BETWEEN` 을 쓰는 게 적합하고, 언제 `IN` 을 쓰는 게 적합할까?
 date: 2024-05-17
-tags: [journal, database]
+tags:
+  - database
 lang: ko
 draft: false
 ---

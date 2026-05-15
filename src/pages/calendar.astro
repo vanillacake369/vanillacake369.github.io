@@ -1,4 +1,7 @@
 ---
+import '../styles/typography/tokens.css';
+import '../styles/typography/page.css';
+import '../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { filterPublished, groupByCalendarDay, sortPostsByDate, entryToPost } from '../domain/post';
@@ -62,12 +65,15 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
   description="Post contribution calendar."
 >
   <section class="calendar-page">
-    <h1
-      class="page-title"
-      data-i18n="calendar.title"
-      data-i18n-ko={translations.ko['calendar.title']}
-      data-i18n-en={translations.en['calendar.title']}
-    >{translations.ko['calendar.title']}</h1>
+    <header class="page-header">
+      <h1
+        class="page-title"
+        data-i18n="calendar.title"
+        data-i18n-ko={translations.ko['calendar.title']}
+        data-i18n-en={translations.en['calendar.title']}
+      >{translations.ko['calendar.title']}</h1>
+      <p class="page-desc">Post contribution calendar.</p>
+    </header>
 
     <!-- Year navigation -->
     <div class="year-nav">
@@ -236,13 +242,6 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
 <style>
   .calendar-page { max-width: 100%; }
 
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: var(--spacing-md);
-  }
-
   /* Year navigation */
   .year-nav {
     display: flex;
@@ -265,7 +264,7 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
     border-color: var(--color-accent);
   }
   .year-label {
-    font-size: 1.1rem;
+    font-size: var(--font-size-section-title);
     font-weight: 600;
     color: var(--color-text);
     min-width: 3rem;
@@ -332,7 +331,6 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
     background: var(--color-code-bg);
   }
   .day-posts-title {
-    font-size: 0.95rem; font-weight: 600; color: var(--color-text);
     margin-bottom: var(--spacing-sm);
   }
   .day-posts-list { list-style: none; padding: 0; }
@@ -348,7 +346,7 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
 
   /* All posts */
   .post-list-section { margin-top: var(--spacing-xl); padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border); }
-  .post-list-title { font-size: 1.1rem; font-weight: 600; margin-bottom: var(--spacing-lg); }
+  .post-list-title { margin-bottom: var(--spacing-lg); }
   .post-list { list-style: none; padding: 0; }
   .post-item {
     display: grid; grid-template-columns: 7rem 1fr; column-gap: var(--spacing-md);
@@ -356,12 +354,8 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
     align-items: baseline;
   }
   .post-item:last-child { border-bottom: none; }
-  .post-item-date { font-size: 0.8rem; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
-  .post-item-title { font-size: 0.95rem; font-weight: 500; color: var(--color-text); text-decoration: none; transition: color 0.15s; }
-  .post-item-title:hover { color: var(--color-accent); }
+  .post-item-date { font-variant-numeric: tabular-nums; }
   .post-item-tags { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); grid-column: 2; }
-  .post-item-tag { font-size: 0.75rem; color: var(--color-text-secondary); text-decoration: none; }
-  .post-item-tag:hover { color: var(--color-accent); }
 
   @media (max-width: 640px) {
     .calendar-scroll-container { margin: 0 calc(-1 * var(--spacing-md)); padding: 0 var(--spacing-md); }

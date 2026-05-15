@@ -50,24 +50,12 @@ function formatDate(date: Date): string {
   }
 
   .post-item-date {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   .post-item-title {
     display: block;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-text);
-    text-decoration: none;
     margin-bottom: var(--spacing-sm);
-    line-height: 1.3;
-    transition: color 0.15s ease;
-  }
-
-  .post-item-title:hover {
-    color: var(--color-accent);
   }
 
   .post-item-description {
@@ -85,16 +73,5 @@ function formatDate(date: Date): string {
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-sm);
-  }
-
-  .post-item-tag {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  .post-item-tag:hover {
-    color: var(--color-accent);
   }
 </style>

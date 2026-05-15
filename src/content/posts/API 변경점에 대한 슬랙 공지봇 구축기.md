@@ -1,5 +1,5 @@
 ---
-description: "API 변경점이 생기면 개발팀에게 변경점 요약을 해줄 수 있게끔 해보자"
+description: "GitLab CI/CD 파이프라인에 oasdiff를 통합해 Swagger 스펙 변경점을 자동 감지하고 슬랙으로 공지하는 봇을 구축한 과정을 기록한다."
 date: 2025-03-02
 tags: [journal]
 lang: ko
@@ -11,15 +11,11 @@ draft: false
 # Episode 📜
 
 BE API 는 수정이 잦을 수밖에 없다.
-
 만약 기획 변경이나 잘못된 설계가 진행된 경우, API 의 필드값, 스키마 혹은 로직 자체가 수정되어야 한다.
-
 특히 바쁜 일정과 변경점이 잦은 프로젝트일수록 API 는 자주 변화하고 자주 수정된다.
 
 현재 사내에서는 백엔드 완성 이전에 프론트가 작업을 착수하고 있는데, 프론트 개발 도중 API 가 수정되는 일이 발생한다.
-
 문제점은 프론트팀에서 이를 탐지하지 못 한다는 것이다.
-
 즉, 본인은 기존 API 스펙에 맞게 구현하였음에도, 변경된 API 스펙을 인지하지 못 해 장애가 발생하는 상황이 생기는 것이다.
 
 실제로 아래와 같은 슬랙을 주고받았다.
@@ -27,7 +23,6 @@ BE API 는 수정이 잦을 수밖에 없다.
 ![](/images/velog/3a08a22420f3f32f.png)
 
 이러한 문제점이 생각보다 심각함을 알게되었고, 내부설문조사를 해보았다.
-
 아래는 프론트팀에서 제기한 문제점들을 나열한 것이다.
 
 - 데이터 타입 변경건 (eg 문자열 → 리스트)
@@ -37,18 +32,14 @@ BE API 는 수정이 잦을 수밖에 없다.
 - 에러수정에 대해 탐지할 수 없는 건
 
 그렇다면 이를 해결할 수는 없을까?
-
 필자는 변경점이 존재할 때 프론트팀에 공지할 수 있도록 하고자 한다.
-
-API 스펙 변경 시 swagger diff 오픈소스들을 활용하여 배포 파이프라인에서 변경점을 감지하고,
-
-이를 slack 에 notify 될 수 있도록 구현해보고자 한다.
+API 스펙 변경 시 swagger diff 오픈소스들을 활용하여 배포 파이프라인에서 변경점을 감지하고, 이를 slack 에 notify 될 수 있도록 구현해보고자 한다.
 
 # About 💁‍♂️
 
 아래와 같은 설계로 접근해보고자 한다.
 
-> 💡
+
 >
 > 1.
 
@@ -84,7 +75,7 @@ a. curl 명령어를 사용하여 다운
 
 >
 
-### swagger diff 를 지원하는 오픈소스들
+### swagger diff 를 지원하는 오픈소스들 🔎
 
 #### [Sayi/swagger-diff](https://github.com/Sayi/swagger-diff#usage)
 
@@ -290,10 +281,9 @@ jihoon@HAMA:~$ oasdiff changelog swagger-sample-01.yaml swagger-sample-02.yaml -
 
 ```
 
-### 무엇을 쓰기로 결정했고 왜 그런 선택을 했는지?
+### 무엇을 쓰기로 결정했고 왜 그런 선택을 했는지? 🤔
 
 [Tufin/oasdiff](https://github.com/Tufin/oasdiff) 를 사용하기로 결정했다.
-
 이유인 즉슨,,
 
 1.
@@ -311,7 +301,6 @@ CLI 태그를 통해 다양한 format 을 지원한다. 1. md 2. html 3. text 3.
 # Apply 🧑‍💻
 
 필자는 GitLab 의 파이프라인에 통합하여 CI/CD 과정에서 처리될 수 있게끔 하고자 하였다.
-
 대충 프로세스는 아래와 같다.
 
 1.
@@ -324,7 +313,6 @@ CLI 태그를 통해 다양한 format 을 지원한다. 1. md 2. html 3. text 3.
 
 3. oas-diff 스테이지에서 배포된 버전의 oas(latest.json)를 얻고, oasdiff 로 옛날 버전의 origin.json 파일과 비교하여 변경점을 깃랩서버에 저장한다.
    (최초 실행시 origin.json 이 없다.
-
 캐시되기 전이므로, 두번째 배포부터 비교되기 시작한다.)
 
 4. oas-cache 스테이지에서 배포된 버전의 oas(origin.json)를 얻고, 러너에 캐시한다.
@@ -332,7 +320,6 @@ CLI 태그를 통해 다양한 format 을 지원한다. 1. md 2. html 3. text 3.
 5.
 
 위 과정을 다음 파이프라인에서 반복한다.
-
 반복되면 oas-diff 스테이지에서 이전 파이프라인의 캐시된 origin.json 과 현재 배포중인 latest.json 을 반복적으로 비교하게된다.
 
 6.
@@ -353,7 +340,7 @@ deploy:
 	url: **$DEV_OAS_URL**
   ...
 
-oas-diff:
+ oas-diff:
   image: python:3.10
   stage: Diff
   before_script:
@@ -437,11 +424,8 @@ post-slack-message:
 ![](/images/velog/78d1004abafd15d9.png)
 
 다만 oasdiff 결과물인 영어로 처리되어 나오는 것을 볼 수 있었다. 😭
-
 Devops/AI 팀의 지원을 통해 이를 해결할 수 있었다.
-
 n8n 워크플로우 기반으로 한글로 번역, 요약되어 볼 수 있게끔 처리해주셨다.
-
 (Special Thx to 오대리님,,)
 
 1.
@@ -470,22 +454,8 @@ GitLab 파이프라인에서 비교결과파일([changelog.md](http://changelog.
   - 현재 구조 상으로는 API A 에 대해 어떤 변경내역이 있었고, 누가 이 변경점을 처리했었는지 추적이 어렵다.
   - 만약 개선이 가능하다면 커밋 히스토리와 묶일 수 있으면 좋겠다는 생각이 든다.
 
-# Reference 📚
-
-https://github.com/tinohager/swagger-diff
-
-https://github.com/Sayi/swagger-diff#usage
-
-https://github.com/civisanalytics/swagger-diff
-
-https://bitbucket.org/atlassian/openapi-diff/src/master/
-
-https://github.com/OpenAPITools/openapi-diff
-
-https://github.com/Tufin/oasdiff
-
-https://findstar.pe.kr/2018/05/13/upload-file-on-curl/
-
-https://stackoverflow.com/questions/63480282/how-to-send-a-message-to-slack-using-curl-from-gitlab-ci-yml
-
-https://mrdevx.medium.com/step-by-step-guide-integrating-slack-with-gitlab-ci-for-seamless-ci-cd-notifications-be76a54d3038
+[^1]: Tufin/oasdiff 공식 저장소 — https://github.com/Tufin/oasdiff
+[^2]: OpenAPITools/openapi-diff 공식 저장소 — https://github.com/OpenAPITools/openapi-diff
+[^3]: GitLab CI에서 Slack 연동하는 방법 — https://mrdevx.medium.com/step-by-step-guide-integrating-slack-with-gitlab-ci-for-seamless-ci-cd-notifications-be76a54d3038
+[^4]: curl 로 파일 업로드하기 — https://findstar.pe.kr/2018/05/13/upload-file-on-curl/
+[^5]: curl 로 Slack 메시지 전송하기 (Stack Overflow) — https://stackoverflow.com/questions/63480282/how-to-send-a-message-to-slack-using-curl-from-gitlab-ci-yml

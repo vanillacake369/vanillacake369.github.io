@@ -1,5 +1,5 @@
 ---
-description: "공간데이터란 무엇이고, 주의점은 무엇인지, 또한 이를 Spring 단에서 처리하며 맞닥드렸던 문제점과 해결방법에 대해 나열해보고자 한다."
+description: "PostGIS와 Redis Geo를 Spring QueryDSL에 연동하면서 겪은 좌표계 선택, Spatial Index 활용, KNN 연산자 커스텀 Dialect 등록까지 실무 삽질기를 정리한다."
 date: 2025-07-28
 tags: [journal]
 lang: ko
@@ -12,61 +12,57 @@ draft: false
 
 # What?
 
-## 공간 데이터(Spatial Data)란?
+## 공간 데이터(Spatial Data)란? 🌐
 
-공간 데이터(Spatial Data)는 지리적 위치 정보를 포함한 데이터를 말하며, 실제 세계의 객체나 사건, 현상이 가지는 위치(좌표, 주소 등)를 기반으로 표현됩니다.
-
-주로 점(Point), 선(Line), 면(Polygon)의 형태로 나타납니다.
+공간 데이터(Spatial Data)는 지리적 위치 정보를 포함한 데이터로, 실제 세계의 객체나 사건·현상이 가지는 위치(좌표, 주소 등)를 기반으로 표현된다. 주로 점(Point), 선(Line), 면(Polygon)의 형태로 나타난다.
 
 - **점(Point)**: 특정 위치를 나타내는 단일 좌표 (예: 상점, 버스 정류장).
 - **선(LineString)**: 두 개 이상의 점을 연결하여 형성되는 객체 (예: 도로, 강).
 - **면(Polygon)**: 세 개 이상의 점으로 둘러싸인 닫힌 영역 (예: 공원, 행정구역).
 
-## 공간 데이터 저장 방식
+## 공간 데이터 저장 방식 💾
 
-공간 데이터 저장 방식은 크게 벡터(Vector)와 래스터(Raster) 두 가지가 있습니다.
+공간 데이터 저장 방식은 크게 벡터(Vector)와 래스터(Raster) 두 가지가 있다.
 
 ### 벡터(Vector) 데이터 모델
 
-- 점, 선, 면과 같은 기하학적 요소를 사용하여 객체를 표현합니다.
-- 객체별 좌표 배열을 관리하며 정밀한 경계 및 형태 표현에 적합합니다.
+- 점, 선, 면과 같은 기하학적 요소를 사용하여 객체를 표현한다.
+- 객체별 좌표 배열을 관리하며 정밀한 경계 및 형태 표현에 적합하다.
 - 예시: 건물 경계, 도로 네트워크 등
 
 ### 래스터(Raster) 데이터 모델
 
-- 픽셀(Pixel)로 이루어진 격자(Grid) 형태로 데이터를 표현합니다.
-- 위성 이미지, 고도 데이터, 온도와 같은 연속적인 값 표현에 적합합니다.
+- 픽셀(Pixel)로 이루어진 격자(Grid) 형태로 데이터를 표현한다.
+- 위성 이미지, 고도 데이터, 온도와 같은 연속적인 값 표현에 적합하다.
 
-## SRID(Spatial Reference System Identifier)
+## SRID(Spatial Reference System Identifier) 🗺️
 
-SRID는 공간 데이터를 표현하는 데 사용되는 좌표계와 투영 방식을 식별하는 고유한 번호입니다.
+SRID는 공간 데이터를 표현하는 데 사용되는 좌표계와 투영 방식을 식별하는 고유한 번호다.
 
-- **EPSG:4326** (WGS84): 가장 널리 사용되는 위도·경도 기반 좌표계로 GPS에 사용됩니다.
-- **EPSG:3857** (Web Mercator): 웹 지도 서비스(구글 맵 등)에서 많이 사용되는 좌표계입니다.
+- **EPSG:4326** (WGS84): 가장 널리 사용되는 위도·경도 기반 좌표계로 GPS에 사용된다.
+- **EPSG:3857** (Web Mercator): 웹 지도 서비스(구글 맵 등)에서 많이 사용되는 좌표계다.
 
-SRID는 정확한 위치 표현과 좌표계 변환을 가능하게 합니다.
+SRID는 정확한 위치 표현과 좌표계 변환을 가능하게 한다.
 
-## R-Tree와 공간지리인덱스(Spatial Index)
+## R-Tree와 공간지리인덱스(Spatial Index) 🌲
 
-공간 데이터는 2차원 이상의 다차원 구조로 인해 일반적인 데이터베이스 인덱스(B-Tree 등)로는 효율적이지 않습니다.
-
-이를 위해 공간지리인덱스가 사용됩니다.
+공간 데이터는 2차원 이상의 다차원 구조로 인해 일반적인 데이터베이스 인덱스(B-Tree 등)로는 효율적이지 않다. 이를 위해 공간지리인덱스가 사용된다.
 
 ### R-Tree
 
-- 다차원 데이터를 효율적으로 검색하기 위한 계층적 트리 구조입니다.
-- 최소 경계 사각형(MBR, Minimum Bounding Rectangle)을 사용하여 객체들을 그룹화하여 관리합니다.
-- 검색 효율성이 뛰어나며 GIS 및 위치 기반 서비스(LBS)에서 널리 쓰입니다.
+- 다차원 데이터를 효율적으로 검색하기 위한 계층적 트리 구조다.
+- 최소 경계 사각형(MBR, Minimum Bounding Rectangle)을 사용하여 객체들을 그룹화하여 관리한다.
+- 검색 효율성이 뛰어나며 GIS 및 위치 기반 서비스(LBS)에서 널리 쓰인다.
 
-## PostgreSQL(PostGIS)에서의 공간 데이터 저장
+## PostgreSQL(PostGIS)에서의 공간 데이터 저장 🐘
 
-PostgreSQL은 PostGIS 확장 모듈을 통해 공간 데이터를 지원하며, 주요 타입으로 **geometry**와 **geography**를 제공합니다.
+PostgreSQL은 PostGIS 확장 모듈을 통해 공간 데이터를 지원하며, 주요 타입으로 **geometry**와 **geography**를 제공한다.
 
 ### geometry 타입
 
-- **좌표 체계**: 유클리드 평면(Euclidean Plane)을 기반으로 합니다.
-- **성능**: 연산이 빠르고 데이터가 압축된 바이너리 형태로 저장되어 효율적입니다.
-- **적합한 용도**: 좁은 지역 내에서의 정밀한 연산 및 지도 투영 좌표계(EPSG:3857 등)에 적합합니다.
+- **좌표 체계**: 유클리드 평면(Euclidean Plane)을 기반으로 한다.
+- **성능**: 연산이 빠르고 데이터가 압축된 바이너리 형태로 저장되어 효율적이다.
+- **적합한 용도**: 좁은 지역 내에서의 정밀한 연산 및 지도 투영 좌표계(EPSG:3857 등)에 적합하다.
 
 **사용 예시:**
 
@@ -81,10 +77,10 @@ CREATE TABLE places (
 
 ### geography 타입
 
-- **좌표 체계**: 지구의 곡률을 고려한 타원체(Spheroidal Coordinate System)를 기반으로 합니다.
-- **정확성**: 넓은 지역에서 실제 거리와 면적을 정확하게 계산할 수 있습니다.
-- **성능**: geometry보다 연산 속도가 느릴 수 있으나 정확성은 높습니다.
-- **적합한 용도**: 대규모 범위에서 정확한 거리 계산이 필요한 경우 적합합니다.
+- **좌표 체계**: 지구의 곡률을 고려한 타원체(Spheroidal Coordinate System)를 기반으로 한다.
+- **정확성**: 넓은 지역에서 실제 거리와 면적을 정확하게 계산할 수 있다.
+- **성능**: geometry보다 연산 속도가 느릴 수 있으나 정확성은 높다.
+- **적합한 용도**: 대규모 범위에서 정확한 거리 계산이 필요한 경우 적합하다.
 
 **사용 예시:**
 
@@ -102,9 +98,9 @@ CREATE TABLE cities (
 - **geometry**: 좁은 지역, 빠른 성능 우선, 지도 투영 좌표계 활용 시
 - **geography**: 넓은 지역, 정확한 거리 및 면적 계산 우선 시
 
-## Redis에서의 공간 데이터 저장
+## Redis에서의 공간 데이터 저장 ⚡
 
-Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 공간 데이터를 위한 GeoSpatial Index를 지원합니다.
+Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 공간 데이터를 위한 GeoSpatial Index를 지원한다.
 
 ### Redis Geo 명령어
 
@@ -131,17 +127,17 @@ Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 
 
 ### Redis 공간 데이터 특징
 
-- **Geohash 기반 Sorted Set**: 위도·경도를 Geohash로 변환하여 효율적으로 관리합니다.
-- **빠른 성능**: 메모리 기반으로 실시간 위치 검색 및 근접 객체 검색에 최적화되어 있습니다.
+- **Geohash 기반 Sorted Set**: 위도·경도를 Geohash로 변환하여 효율적으로 관리한다.
+- **빠른 성능**: 메모리 기반으로 실시간 위치 검색 및 근접 객체 검색에 최적화되어 있다.
 - **적합한 용도**: 간단한 위치 기반 서비스, 캐싱, 실시간 추적 등
 
-복잡한 공간 연산 및 대규모 GIS는 PostGIS와 같은 전문 데이터베이스가 더 적합합니다.
+복잡한 공간 연산 및 대규모 GIS는 PostGIS와 같은 전문 데이터베이스가 더 적합하다.
 
 # How?
 
-어떻게 씀?
+?
 
-## 전체적인 컴포넌트
+## 전체적인 컴포넌트 🧩
 
 | 계층                     | 컴포넌트                           | 역할                                                               |
 | ------------------------ | ---------------------------------- | ------------------------------------------------------------------ |
@@ -166,25 +162,19 @@ Redis는 기본적으로 Key-Value 데이터베이스이지만, Redis 3.2부터 
 
 ![](/images/velog/dcbc1d40732bc8bb.png)
 
-## 컴포넌트 설명
+## 컴포넌트 설명 🔧
 
 컴포넌트 설명에 앞서서 설계 의도 자체는 아래와 같다.
 
 - 하드코딩은 최대한 지양할 것
 - 모든 PostGis 를 지원할 수 있게 할 것
-- Spatial Index 를 사용하는 함수만을 지향할 것 (
+- Spatial Index 를 사용하는 함수만을 지향할 것
 
-이를 주의하여 참고하도록 하자.
-
-만약 다르게 설계 및 사용하고 싶다면 변형해도 좋다.
+이를 주의하여 참고하도록 하자. 만약 다르게 설계 및 사용하고 싶다면 변형해도 좋다.
 
 ### PostGisJPQLTemplate
 
-기본적으로 거리순정렬, 각 데이터에 대한 거리차이들을 구하려면 PostGIS 함수를 호출해야한다.
-
-하지만 사내에서의 Querydsl 은 기본적으로 JPA & JPQL 을 따른다.
-
-따라서 Native JPQL 대신해서 사용할 수 있도록 아래와 같이 직접적으로 선언해서 주입해주었다.
+기본적으로 거리순정렬, 각 데이터에 대한 거리차이들을 구하려면 PostGIS 함수를 호출해야한다. 하지만 사내에서의 Querydsl 은 기본적으로 JPA & JPQL 을 따른다. 따라서 Native JPQL 대신해서 사용할 수 있도록 아래와 같이 직접적으로 선언해서 주입해주었다.
 
 ```java
 /**
@@ -244,21 +234,12 @@ public void setEntityManager(EntityManager entityManager) {
 
 ### CustomPostGisDialect
 
-위에서 보다보면 `CustomPostGisDialect` 이라는 친구를 선언한 것을 볼 수 있을 것이다.
+위에서 보다보면 `CustomPostGisDialect` 이라는 친구를 선언한 것을 볼 수 있을 것이다. 이 또한 PostGis 의 `<->` 함수를 사용하기 위함이다. 다만 우리의 JPQL, Dialect 에 있는 SQL 예약어가 아니면 에러를 내뱉는다. 따라서 `<->` 를 인식하게끔 해주기 위해 다음 두 단계 작업을 처리해주었다.
 
-이 또한 PostGis 의 `<->` 함수를 사용하기 위함이다.
-
-다만 우리의 JPQL , Dialect 에 있는 SQL 예약어가 아니면 에러를 내뱉는다.
-
-따라서 `<->` 를 인식하게끔 해주기 위해 다음 두 단계 작업을 처리해주었다.
-
-1.
-
-Dialect 를 직접 선언 2. resoureces/META-INF 에 직접 선언한 Dialect 를 등록 1. `src/main/resources/META-INF/services/org.hibernate.boot.model.FunctionContributor`파일을 생성한다. 2.
-
-해당 파일에 직접 구현한 CustomFunctionContributor를 등록한다. 1.
-
-패키지명.컨트리뷰터이름 형태로 등록
+1. Dialect 를 직접 선언한다.
+2. `resources/META-INF` 에 직접 선언한 Dialect 를 등록한다.
+   1. `src/main/resources/META-INF/services/org.hibernate.boot.model.FunctionContributor` 파일을 생성한다.
+   2. 해당 파일에 직접 구현한 CustomFunctionContributor를 등록한다. (패키지명.컨트리뷰터이름 형태로 등록)
 
 ```java
 /**
@@ -290,25 +271,15 @@ public class CustomPostGisDialect extends SpatialFunctionContributor {
 
 ### 동적 조건부절
 
-위와 같이 환경설정이 끝났다면 이제 실제로 SQL 문에 대한 쿼리를 짤 차례이다.
-
-두 가지 주의사항이 있는데 하나는 좌표계이고, 하나는 ST_DistanceSpheroid 함수이다.
+위와 같이 환경설정이 끝났다면 이제 실제로 SQL 문에 대한 쿼리를 짤 차례이다. 두 가지 주의사항이 있는데 하나는 좌표계이고, 하나는 ST_DistanceSpheroid 함수이다.
 
 > 좌표계
 
-필자는 4326 좌표계 & Geometry 를 사용하고 있어 실제 거리가 아닌 각도 체계 거리로 처리되는 문제가 있었다.
-
-이를 해결하기 위해서 ST_Transform 함수를 통해 3857 좌표계로 변환, ST_DWithin 함수를 사용하였다.
+필자는 4326 좌표계 & Geometry 를 사용하고 있어 실제 거리가 아닌 각도 체계 거리로 처리되는 문제가 있었다. 이를 해결하기 위해서 ST_Transform 함수를 통해 3857 좌표계로 변환, ST_DWithin 함수를 사용하였다.
 
 > ST_DistanceSpheroid 함수
 
-필자는 실제 거리에 가까운 ST_DistanceSpheroid 함수 사용하지 않았다.
-
-엥 실제 거리에 가까우니까 좋은 거 아냐 하는 마음에 사용할 수 있지만,
-
-이는 Spatial Index 를 사용하지 않았고, 앞서 말했듯이 최대한 Spatial Indeex 를 사용하고자 하였다.
-
-따라서 필자는 [PostGis 에 적혀있는 함수목록](https://postgis.net/documentation/faq/spatial-indexes/) 을 최대한 사용하였다.
+필자는 실제 거리에 가까운 ST_DistanceSpheroid 함수를 사용하지 않았다. 엥 실제 거리에 가까우니까 좋은 거 아냐 하는 마음에 사용할 수 있지만, 이는 Spatial Index 를 사용하지 않았고, 앞서 말했듯이 최대한 Spatial Index 를 사용하고자 하였다. 따라서 필자는 [PostGis 에 적혀있는 함수목록](https://postgis.net/documentation/faq/spatial-indexes/) 을 최대한 사용하였다.
 
 ```java
 /**
@@ -366,17 +337,11 @@ default <T> JPAQuery<T> orderByDistanceAsc(JPAQuery<T> query, Boolean isDistance
 }
 ```
 
-## 주의점
+## 주의점 ⚠️
 
 ### 캐시와 DB 동기화
 
-입력에 따른 캐싱 저장과 Cache-aside 를 활용한 조회는 단순하다.
-
-다만 수정/삭제에 따라 캐싱과 DB 를 동기화해야하는 포인트가 어렵다.
-
-특히 Redis Geo 는 Sorted Set 으로 관리되므로 — ${KEY} ${MEMBER:위경도} ${VALUE} —
-
-수정/삭제 시에는 아래와 같이 처리해주어야 한다.
+입력에 따른 캐싱 저장과 Cache-aside 를 활용한 조회는 단순하다. 다만 수정/삭제에 따라 캐싱과 DB 를 동기화해야하는 포인트가 어렵다. 특히 Redis Geo 는 Sorted Set 으로 관리되므로 — ${KEY} ${MEMBER:위경도} ${VALUE} — 수정/삭제 시에는 아래와 같이 처리해주어야 한다.
 
 > 수정
 >
@@ -415,9 +380,7 @@ redisTemplate.opsForZSet().remove("locations", "loc1");
 
 # 총평
 
-예제가 없어서 그냥 SQL 로 짜면 될 것을 굳이굳이 Querydsl 로 하겠다고 몇 번의 삽질을 했는지 모른다.
-
-다만 이렇게 해두고 나니 하드코딩이 아닌 코드 단으로 로직을 처리할 수 있다는 장점이 있다.
+예제가 없어서 그냥 SQL 로 짜면 될 것을 굳이굳이 Querydsl 로 하겠다고 몇 번의 삽질을 했는지 모른다. 다만 이렇게 해두고 나니 하드코딩이 아닌 코드 단으로 로직을 처리할 수 있다는 장점이 있다.
 
 아래와 같이 여러 방면에서의 제한점이 있는지 체크해보고 도입해도록 하자.
 
@@ -425,10 +388,10 @@ redisTemplate.opsForZSet().remove("locations", "loc1");
 - Spatial Index 사용, 미사용의 성능 최대치 차이점
 - SQL 에 대한 커스텀 Dialect 선언 시 Multi DB 사용 가능한지
 
-[^1]: https://postgis.net/workshops/postgis-intro/geography.html <https://postgis.net/workshops/postgis-intro/geography.html>
+[^1]: <https://postgis.net/workshops/postgis-intro/geography.html>
 
-[^2]: https://postgis.net/documentation/faq/spatial-indexes/ <https://postgis.net/documentation/faq/spatial-indexes/>
+[^2]: <https://postgis.net/documentation/faq/spatial-indexes/>
 
-[^3]: https://redis.io/docs/latest/develop/data-types/geospatial/ <https://redis.io/docs/latest/develop/data-types/geospatial/>
+[^3]: <https://redis.io/docs/latest/develop/data-types/geospatial/>
 
-[^4]: https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0 <https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0>
+[^4]: <https://www.inflearn.com/community/questions/1096265/hibernate-6-custom-%ED%95%A8%EC%88%98-%EB%93%B1%EB%A1%9D-%EB%B0%A9%EB%B2%95-%EA%B3%B5%EC%9C%A0>

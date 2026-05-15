@@ -6,7 +6,7 @@ lang: ko
 draft: false
 ---
 
-# 가상화 기술 이전과 이후
+# 가상화 기술 이전과 이후 🖥️
 
 ## 가상화 이전
 
@@ -59,7 +59,7 @@ Linux 의 C Group 과 Namespace 를 사용
 
 ```
 
-# Docker Container vs Docker Image vs Docker Volume
+# Docker Container vs Docker Image vs Docker Volume 📦
 
 - Docker image
   **_pre-packaged, read-only template that contains everything needed to run an application,_**
@@ -75,13 +75,9 @@ Containers are created from Docker images, and multiple containers can run from 
 - Docker Volume
   **_persistent data storage area_** that can be used by one or more containers.
 
-Volumes are used to store data that needs to persist beyond the life of a container,
-such as application configuration files or user data.
+Volumes are used to store data that needs to persist beyond the life of a container, such as application configuration files or user data. Volumes can be created and managed independently of containers and can be shared between containers.
 
-Volumes can be created and managed independently of containers
-and can be shared between containers.
-
-# Docker 사용 흐름
+# Docker 사용 흐름 🔄
 
 ![](/images/notion/525df9760342fcf8.png)
 
@@ -91,17 +87,25 @@ and can be shared between containers.
 - Docker Image Cache Storage
 - Docker Hub
 
-# 도커 컨테이너 생명주기
+# 도커 컨테이너 생명주기 ♻️
 
 > create -> start -> running -> stopped -> deleted
 
 - `docker run` == `docker create` & `docker start`
 - `docker stop` vs `docker kill`
 
-# 도커 컨테이너에 명령어 전달
+# 도커 컨테이너에 명령어 전달 💬
 
 `docker exec <컨테이너 아이디>`
 
 - 옵션
 
 > E.G.
+
+[^1]: Docker 공식 문서 — 컨테이너와 이미지, 볼륨의 개념을 상세히 설명한다. <https://docs.docker.com/get-started/overview/>
+
+[^2]: Linux man page — cgroups(7). CPU·메모리 등 자원을 프로세스 그룹 단위로 제한하는 커널 기능. <https://man7.org/linux/man-pages/man7/cgroups.7.html>
+
+[^3]: Linux man page — namespaces(7). PID, Network, Mount 등 커널 자원을 프로세스별로 분리하는 방법. <https://man7.org/linux/man-pages/man7/namespaces.7.html>
+
+[^4]: Brendan Burns et al., *Kubernetes: Up and Running* — 컨테이너 위에서 동작하는 오케스트레이션 시스템의 기초를 이해하는 데 도움이 된다.

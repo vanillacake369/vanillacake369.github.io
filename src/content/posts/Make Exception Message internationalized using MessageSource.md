@@ -1,5 +1,5 @@
 ---
-description: "모든 소스코드는 해당 깃허브를 참고하면 된다."
+description: "Spring MessageSource와 YAML 번들로 예외 메시지를 언어별로 국제화하는 전체 구현 흐름을 정리한다."
 date: 2026-02-25
 tags: [java]
 lang: ko
@@ -8,26 +8,29 @@ draft: false
 
 # Why(What For?) 🤷‍♂️
 
-> 만약 내 서비스를 세계 어디서든 사용한다고 생각해보자.
-> 알고보니,,, 메세지 국제화는 보통 Front 단에서 처리한다고 한다,,,
+서비스가 다국어 사용자를 대상으로 할 때, 예외 메시지까지 사용자 언어에 맞게 반환되어야 일관된 UX를 제공할 수 있다. 보통 다국어 처리는 프론트엔드에서 담당하지만, 백엔드 예외 메시지 또한 `Accept-Language` 혹은 쿼리 파라미터 기반으로 국제화할 수 있다.[^1] 본 글은 Spring `MessageSource`와 YAML 리소스 번들을 조합하여 예외 메시지를 국제화하는 구체적인 방법을 다룬다.
 
-# What(What should I know?) 👇
+> 모든 소스코드는 [해당 깃허브](https://github.com/sparta-nullnull/otil)를 참고하면 된다.
 
-모든 소스코드는 [해당 깃허브](https://github.com/sparta-nullnull/otil)를 참고하면 된다.
+# 의존성과 리소스 파일 구성 📦
 
-Message Source에 대한 build.gradle 설정을 해주자.
+## build.gradle 의존성을 추가해야 하는 이유
+
+Spring의 기본 `MessageSource`는 `.properties` 파일만 읽는다. YAML 형식으로 메시지를 관리하려면 `yaml-resource-bundle` 라이브러리가 필요하다.[^2]
 
 ```java
 /* Message Source */
 implementation 'net.rakugakibox.util:yaml-resource-bundle:1.2'
 ```
 
-국제화 파일들을 만들어주자.
+## 언어별 YAML 파일을 분리해야 하는 이유
+
+Spring은 `basename_언어코드.yml` 규칙으로 파일을 탐색한다. 영어(`_en`)와 한국어(`_ko`)를 분리하여 로케일별 메시지를 관리한다.[^3]
 
 <details>
 <summary>**`exception_en.yml`**</summary>
 
-```java
+```yaml
 # Common
 unKnown:
   code: "-9000"
@@ -148,10 +151,11 @@ inappropriateCategory:
 ```
 
 </details>
-<details>
-<summary>`exception_ko.yml`</summary>
 
-```java
+<details>
+<summary>**`exception_ko.yml`**</summary>
+
+```yaml
 # Common
 unKnown:
   code: "-9000"
@@ -220,7 +224,6 @@ invalidAdminKey:
   msg: "어드민 권한 획득 키값과 일치하지 않습니다."
   status: "403"
 
-
 # Post
 notFoundPost:
   code: "-2100"
@@ -253,7 +256,7 @@ inappropriateComment:
   msg: "부적절한 댓글입니다."
   status: "400"
 
-# Comment
+# Category
 notFoundCategory:
   code: "-4100"
   msg: "해당 카테고리는 존재하지 않습니다."
@@ -274,17 +277,24 @@ inappropriateCategory:
 
 </details>
 
-application.yml을 통해 국제화 저장경로를 지정해주자.
+# MessageSource 설정 ⚙️
+
+## application.yml 경로를 지정해야 하는 이유
+
+Spring이 `MessageSource` 빈을 자동 구성할 때 `basename` 경로를 기준으로 리소스 번들을 탐색한다. 경로가 잘못되면 모든 메시지 조회가 실패하므로 반드시 정확히 지정해야 한다.[^4]
 
 ```yaml
 spring:
-  messages: basename:message/messages
-    encoding:UTF-8
-    fallbackToSystemLocale:false
-    alwaysUseMessageFormat:true
+  messages:
+    basename: message/messages
+    encoding: UTF-8
+    fallbackToSystemLocale: false
+    alwaysUseMessageFormat: true
 ```
 
-다음으로 메세지 소스에 대한 설정을 해주자.
+## MessageSourceConfig를 별도로 작성해야 하는 이유
+
+기본 `MessageSource`는 `.properties` 파일을 파싱한다. YAML을 읽으려면 `YamlResourceBundle.Control`을 사용하는 커스텀 `ResourceBundleMessageSource`를 빈으로 등록해야 한다. 또한 `LocaleChangeInterceptor`를 통해 요청 파라미터 `lang`으로 로케일을 동적으로 전환할 수 있다.[^5]
 
 ```java
 package com.spartanullnull.otil.config;
@@ -347,24 +357,13 @@ public class MessageSourceConfig implements WebMvcConfigurer {
 }
 ```
 
-위 설정을 통해 각기 다른 지역에 따라, 다른 yml 파일을 읽게 할 수 있다.
+위 설정을 통해 각기 다른 지역에 따라 다른 YAML 파일을 읽게 할 수 있다.
 
-이제 예외처리 할 때, 메세지 국제화한 값을 예외메세지로 반환하게 해주게 할 수 있다.
+# Static Context에 MessageSource를 주입하는 이유 🔧
 
-이 때, 조금 어색하지만 중요한 작업을 해주어야만 돌아가게끔 해주었다.
+## 정적 예외 처리에서 동적 빈을 직접 주입할 수 없는 이유
 
-바로 “Bean에 대한 의존성 주입을 static variable로 받게 하기” 이다.
-
-사실 이러한 행위는 DI를 역행하는 행위이다.
-
-하지만 이렇게 해야만 하는 이유가 있었는데,
-그것은 바로 MessageSource 인스턴스 자체는 동적으로 변경되고 주입되지만, 예외처리는 static 한 상황에서 처리하게끔 하고자 하기 때문이다.
-
-MessageSource 인스턴스가 지역에 따라 다르게 변경되는 반면, 예외처리는 정적으로 처리하게끔해야한다.
-
-만약, 예외처리를 동적으로 — MessageSource 인스턴스를 주입받아 하고자한다면 — 매 번 새로운 인스턴스를 주입받아야 할 것이고, 이는 오버헤드가 상당히 크다고 판단하였다.
-
-따라서 `@PostConstruct`를 통해 미리 주입받은 뒤, 예외메세지를 처리해주었다.
+예외 처리 유틸리티 메서드는 대부분 `static`으로 선언된다. Spring DI는 인스턴스 필드를 대상으로 하므로 `static` 필드에는 직접 주입할 수 없다. 매번 `ApplicationContext`를 조회하면 오버헤드가 크기 때문에, `@PostConstruct`를 통해 인스턴스 주입 시점에 `static` 필드에 한 번만 할당하는 방식을 택하였다.[^6] 이 방식은 DI 원칙을 역행하지만, 정적 컨텍스트에서 로케일 반응형 메시지를 조회하기 위한 불가피한 선택이다.
 
 ```java
 private final static String DEFAULT_MESSAGE = "messageKeyNotFound";
@@ -377,7 +376,9 @@ public void init() {
 }
 ```
 
-이렇게 처리한 MessageSource 를 통해 에러 케이스 코드를 변환해주었다.
+## ErrorCaseResolver 메시지 조회 메서드
+
+이렇게 처리한 `MessageSource`를 통해 에러 케이스 코드를 현재 로케일에 맞는 값으로 변환한다. 키가 존재하지 않으면 `NoSuchMessageException`을 던져 누락된 번역을 명시적으로 알린다.[^7]
 
 ```java
 // code정보, 추가 argument로 현재 locale에 맞는 메시지를 조회합니다.
@@ -417,9 +418,11 @@ public static HttpStatus getStatus(ErrorCase errorCase) throws NoSuchMessageExce
 }
 ```
 
-이제 모든 설정은 다 끝났다.
+# GlobalExceptionHandler 구성 🛡️
 
-GlobalExceptionHandler를 통해 예외처리를 AOP를 통해 하는 핸들러를 만들어주면 된다!
+## AOP 기반 예외 핸들러가 필요한 이유
+
+`@RestControllerAdvice`는 모든 컨트롤러에 걸쳐 예외를 일관되게 처리한다. 국제화된 메시지를 담은 `ErrorCode`를 `ErrorResponse`로 포장하여 반환하면, 클라이언트는 별도 처리 없이 로케일에 맞는 메시지를 받을 수 있다.[^8]
 
 ```java
 @Slf4j
@@ -443,7 +446,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
 
-
     /**
      * 권한 제한 예외 발생 시 예외처리 핸들러
      *
@@ -460,9 +462,9 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 메세지 국제화 처리 오휴 발생 시 예외처리 핸들러
+     * 메세지 국제화 처리 오류 발생 시 예외처리 핸들러
      *
-     * @param ex 메세지 국제화 처리 오휴
+     * @param ex 메세지 국제화 처리 오류
      * @return ErrorResponse => {에러코드,메세지,HttpStatus 를 담은 ErrorCode} + {에러발생사유를 담은 ErrorDetail}
      * @author 임지훈
      */
@@ -471,7 +473,6 @@ public class GlobalExceptionHandler {
         log.error("handleNoSuchMessageException", ex);
         return ResponseEntity.internalServerError().body(ex.getMessage());
     }
-
 
     /**
      * 비즈니스 관련 예외 발생 시 예외처리 핸들러
@@ -491,7 +492,11 @@ public class GlobalExceptionHandler {
 }
 ```
 
-혹시 몰라 테스트 코드 또한 작성해주었다.
+# 테스트 코드 🧪
+
+## 정적 주입과 메시지 조회를 검증해야 하는 이유
+
+`@PostConstruct`를 통한 정적 주입은 Spring 컨텍스트 없이는 동작하지 않는다. `@ContextConfiguration`으로 최소한의 컨텍스트를 구성한 뒤, 정적 필드에 실제 빈이 할당되었는지와 메시지 조회 결과가 올바른지를 모두 검증해야 한다.[^9]
 
 ```java
 @ExtendWith(SpringExtension.class)
@@ -545,10 +550,42 @@ class ErrorCaseResolverTest {
 }
 ```
 
-# Reference 📚
+# 전체 흐름 요약 🗺️
 
-[https://blog.hkwon.me/spring-boot-spring-i18n-configuration/](https://blog.hkwon.me/spring-boot-spring-i18n-configuration/)
-[https://velog.io/@maketheworldwise/다국어-처리의-모든-것](https://velog.io/@maketheworldwise/다국어-처리의-모든-것)
-[https://blog.naver.com/vps32/222140843367](https://blog.naver.com/vps32/222140843367)
-[https://kim-jong-hyun.tistory.com/26](https://kim-jong-hyun.tistory.com/26)
-[https://velog.io/@youjung/Spring-MessageSource-자동설정으로-MessageSource-쉽게-세팅하기](https://velog.io/@youjung/Spring-MessageSource-자동설정으로-MessageSource-쉽게-세팅하기)
+```mermaid
+flowchart TD
+    A[HTTP 요청 with lang=en] --> B[LocaleChangeInterceptor]
+    B --> C[SessionLocaleResolver\n로케일 세션 저장]
+    C --> D[Controller / Service]
+    D --> E{예외 발생}
+    E --> F[GlobalExceptionHandler]
+    F --> G[ErrorCaseResolver.getMsg]
+    G --> H[MessageSource.getMessage\nLocale.getDefault]
+    H --> I{YAML 파일 탐색}
+    I -->|ko| J[exception_ko.yml]
+    I -->|en| K[exception_en.yml]
+    J --> L[ErrorResponse 반환]
+    K --> L
+```
+
+# Conclusion 🎯
+
+Spring `MessageSource`와 YAML 리소스 번들을 조합하면 예외 메시지를 로케일 단위로 분리하여 관리할 수 있다. 핵심 설계 결정은 세 가지이다. 첫째, `YamlResourceBundle.Control`을 사용하는 커스텀 `ResourceBundleMessageSource`로 YAML 파싱을 지원한다. 둘째, `@PostConstruct`로 `static` 필드에 `MessageSource`를 한 번 주입하여 정적 컨텍스트에서의 조회 오버헤드를 제거한다. 셋째, `GlobalExceptionHandler`에서 `NoSuchMessageException`을 별도로 처리하여 번역 누락을 명시적으로 드러낸다. 이 구조 덕분에 새로운 언어를 추가할 때 YAML 파일 하나만 추가하면 되고, 나머지 코드는 변경하지 않아도 된다.
+
+[^1]: Spring i18n 구성 전반 <https://blog.hkwon.me/spring-boot-spring-i18n-configuration/>
+
+[^2]: yaml-resource-bundle 라이브러리 — YAML 형식 리소스 번들 지원 <https://github.com/akihyro/yaml-resource-bundle>
+
+[^3]: 다국어 처리의 모든 것 <https://velog.io/@maketheworldwise/다국어-처리의-모든-것>
+
+[^4]: Spring MessageSource 자동설정으로 쉽게 세팅하기 <https://velog.io/@youjung/Spring-MessageSource-자동설정으로-MessageSource-쉽게-세팅하기>
+
+[^5]: LocaleChangeInterceptor 와 SessionLocaleResolver 동작 원리 <https://blog.naver.com/vps32/222140843367>
+
+[^6]: @PostConstruct를 통한 static 필드 주입 패턴 <https://kim-jong-hyun.tistory.com/26>
+
+[^7]: NoSuchMessageException — 번역 키 누락 시 명시적 예외 발생 전략 <https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/NoSuchMessageException.html>
+
+[^8]: @RestControllerAdvice AOP 예외 처리 <https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/RestControllerAdvice.html>
+
+[^9]: @ContextConfiguration을 이용한 슬라이스 테스트 <https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/context/ContextConfiguration.html>

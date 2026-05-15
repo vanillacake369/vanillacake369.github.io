@@ -1,4 +1,7 @@
 ---
+import '../styles/typography/tokens.css';
+import '../styles/typography/page.css';
+import '../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostListItem from '../components/PostListItem.astro';
@@ -13,12 +16,14 @@ const publishedPosts = sortPostsByDate(filterPublished(posts));
 
 <BaseLayout title={SITE_CONFIG.title} description={SITE_CONFIG.description}>
   <section class="post-list-section">
-    <h1
-      class="page-title"
-      data-i18n="posts.title"
-      data-i18n-ko={translations.ko['posts.title']}
-      data-i18n-en={translations.en['posts.title']}
-    >{translations.ko['posts.title']}</h1>
+    <header class="page-header">
+      <h1
+        class="page-title"
+        data-i18n="posts.title"
+        data-i18n-ko={translations.ko['posts.title']}
+        data-i18n-en={translations.en['posts.title']}
+      >{translations.ko['posts.title']}</h1>
+    </header>
     {publishedPosts.length === 0 ? (
       <p
         class="no-posts"
@@ -37,14 +42,6 @@ const publishedPosts = sortPostsByDate(filterPublished(posts));
 </BaseLayout>
 
 <style>
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: var(--spacing-xl);
-    letter-spacing: -0.02em;
-  }
-
   .no-posts {
     color: var(--color-text-secondary);
   }

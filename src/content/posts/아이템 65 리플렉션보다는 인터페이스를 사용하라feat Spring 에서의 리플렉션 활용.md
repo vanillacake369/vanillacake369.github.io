@@ -1,5 +1,5 @@
 ---
-description: "리플렉션의 동작 원리와 단점을 살펴보고, 이펙티브 자바 아이템 65에서 인터페이스 사용을 권장하는 이유를 정리했다."
+description: "리플렉션의 동작 원리와 단점을 살펴보고, 이펙티브 자바 아이템 65에서 인터페이스 사용을 권장하는 이유를 정리했다. Spring DI 구현 예시를 통해 리플렉션의 실전 활용법도 함께 다룬다."
 date: 2026-02-25
 tags: [java]
 lang: ko
@@ -28,7 +28,7 @@ series: { id: "Effective Java", order: 5 }
 
 [https://www.oracle.com/technical-resources/articles/java/javareflection.html](https://www.oracle.com/technical-resources/articles/java/javareflection.html)
 
-## How reflection works
+## How reflection works 🔍
 
 다음 정보들을 가져와서 런타임 시점에서 동적 바인딩을 이용한다.
 
@@ -45,16 +45,14 @@ series: { id: "Effective Java", order: 5 }
 # 리플렉션의 단점?
 
 - 동적 타잎 체킹이다 보니, 컴파일 타입 검사의 이점을 활용할 수가 없다.
-- 엄청난 예외 검사를 해주어야 한다.
-- 런타임 바인딩이므로 성능이 떨어진다.
+- 엄청난 예외 검사를 해주어야 하며, 런타임 바인딩이므로 성능도 떨어진다.
 
 # Effective java에서의 지향점
 
-## 왜 인터페이스를 권장할까?
+## 왜 인터페이스를 권장할까? 🤔
 
 - 리플렉션을 대신해서 인터페이스를 쓰라는 것이 아니다.
-- 리플렉션으로 생성된 인스턴스에 대해서 인터페이스로 참조하라는 것이다.
-- 이렇게 함으로서 리플렉션에 따라 생성된 여러 종류의 클래스 타입의 인스턴스를 하나의 인터페이스 변수로 받을 수 있다.
+- 리플렉션으로 생성된 인스턴스에 대해서 인터페이스로 참조하라는 것이다. 이렇게 함으로서 리플렉션에 따라 생성된 여러 종류의 클래스 타입의 인스턴스를 하나의 인터페이스 변수로 받을 수 있다.
 
 ```java
 public class ReflectiveInstantiation {
@@ -110,8 +108,7 @@ public class ReflectiveInstantiation {
 
 > 어떻게 리플렉션의 장점을 극대화??
 
-필드 주입에 사용되는 객체인지 확인하기 위해, `@Inject`라는 어노테이션을 생성
-런타임 시 참조해야하므로 `@Retention`어노테이션도 적용해줌
+필드 주입에 사용되는 객체인지 확인하기 위해 `@Inject`라는 어노테이션을 생성하고, 런타임 시 참조해야 하므로 `@Retention` 어노테이션도 적용해준다.
 
 ```java
 import java.lang.annotation.Retention;
@@ -122,10 +119,9 @@ public @interface Inject {
 }
 ```
 
-## 동적 바인딩
+## 동적 바인딩 ⚡
 
-`getObject` 메서드를 통해 classType 에 해당하는 타입의 객체 생성해줌
-단, 해당 객체의 필드 중에 `@Inject` 어노테이션이 있다면 해당 필드도 같이 만들어 제공
+`getObject` 메서드를 통해 classType에 해당하는 타입의 객체를 생성하며, 해당 객체의 필드 중에 `@Inject` 어노테이션이 있다면 해당 필드도 같이 만들어 제공한다.
 
 ```java
 public class ContainerService {
@@ -159,3 +155,9 @@ public class ContainerService {
 ```
 
 [https://velog.io/@suyeon-jin/리플렉션-스프링의-DI는-어떻게-동작하는걸까](https://velog.io/@suyeon-jin/리플렉션-스프링의-DI는-어떻게-동작하는걸까)
+
+[^1]: Java 리플렉션은 `java.lang.reflect` 패키지를 통해 제공되며, JDK 1.1부터 포함된 기능이다.
+[^2]: `Class.forName()`은 클래스 로더를 통해 런타임에 클래스를 동적으로 로드한다. 존재하지 않는 클래스명을 전달하면 `ClassNotFoundException`이 발생한다.
+[^3]: Spring의 `BeanFactory`는 내부적으로 리플렉션을 사용해 빈을 인스턴스화하며, `@Autowired` 필드 주입도 `Field.set()`을 통해 이루어진다.
+[^4]: 리플렉션을 과도하게 사용하면 JIT 컴파일러의 최적화 혜택을 받지 못해 직접 호출 대비 수십 배 느려질 수 있다.
+[^5]: Java 9 이후 모듈 시스템(JPMS) 도입으로 `setAccessible(true)` 호출이 모듈 경계에서 제한되어, 리플렉션 기반 코드에서 `InaccessibleObjectException`이 발생할 수 있다.

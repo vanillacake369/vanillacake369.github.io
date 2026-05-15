@@ -1,0 +1,29 @@
+.post-item-title {
+  font-size: var(--font-size-list-title);
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.post-item-title:hover {
+  color: var(--color-accent);
+}
+
+.post-item-date {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.post-item-tag {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.post-item-tag:hover {
+  color: var(--color-accent);
+}

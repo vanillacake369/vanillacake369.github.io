@@ -20,11 +20,9 @@ MySQL Exporter 는 무엇이고 어떻게 동작할까?
 
 ![](/images/velog/e3fda470777610b5.png)
 
-## 정의
+## 정의 📖
 
-**MySQL Exporter** 는 Prometheus에서 제공하는 공식 Exporter 중 하나로, MySQL 서버의 내부 지표를 Prometheus 형식으로 변환해주는 **데이터 브릿지 역할**을 한다.
-
-쉽게 말해, 데이터베이스의 내부 세계를 Prometheus가 이해할 수 있는 언어로 ‘통역’해주는 역할을 한다고 보면 된다.
+**MySQL Exporter** 는 Prometheus에서 제공하는 공식 Exporter 중 하나로, MySQL 서버의 내부 지표를 Prometheus 형식으로 변환해주는 **데이터 브릿지 역할**을 한다. 쉽게 말해, 데이터베이스의 내부 세계를 Prometheus가 이해할 수 있는 언어로 '통역'해주는 역할을 한다고 보면 된다.
 
 예를 들어 다음과 같은 메트릭을 수집할 수 있다.
 
@@ -38,7 +36,7 @@ MySQL Exporter 는 무엇이고 어떻게 동작할까?
 
 이러한 지표는 단순한 수치 그 이상이다. **쿼리 튜닝, 커넥션 풀 관리, 성능 병목 탐지**에 직접적인 근거를 제공한다.
 
-## 기본 동작 원리
+## 기본 동작 원리 ⚙️
 
 MySQL Exporter는 내부적으로 다음 과정을 거친다.
 
@@ -63,7 +61,7 @@ MySQL Exporter는 내부적으로 다음 과정을 거친다.
 3. **Prometheus 포맷으로 노출**
    - 수집된 결과를 `/metrics` 엔드포인트에서 Prometheus가 스크랩할 수 있도록 노출한다.
 
-## 필수요건
+## 필수요건 📋
 
 ```bash
   prometheus.exporter.mysql "main" {
@@ -83,7 +81,7 @@ MySQL Exporter는 내부적으로 다음 과정을 거친다.
 
 # How?
 
-어떻게 씀?
+?
 
 https://severalnines.com/blog/how-monitor-mysql-containers-prometheus-deployment-standalone-and-swarm-part-one/#:~:text=Deploying%20MySQL%20Exporter,monitoring%20scrapes%20under%20heavy%20load
 
@@ -136,7 +134,7 @@ receivers:
 
 ![](/images/velog/7ebc8c7f2f2638eb.png)
 
-MySQL Exporter가 제공하는 Prometheus 메트릭을 쿼리할 때, 특히 커넥션 상태나 MySQL 서버 상태 관련 메트릭은 주로 `mysql_global_status_` 접두사를 가진 메트릭명을 사용합니다.
+MySQL Exporter가 제공하는 Prometheus 메트릭을 쿼리할 때, 특히 커넥션 상태나 MySQL 서버 상태 관련 메트릭은 주로 `mysql_global_status_` 접두사를 가진 메트릭명을 사용한다.
 
 - 현재 연결 수 (connected connections):
   `textmysql_global_status_threads_connected`
@@ -149,6 +147,8 @@ MySQL Exporter가 제공하는 Prometheus 메트릭을 쿼리할 때, 특히 커
 - 슬레이브 복제 상태(복제 지연 등):
   `textmysql_slave_status_seconds_behind_master`
 
-[^1]: https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.mysql/ <https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.mysql/>
-
-[^2]: https://techblog.goinc.jp/entry/2024/11/29/171127 <https://techblog.goinc.jp/entry/2024/11/29/171127>
+[^1]: <https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.mysql/>
+[^2]: <https://techblog.goinc.jp/entry/2024/11/29/171127>
+[^3]: <https://github.com/prometheus/mysqld_exporter>
+[^4]: <https://prometheus.io/docs/instrumenting/exporters/>
+[^5]: <https://severalnines.com/blog/how-monitor-mysql-containers-prometheus-deployment-standalone-and-swarm-part-one/>

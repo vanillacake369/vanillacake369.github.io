@@ -8,19 +8,19 @@ draft: false
 
 # DTO
 
-## What is DTO??
+## What is DTO?? 📦
 
 > 값들을 하나의 곳으로 모아서, 목적에 따라 인스턴스 간 주고받을 수 있게 포장되어지는 데이터셋
 >
-> It is a *Data Transfer Object,* i.e. the data aggregate object, sole purpose of which is to facilitate conveying data from the point A (the source) to the point B (destination).
+> It is a *Data Transfer Object,* i.e. the data aggregate object, sole purpose of which is to facilitate conveying data from the point A (the source) to the point B (destination).
 
-## Why use DTO??
+## Why use DTO?? 🤔
 
 > 목적에 따른 값을 추출해 A→B로 값을 옮기기 위함
 >
 > to convey data from point A (the source) to the point B (destination).
 
-## When to use DTO??
+## When to use DTO?? 📋
 
 > 어떤 반환값을 전달할 지에 따라 달려있다.
 
@@ -40,47 +40,35 @@ draft: false
 
 1.
 
-When you want to **aggregate the data for your object from different [re]sources**, i.e. you want to put some *object transformation* logic between the Persistence Layer and the Business(or Web) Layer
+When you want to **aggregate the data for your object from different [re]sources**, i.e. you want to put some *object transformation* logic between the Persistence Layer and the Business(or Web) Layer
 
     ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/3db2b170-876f-457d-b66e-dd806b51bd64/86a5ba92-383d-4cf2-b5c7-58c0d6760503/Untitled.png)
 
 2.
 
-When you don’t necessarily combine data received from different sources, but **you want to modify and customize the model instance, which you will be returning**
+When you don't necessarily combine data received from different sources, but **you want to modify and customize the model instance, which you will be returning**
 
 [DTO or not to DTO?](https://medium.com/javarevisited/dto-or-not-to-dto-58259d4228ec)
 
 # VO
 
-## What is VO??
+## What is VO?? 🧩
 
-VO란 이렇게 도메인에서 한 개 또는 그 이상의 속성들을 묶어서 **특정 값을 나타내는** 객체
+VO란 이렇게 도메인에서 한 개 또는 그 이상의 속성들을 묶어서 **특정 값을 나타내는** 객체이다.
 
 > When programming, I often find it's useful to represent things as a compound.
 > 👉 프로그래밍할 때, 사물을 복합물로 표현하는 것이 유용한 경우가 종종 있다.
 
-A 2D coordinate consists of an x value and y value.
-
-An amount of money consists of a number and a currency.
-
-A date range consists of start and end dates, which themselves can be compounds of year, month, and day.
+A 2D coordinate consists of an x value and y value. An amount of money consists of a number and a currency. A date range consists of start and end dates, which themselves can be compounds of year, month, and day.
 👉 예를 들면 x, y로 이루어진 2차원 좌표를 표현하거나, 숫자와 통화로 이루어진 금액, 시작 날짜와 끝 날짜로 이루어진 날짜 기간 등이 있다.
 
 >
 
-## Why use VO??
+## Why use VO?? 🛡️
 
-> To avoid “Primitive Obsession”
+> To avoid "Primitive Obsession"
 
-사용자가 값을 입력한다.
-
-그런데, 사용자의 입력값은 언제나 어떤 특정한 목적성을 가진 값이다.
-
-따라서 특정 값들은 동일한 캐릭터로서 , 즉 하나의 type으로서 보장받아야한다.
-
-우리는 이것을 원시값으로 저장하면 안 된다.
-
-우리는 원시값을 이용하여 그 캐릭터를 만들어주어야 한다!!
+사용자가 값을 입력한다. 그런데, 사용자의 입력값은 언제나 어떤 특정한 목적성을 가진 값이다. 따라서 특정 값들은 동일한 캐릭터로서 , 즉 하나의 type으로서 보장받아야한다. 우리는 이것을 원시값으로 저장하면 안 되고, 원시값을 이용하여 그 캐릭터를 만들어주어야 한다.
 
 ```java
 /** 사용자가 좌표값을 입력 **/
@@ -92,9 +80,9 @@ int x = 3; int y =5;
 Point p = new Point(3,5);
 ```
 
-## VO의 특징 세 가지
+## VO의 특징 세 가지 📌
 
-판단에는 ”어떤 공통된 성격의 원시값들을 살아있는 인스턴스로 만들어내는 작업” 이라고 판단된다.
+판단에는 "어떤 공통된 성격의 원시값들을 살아있는 인스턴스로 만들어내는 작업" 이라고 판단된다.
 
 왜냐하면 다음과 같은 특징이 있기 때문이다.
 
@@ -145,11 +133,11 @@ public final class EmailAddress {
 }
 ```
 
-## When to use VO??
+## When to use VO?? 🎯
 
 1.
 
-값을 하나의 캐릭터로(타입으로) 사용하고자 할 때 (”Avoid primitive obsession”)
+값을 하나의 캐릭터로(타입으로) 사용하고자 할 때 ("Avoid primitive obsession")
 
     ```java
     // How can you identify the difference ??
@@ -199,3 +187,9 @@ public final class EmailAddress {
 - [Do "avoid primitive obsession" and "use most abstract type as possible" contradict each other?](https://softwareengineering.stackexchange.com/questions/404768/do-avoid-primitive-obsession-and-use-most-abstract-type-as-possible-contradi)
 
 - [Primitive obsession - why you should stop using int and string everywhere](https://www.reddit.com/r/csharp/comments/onbypx/primitive_obsession_why_you_should_stop_using_int/)
+
+[^1]: DTO 는 레이어 간 데이터 이동을 목적으로 하며, 그 자체로는 어떤 비즈니스 로직도 포함하지 않는 단순 운반체다.
+[^2]: VO 는 값 그 자체가 식별자 역할을 한다. 즉, 속성이 같으면 동일한 객체로 간주하므로 `equals`/`hashCode` 재정의가 필수다.
+[^3]: VO 의 불변성(Immutability)은 값 변경 시 새 인스턴스를 반환하는 방식으로 구현한다. 이는 `String` 이 동작하는 방식과 동일하다.
+[^4]: DTO 는 mutable 해도 무방하지만, VO 에 setter 를 두면 동일 참조가 여러 곳에서 예기치 않게 변경되어 불변 보장이 깨진다.
+[^5]: "Primitive Obsession" 은 도메인 개념을 `int`, `String` 같은 원시 타입으로만 표현할 때 발생하는 코드 악취(code smell)로, VO 도입이 대표적인 해결책이다.

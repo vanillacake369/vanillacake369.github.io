@@ -1,5 +1,5 @@
 ---
-description: "Test Fixture 라이브러리 활용 케이스를 소개해보고자 한다."
+description: "네이버 오픈소스 라이브러리 FixtureMonkey를 활용해 테스트용 목업 데이터를 자동화하는 방법과 사내 적용 사례를 소개한다."
 date: 2025-03-02
 tags: [journal]
 lang: ko
@@ -10,41 +10,23 @@ draft: false
 
 ![](/images/velog/fbc2bc911e7876cd.png)
 
-유닛 테스트를 짤 때의 가장 큰 고민점이 바로 given context 를 세팅하는 것일 것이다.
+유닛 테스트를 짤 때의 가장 큰 고민점이 바로 given context 를 세팅하는 것일 것이다. 이를 Test Fixture 라고 부른다.
 
-이를 Test Fixture 라고 부른다.
+어떤 목적의 테스트인지, 어떤 유스케이스와 어떤 도메인들이 묶여있을지에 따라 다르게 세팅해야한다. 이 때 고민하는 것 중에 하나가 테스트 목업 데이터이다. 하지만 매 테스트 케이스마다 직접 생성하는 것은 번거로운 작업이다. 우리는 이런 수작업보다 자동화된 Utils 를 원하게 된다.
 
-어떤 목적의 테스트인지, 어떤 유스케이스와 어떤 도메인들이 묶여있을지에 따라 다르게 세팅해야한다.
+FixtureMonkey 는 이를 지원하는 네이버에서 오픈소스화한 라이브러리이다.[^1] Java, Kotlin 을 지원 중에 있으며, 최근에도 커밋이 올라오는 것을 보아하니 유지보수가 계속 되고 있음을 확인할 수 있었다.
 
-이 때 고민하는 것 중에 하나가 테스트 목업 데이터이다.
-
-하지만 매 테스트 케이스마다 직접 생성하는 것은 번거로운 작업이다.
-
-우리는 이런 수작업보다 자동화된 Utils 를 원하게 된다.
-
-FixtureMonkey 는 이를 지원하는 네이버에서 오픈소스화한 라이브러리이다.
-
-Java, Kotlin 을 지원 중에 있으며,
-
-최근에도 커밋이 올라오는 것을 보아하니 유지보수가 계속 되고 있음을 확인할 수 있었다.
-
-이외에도 Instancio 와 AutoParam 도 있는데 Instancio 도 상당히 매력적이라
-
-쓰고 싶은 사람은 고려를 해보는 것도 좋을 거 같다.
+이외에도 Instancio 와 AutoParam 도 있는데 Instancio 도 상당히 매력적이라 쓰고 싶은 사람은 고려를 해보는 것도 좋을 거 같다.[^2]
 
 ( 함수형을 좋아하는 필자는 FixtureMonkey 로 정착하기 전이였다면 Instancio 를 선택했을 듯하다 )
 
 # About 💁‍♂️
 
-사실 해당 포스트는 그다지 깊은 내용을 다룰 수가 없다고 생각한다.
-
-이미 [공식문서](https://github.com/naver/fixture-monkey) 와 국내 블로그에서 너무나도 잘 소개 되어있기 때문이다.
+사실 해당 포스트는 그다지 깊은 내용을 다룰 수가 없다고 생각한다. 이미 [공식문서](https://github.com/naver/fixture-monkey) 와 국내 블로그에서 너무나도 잘 소개 되어있기 때문이다.[^3]
 
 ~~특히 공식문서가 한글로 이렇게 친절히 되어있는 것은,,, 국뽕심취주의를 불러일으킨다,,~~
 
-그렇기에 필자는 사내에서 어떻게 활용하고 있는지만 코드로 남기고자 한다.
-
-도입 직후 사내에 아래와 같은 부수효과가 나타났기 때문이다.
+그렇기에 필자는 사내에서 어떻게 활용하고 있는지만 코드로 남기고자 한다. 도입 직후 사내에 아래와 같은 부수효과가 나타났기 때문이다.
 
 - 목업 섹션에서 Fixture Monkey 는 공통 모듈이라고 인지하지 않는 팀원들이 나타났다.
   - 대부분의 부수효과는 이로 인해 발생했었다,,, ^^
@@ -57,7 +39,7 @@ Java, Kotlin 을 지원 중에 있으며,
 
 # Apply 🧑‍💻
 
-필자는 아래와 같이 FixtureMonkey 에 대한 공통 헬퍼 클래스를 만들었다.
+필자는 아래와 같이 FixtureMonkey 에 대한 공통 헬퍼 클래스를 만들었다.[^4]
 
 ```java
 public final class FixtureFactory {
@@ -310,3 +292,9 @@ https://haril.dev/en/blog/2024/02/03/Fixture-Monkey
 https://oliveyoung.tech/2024-04-01/testcode-use-fixture-monkey/
 
 https://github.com/naver/fixture-monkey
+
+[^1]: FixtureMonkey 공식 GitHub 저장소: <https://github.com/naver/fixture-monkey>
+[^2]: Instancio 공식 사이트: <https://www.instancio.org/>
+[^3]: FixtureMonkey 한국어 공식 문서: <https://naver.github.io/fixture-monkey/v1-0-0-kor/>
+[^4]: FailoverIntrospector 는 여러 Introspector 를 순서대로 시도하여 객체 생성에 성공하는 첫 번째 방식을 택하는 전략 패턴 구현체다. 참고: <https://naver.github.io/fixture-monkey/v1-0-0-kor/docs/generating-objects/introspector/>
+[^5]: Arbitrary 타입은 jqwik 라이브러리의 핵심 인터페이스로, 무작위 값 생성 전략을 추상화한다. 참고: <https://jqwik.net/docs/current/user-guide.html#creating-an-arbitrary-of-existing-arbitraries>

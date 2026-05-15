@@ -1,4 +1,7 @@
 ---
+import '../../styles/typography/tokens.css';
+import '../../styles/typography/page.css';
+import '../../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostListItem from '../../components/PostListItem.astro';
@@ -24,11 +27,11 @@ const { tagName, taggedPosts } = Astro.props;
 
 <BaseLayout title={`#${tagName}`} description={`Posts tagged with ${tagName}.`}>
   <section class="post-list-section">
-    <div class="page-header">
-      <a href="/tags" class="back-link">&larr; Tags</a>
+    <header class="page-header">
+      <a href="/tags" class="page-back-link">&larr; Tags</a>
       <h1 class="page-title">#{tagName}</h1>
-      <p class="tag-post-count">{taggedPosts.length} {taggedPosts.length === 1 ? 'post' : 'posts'}</p>
-    </div>
+      <p class="page-desc">{taggedPosts.length} {taggedPosts.length === 1 ? 'post' : 'posts'}</p>
+    </header>
 
     {taggedPosts.length === 0 ? (
       <p class="no-posts">No posts with this tag.</p>
@@ -43,36 +46,6 @@ const { tagName, taggedPosts } = Astro.props;
 </BaseLayout>
 
 <style>
-  .page-header {
-    margin-bottom: var(--spacing-2xl);
-  }
-
-  .back-link {
-    display: inline-block;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    margin-bottom: var(--spacing-md);
-    transition: color 0.15s ease;
-  }
-
-  .back-link:hover {
-    color: var(--color-accent);
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    letter-spacing: -0.02em;
-    margin-bottom: var(--spacing-xs);
-  }
-
-  .tag-post-count {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-  }
-
   .no-posts {
     color: var(--color-text-secondary);
   }

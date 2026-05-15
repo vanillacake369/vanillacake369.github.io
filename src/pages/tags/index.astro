@@ -1,4 +1,6 @@
 ---
+import '../../styles/typography/tokens.css';
+import '../../styles/typography/page.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { filterPublished, extractTags, entryToPost } from '../../domain/post';
@@ -13,7 +15,10 @@ const tags = extractTags(publishedPosts);
 
 <BaseLayout title="Tags" description="Browse posts by tag.">
   <section class="tags-section">
-    <h1 class="page-title">Tags</h1>
+    <header class="page-header">
+      <h1 class="page-title">Tags</h1>
+      <p class="page-desc">Browse posts by tag.</p>
+    </header>
 
     {tags.length === 0 ? (
       <p class="no-tags">No tags yet.</p>
@@ -33,14 +38,6 @@ const tags = extractTags(publishedPosts);
 </BaseLayout>
 
 <style>
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: var(--spacing-2xl);
-    letter-spacing: -0.02em;
-  }
-
   .no-tags {
     color: var(--color-text-secondary);
   }
@@ -75,14 +72,14 @@ const tags = extractTags(publishedPosts);
   }
 
   .tag-name {
-    font-size: 1rem;
+    font-size: var(--font-size-list-title);
     font-weight: 600;
     color: var(--color-text);
     transition: color 0.15s ease;
   }
 
   .tag-count {
-    font-size: 0.825rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-secondary);
     background-color: var(--color-border);
     padding: 0.1em 0.55em;

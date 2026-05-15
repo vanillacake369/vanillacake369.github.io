@@ -1,20 +1,18 @@
 ---
-description: "OWASP 서울에서 DevSecOps 에 대한 세미나가 있길래 팟캐스트처럼 보던 와중"
+description: "DevSecOps 개념과 SAST·DAST의 차이를 정리한다. 보안을 개발 파이프라인 초반부터 자동화하는 방식과 각 도구의 적용 시점을 비교한다."
 date: 2025-12-28
 tags: [conference]
 lang: ko
 draft: false
 ---
 
-# Why?
+# Why? 🤔
 
-OWASP 서울에서 DevSecOps 에 대한 세미나가 있길래 팟캐스트처럼 보던 와중
-DevSecOps 가 하는 일이 정확히 무엇이고,
-영상에서 언급된 SAST / DAST 가 무엇인지 궁금하게 되어 정리해보았다.
+OWASP 서울에서 DevSecOps 에 대한 세미나가 있길래 팟캐스트처럼 보던 와중, DevSecOps 가 하는 일이 정확히 무엇이고 영상에서 언급된 SAST / DAST 가 무엇인지 궁금하게 되어 정리해보았다.
 
-# What?
+# What? 📖
 
-## DevSecOps란?
+## DevSecOps란? 🛡️
 
 **DevSecOps = Dev + Sec + Ops**
 보안(Security)을 개발과 운영의 나중 단계가 아니라, 처음부터 자동화된 프로세스로 통합을 지향
@@ -32,7 +30,7 @@ DevSecOps 가 하는 일이 정확히 무엇이고,
 | 방식      | 수동 점검   | 자동화된 스캔       |
 | 결과      | 릴리즈 지연 | 빠르고 안전한 배포  |
 
-## SAST (Static Application Security Testing)
+## SAST (Static Application Security Testing) 🔍
 
 ### 정의
 
@@ -73,7 +71,7 @@ git push
 
 ```
 
-## DAST (Dynamic Application Security Testing)
+## DAST (Dynamic Application Security Testing) 💥
 
 ### 정의
 
@@ -122,6 +120,12 @@ git push
 | 공격 시뮬레이션 | ❌           | ✅         |
 | 개발자 친화성   | 높음         | 낮음       |
 
-[^1]: https://www.blackduck.com/glossary/what-is-sast.html <https://www.blackduck.com/glossary/what-is-sast.html>
+[^1]: <https://www.blackduck.com/glossary/what-is-sast.html>
 
-[^2]: https://www.wiz.io/ko-kr/academy/application-security/static-application-security-testing-sast <https://www.wiz.io/ko-kr/academy/application-security/static-application-security-testing-sast>
+[^2]: <https://www.wiz.io/ko-kr/academy/application-security/static-application-security-testing-sast>
+
+[^3]: <https://owasp.org/www-community/Source_Code_Analysis_Tools>
+
+[^4]: <https://owasp.org/www-community/Vulnerability_Scanning_Tools>
+
+[^5]: <https://cheatsheetseries.owasp.org/cheatsheets/CI_CD_Security_Cheat_Sheet.html>
