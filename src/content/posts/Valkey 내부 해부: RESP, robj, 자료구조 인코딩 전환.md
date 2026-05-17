@@ -1,7 +1,8 @@
 ---
-description: "OSSCA Valkey 오픈소스 컨트리뷰션 세션을 계기로, RESP 프로토콜부터 robj wrapper, SDS · listpack · quicklist · hashtable · skiplist · radix tree 까지 Valkey 내부 자료구조를 소스 코드 수준에서 해부한다."
+description: OSSCA Valkey 오픈소스 컨트리뷰션 세션을 계기로, RESP 프로토콜부터 robj wrapper, SDS · listpack · quicklist · hashtable · skiplist · radix tree 까지 Valkey 내부 자료구조를 소스 코드 수준에서 해부한다.
 date: 2026-04-29
-tags: [tools, journal]
+tags:
+  - tools
 lang: ko
 draft: false
 ---

@@ -5,7 +5,6 @@ tags: [network]
 lang: ko
 draft: false
 ---
-
 # Why?
 
 LFCS 시험을 위해 `openssl` 명령어를 배우다보니 TLS 처리과정과 인증서 생성과 관리방법에 대해 궁금해져서 정리해보았다.
