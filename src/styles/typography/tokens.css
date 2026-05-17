@@ -11,10 +11,10 @@
     --font-size-post-title: clamp(1.55rem, 0.75vw + 1.25rem, 1.95rem);
 
     --prose-body: 0.95rem;
-    --prose-h1: 1.55rem;
+    --prose-h1: 1.7rem;
     --prose-h2: 1.35rem;
-    --prose-h3: 1.12rem;
-    --prose-h4: 1rem;
+    --prose-h3: 1.1rem;
+    --prose-h4: 0.95rem;
     --prose-line-height: 1.8;
 }
 
@@ -26,9 +26,9 @@
         --font-size-post-title: clamp(1.55rem, 0.75vw + 1.25rem, 1.95rem);
 
         --prose-body: 0.98rem;
-        --prose-h1: 1.7rem;
-        --prose-h2: 1.45rem;
-        --prose-h3: 1.16rem;
+        --prose-h1: 1.9rem;
+        --prose-h2: 1.5rem;
+        --prose-h3: 1.14rem;
     }
 }
 
@@ -39,9 +39,9 @@
         --font-size-post-title: clamp(1.55rem, 0.75vw + 1.25rem, 1.95rem);
 
         --prose-body: 0.93rem;
-        --prose-h1: 1.85rem;
-        --prose-h2: 1.55rem;
-        --prose-h3: 1.2rem;
+        --prose-h1: 2.05rem;
+        --prose-h2: 1.6rem;
+        --prose-h3: 1.18rem;
         --prose-line-height: 1.82;
     }
 }
