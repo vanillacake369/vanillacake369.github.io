@@ -17,8 +17,8 @@ interface Props {
 
 const { headings } = Astro.props;
 
-// Only include h2-h4
-const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+// Include h1-h4
+const filtered = headings.filter((h) => h.depth >= 1 && h.depth <= 4);
 ---
 
 {filtered.length > 0 && (
@@ -87,16 +87,26 @@ const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
     padding: 0;
   }
 
-  .toc-depth-2 {
+  .toc-depth-1 {
     padding-left: 0;
   }
 
+  .toc-depth-1 .toc-link {
+    font-weight: 600;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .toc-depth-2 {
+    padding-left: 0.75rem;
+  }
+
   .toc-depth-3 {
-    padding-left: 0.9rem;
+    padding-left: 1.5rem;
   }
 
   .toc-depth-4 {
-    padding-left: 1.8rem;
+    padding-left: 2.25rem;
   }
 
   .toc-link {
@@ -161,7 +171,7 @@ const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
     }
 
     const headingElements = Array.from(
-      document.querySelectorAll<HTMLElement>('h2[id], h3[id], h4[id]'),
+      document.querySelectorAll<HTMLElement>('h1[id], h2[id], h3[id], h4[id]'),
     );
 
     let activeSlug = '';
