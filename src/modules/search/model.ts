@@ -20,7 +20,7 @@ interface SearchEntry {
   data: {
     title?: string;
     description?: string;
-    date: Date;
+    date?: Date;
     updatedDate?: Date;
     tags?: string[];
     lang?: 'ko' | 'en';

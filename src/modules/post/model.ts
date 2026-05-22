@@ -25,12 +25,24 @@ export interface CalendarDay {
   posts: Pick<Post, 'slug' | 'title'>[];
 }
 
+const DATE_PREFIX_RE = /^\d{4}-\d{2}-\d{2}-/;
+
+export function dateFromId(id: string): Date | undefined {
+  const match = id.match(/^(\d{4}-\d{2}-\d{2})-/);
+  if (!match) return undefined;
+  return new Date(match[1]);
+}
+
 export function titleFromId(id: string): string {
-  return id.replace(/\.mdx?$/, '').trim();
+  return id
+    .replace(DATE_PREFIX_RE, '')
+    .replace(/\.mdx?$/, '')
+    .trim();
 }
 
 export function slugify(id: string): string {
   return id
+    .replace(DATE_PREFIX_RE, '')
     .replace(/\.mdx?$/, '')
     .toLowerCase()
     .replace(/\s+/g, '-')
@@ -45,7 +57,7 @@ export function entryToPost(entry: {
   data: {
     title?: string;
     description?: string;
-    date: Date;
+    date?: Date;
     updatedDate?: Date;
     tags?: string[];
     lang?: 'ko' | 'en';
@@ -54,11 +66,12 @@ export function entryToPost(entry: {
     series?: { id: string; order: number };
   };
 }): Post {
+  const date = dateFromId(entry.id) ?? entry.data.date ?? new Date(0);
   return {
     slug: slugify(entry.id),
     title: entry.data.title ?? titleFromId(entry.id),
     description: entry.data.description ?? '',
-    date: entry.data.date,
+    date,
     updatedDate: entry.data.updatedDate,
     tags: entry.data.tags ?? [],
     lang: entry.data.lang ?? 'ko',

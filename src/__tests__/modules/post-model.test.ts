@@ -27,17 +27,19 @@ describe('modules/post/model', () => {
       .toBe('nixos-는-어떤-원리로-커널패키지를-관리할까');
   });
 
-  it('maps a content entry to a Post model', () => {
+  it('maps a content entry with date-prefixed id to a Post model', () => {
     const post = entryToPost({
-      id: 'NixOS 는 어떤 원리로 커널패키지를 관리할까',
+      id: '2026-05-08-NixOS 는 어떤 원리로 커널패키지를 관리할까',
       data: {
-        date: new Date('2026-05-08'),
         tags: ['nix'],
       },
     });
 
     expect(post.slug).toBe('nixos-는-어떤-원리로-커널패키지를-관리할까');
     expect(post.title).toBe('NixOS 는 어떤 원리로 커널패키지를 관리할까');
+    expect(post.date.getFullYear()).toBe(2026);
+    expect(post.date.getMonth()).toBe(4); // 0-indexed May
+    expect(post.date.getDate()).toBe(8);
     expect(post.lang).toBe('ko');
     expect(post.draft).toBe(false);
   });

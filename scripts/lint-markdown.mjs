@@ -17,7 +17,7 @@ import path from 'path';
 const POSTS_DIR = './src/content/posts';
 const PUBLIC_IMAGES = './public/images';
 const FIX_MODE = process.argv.includes('--fix');
-const REQUIRED_FRONTMATTER = ['title', 'description', 'date'];
+const REQUIRED_FRONTMATTER = ['description'];
 
 let errors = 0;
 let warnings = 0;

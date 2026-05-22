@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   titleFromId,
   slugify,
+  dateFromId,
   entryToPost,
   excerptFromBody,
   sortPostsByDate,
@@ -46,6 +47,10 @@ describe('titleFromId', () => {
   it('trims whitespace', () => {
     expect(titleFromId('  spaced  ')).toBe('spaced');
   });
+
+  it('strips date prefix from id', () => {
+    expect(titleFromId('2024-02-04-JPA Cascade Type')).toBe('JPA Cascade Type');
+  });
 });
 
 // ── slugify ──────────────────────────────────────────────────────────────────
@@ -80,25 +85,49 @@ describe('slugify', () => {
   it('removes special characters except allowed ones', () => {
     expect(slugify('C++ & Rust!')).toBe('c-rust');
   });
+
+  it('strips date prefix before slugifying', () => {
+    expect(slugify('2024-02-04-JPA Cascade Type'))
+      .toBe('jpa-cascade-type');
+  });
+});
+
+// ── dateFromId ───────────────────────────────────────────────────────────────
+
+describe('dateFromId', () => {
+  it('extracts date from a prefixed id', () => {
+    const date = dateFromId('2024-02-04-JPA Cascade Type');
+    expect(date).toBeInstanceOf(Date);
+    expect(date?.getFullYear()).toBe(2024);
+    expect(date?.getMonth()).toBe(1); // 0-indexed February
+    expect(date?.getDate()).toBe(4);
+  });
+
+  it('returns undefined when id has no date prefix', () => {
+    expect(dateFromId('NixOS 는 어떤 원리로 커널패키지를 관리할까')).toBeUndefined();
+  });
+
+  it('returns undefined for partial date patterns', () => {
+    expect(dateFromId('2024-02-something')).toBeUndefined();
+  });
 });
 
 // ── entryToPost ──────────────────────────────────────────────────────────────
 
 describe('entryToPost', () => {
   const baseEntry = {
-    id: 'NixOS 는 어떤 원리로 커널패키지를 관리할까',
+    id: '2026-05-08-NixOS 는 어떤 원리로 커널패키지를 관리할까',
     data: {
-      date: new Date('2026-05-08'),
       tags: ['nix'] as string[],
     },
   };
 
-  it('derives slug via slugify', () => {
+  it('derives slug via slugify (strips date prefix)', () => {
     const post = entryToPost(baseEntry);
     expect(post.slug).toBe('nixos-는-어떤-원리로-커널패키지를-관리할까');
   });
 
-  it('derives title from filename when no frontmatter title', () => {
+  it('derives title from filename when no frontmatter title (strips date prefix)', () => {
     const post = entryToPost(baseEntry);
     expect(post.title).toBe('NixOS 는 어떤 원리로 커널패키지를 관리할까');
   });
@@ -109,6 +138,22 @@ describe('entryToPost', () => {
       data: { ...baseEntry.data, title: 'Custom Title' },
     });
     expect(post.title).toBe('Custom Title');
+  });
+
+  it('extracts date from id prefix when no frontmatter date', () => {
+    const post = entryToPost(baseEntry);
+    expect(post.date.getFullYear()).toBe(2026);
+    expect(post.date.getMonth()).toBe(4); // 0-indexed May
+    expect(post.date.getDate()).toBe(8);
+  });
+
+  it('falls back to frontmatter date when id has no date prefix', () => {
+    const fallbackDate = new Date('2025-03-10');
+    const post = entryToPost({
+      id: 'NixOS 는 어떤 원리로 커널패키지를 관리할까',
+      data: { date: fallbackDate, tags: [] },
+    });
+    expect(post.date).toBe(fallbackDate);
   });
 
   it('defaults description to empty string', () => {
