@@ -26,7 +26,6 @@ interface SearchEntry {
     lang?: 'ko' | 'en';
     draft?: boolean;
     heroImage?: string;
-    series?: { id: string; order: number };
   };
 }
 

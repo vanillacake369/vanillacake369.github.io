@@ -16,10 +16,6 @@ const posts = defineCollection({
     date: z.coerce.date().optional(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(tagsEnum).default([]),
-    series: z.object({
-      id: z.string(),
-      order: z.number()
-    }).optional(),
     lang: z.enum(['ko', 'en']).default('ko'),
     draft: z.boolean().default(false),
     heroImage: z.string().optional(),

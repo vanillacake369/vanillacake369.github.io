@@ -3,7 +3,7 @@ import {
   titleFromId,
   slugify,
   dateFromId,
-  entryToPost,
+  createPost,
   excerptFromBody,
   sortPostsByDate,
   filterPublished,
@@ -12,6 +12,8 @@ import {
   extractTags,
   groupByCalendarDay,
   slugifyTag,
+  InvalidPostIdError,
+  InvariantViolation,
 } from '../../modules/post/model';
 import type { Post } from '../../modules/post/model';
 
@@ -112,9 +114,9 @@ describe('dateFromId', () => {
   });
 });
 
-// ── entryToPost ──────────────────────────────────────────────────────────────
+// ── createPost (Smart Constructor) ───────────────────────────────────────────
 
-describe('entryToPost', () => {
+describe('createPost', () => {
   const baseEntry = {
     id: '2026-05-08-NixOS 는 어떤 원리로 커널패키지를 관리할까',
     data: {
@@ -123,52 +125,74 @@ describe('entryToPost', () => {
   };
 
   it('derives slug via slugify (strips date prefix)', () => {
-    const post = entryToPost(baseEntry);
+    const post = createPost(baseEntry);
     expect(post.slug).toBe('nixos-는-어떤-원리로-커널패키지를-관리할까');
   });
 
   it('derives title from filename when no frontmatter title (strips date prefix)', () => {
-    const post = entryToPost(baseEntry);
+    const post = createPost(baseEntry);
     expect(post.title).toBe('NixOS 는 어떤 원리로 커널패키지를 관리할까');
   });
 
   it('uses frontmatter title when provided', () => {
-    const post = entryToPost({
+    const post = createPost({
       ...baseEntry,
       data: { ...baseEntry.data, title: 'Custom Title' },
     });
     expect(post.title).toBe('Custom Title');
   });
 
-  it('extracts date from id prefix when no frontmatter date', () => {
-    const post = entryToPost(baseEntry);
+  it('extracts date from id prefix', () => {
+    const post = createPost(baseEntry);
     expect(post.date.getFullYear()).toBe(2026);
     expect(post.date.getMonth()).toBe(4); // 0-indexed May
     expect(post.date.getDate()).toBe(8);
   });
 
-  it('falls back to frontmatter date when id has no date prefix', () => {
-    const fallbackDate = new Date('2025-03-10');
-    const post = entryToPost({
-      id: 'NixOS 는 어떤 원리로 커널패키지를 관리할까',
-      data: { date: fallbackDate, tags: [] },
-    });
-    expect(post.date).toBe(fallbackDate);
-  });
-
   it('defaults description to empty string', () => {
-    const post = entryToPost(baseEntry);
+    const post = createPost(baseEntry);
     expect(post.description).toBe('');
   });
 
   it('defaults lang to ko', () => {
-    const post = entryToPost(baseEntry);
+    const post = createPost(baseEntry);
     expect(post.lang).toBe('ko');
   });
 
   it('defaults draft to false', () => {
-    const post = entryToPost(baseEntry);
+    const post = createPost(baseEntry);
     expect(post.draft).toBe(false);
+  });
+
+  it('returns a frozen object', () => {
+    const post = createPost(baseEntry);
+    expect(Object.isFrozen(post)).toBe(true);
+  });
+
+  describe('invariant violations', () => {
+    it('throws InvalidPostIdError for missing date prefix', () => {
+      expect(() => createPost({
+        id: 'no-date-prefix',
+        data: { tags: [] },
+      })).toThrow(InvalidPostIdError);
+    });
+
+    it('throws InvariantViolation when updatedDate <= date', () => {
+      expect(() => createPost({
+        id: '2026-05-08-Test',
+        data: {
+          tags: [],
+          updatedDate: new Date('2026-05-01'),  // before 2026-05-08
+        },
+      })).toThrow(InvariantViolation);
+    });
+
+    it('throws InvariantViolation for empty title', () => {
+      expect(() => createPost({
+        id: '2026-05-08-Test',
+        data: { title: '', tags: [] },
+      })).toThrow(InvariantViolation);
+    });
   });
 });
 

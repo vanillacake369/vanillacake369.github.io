@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SERIES,
   TAGS,
   countToLevel,
   extractSeries,
@@ -71,5 +72,10 @@ describe('modules/taxonomy/model', () => {
   it('keeps the tag catalog centralized', () => {
     expect(TAGS).toContain('nix');
     expect(TAGS).toContain('kubernetes');
+  });
+
+  it('keeps the series catalog centralized', () => {
+    expect(SERIES).toContain('NixOS Ecosystem');
+    expect(SERIES).toContain('Effective Java');
   });
 });

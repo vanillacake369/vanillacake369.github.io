@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  entryToPost,
+  createPost,
   excerptFromBody,
   extractTags,
   filterPublished,
@@ -28,7 +28,7 @@ describe('modules/post/model', () => {
   });
 
   it('maps a content entry with date-prefixed id to a Post model', () => {
-    const post = entryToPost({
+    const post = createPost({
       id: '2026-05-08-NixOS 는 어떤 원리로 커널패키지를 관리할까',
       data: {
         tags: ['nix'],

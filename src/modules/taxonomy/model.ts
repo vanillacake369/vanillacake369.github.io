@@ -1,19 +1,24 @@
 import type { CalendarDay, Post } from '../post/model';
 import { groupByCalendarDay, slugifyTag, sortPostsByDate, toLocalDateString } from '../post/model';
 
+export const SERIES = [
+  'NixOS Ecosystem',
+  'Effective Java',
+  'Kubernetes CKA',
+  'Proxmox Homelab',
+] as const;
+export type Series = (typeof SERIES)[number];
+
 export const TAGS = [
   'kubernetes',
   'infra',
   'nix',
   'homelab',
   'linux',
-  'dev',
-  'ai',
   'tools',
   'database',
   'network',
   'system-design',
-  'algorithm',
   'java',
   'spring-boot',
   'effective-java',
@@ -21,7 +26,6 @@ export const TAGS = [
   'conference',
   'investment',
   'journal',
-  'reflection',
 ] as const;
 
 export type Tag = (typeof TAGS)[number];
@@ -79,6 +83,7 @@ export function extractSeries(posts: Post[]): SeriesInfo[] {
   }
 
   return Array.from(seriesMap.entries())
+    .filter(([, entries]) => entries.length > 0)
     .map(([id, entries]) => {
       const orderedPosts = [...entries].sort(
         (a, b) => a.order - b.order || a.date.getTime() - b.date.getTime(),

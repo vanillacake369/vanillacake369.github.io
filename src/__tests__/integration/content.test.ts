@@ -9,7 +9,6 @@ const postSchema = z.object({
   date: z.date(),
   updatedDate: z.date().optional(),
   tags: z.array(z.string()).default([]),
-  series: z.object({ id: z.string(), order: z.number() }).optional(),
   lang: z.enum(['ko', 'en']).default('ko'),
   draft: z.boolean().default(false),
   heroImage: z.string().optional(),

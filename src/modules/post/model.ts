@@ -1,3 +1,14 @@
+import {
+  parsePostId,
+  parsePostIdSafe,
+  InvalidPostIdError,
+  InvariantViolation,
+} from './grammar';
+import type { ParsedPostId } from './grammar';
+
+export { parsePostId, parsePostIdSafe, InvalidPostIdError, InvariantViolation };
+export type { ParsedPostId };
+
 export type Lang = 'ko' | 'en';
 
 export interface Post {
@@ -25,25 +36,24 @@ export interface CalendarDay {
   posts: Pick<Post, 'slug' | 'title'>[];
 }
 
-const DATE_PREFIX_RE = /^\d{4}-\d{2}-\d{2}-/;
+// ── Grammar-based derivation ────────────────────────────────────────────────
 
 export function dateFromId(id: string): Date | undefined {
-  const match = id.match(/^(\d{4}-\d{2}-\d{2})-/);
-  if (!match) return undefined;
-  return new Date(match[1]);
+  const parsed = parsePostIdSafe(id);
+  if (!parsed) return undefined;
+  return new Date(parsed.year, parsed.month - 1, parsed.day);
 }
 
 export function titleFromId(id: string): string {
-  return id
-    .replace(DATE_PREFIX_RE, '')
-    .replace(/\.mdx?$/, '')
-    .trim();
+  const parsed = parsePostIdSafe(id);
+  if (!parsed) return id.replace(/\.mdx?$/, '').trim();
+  return parsed.title;
 }
 
 export function slugify(id: string): string {
-  return id
-    .replace(DATE_PREFIX_RE, '')
-    .replace(/\.mdx?$/, '')
+  const parsed = parsePostIdSafe(id);
+  const raw = parsed ? parsed.title : id.replace(/\.mdx?$/, '');
+  return raw
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ\-_.()]/g, '')
@@ -52,7 +62,14 @@ export function slugify(id: string): string {
     .trim();
 }
 
-export function entryToPost(entry: {
+export function parseSeriesFromId(id: string): { id: string; order: number } | undefined {
+  const parsed = parsePostIdSafe(id);
+  return parsed?.series;
+}
+
+// ── Smart Constructor (Level 1) ─────────────────────────────────────────────
+
+interface RawEntry {
   id: string;
   data: {
     title?: string;
@@ -63,23 +80,47 @@ export function entryToPost(entry: {
     lang?: 'ko' | 'en';
     draft?: boolean;
     heroImage?: string;
-    series?: { id: string; order: number };
   };
-}): Post {
-  const date = dateFromId(entry.id) ?? entry.data.date ?? new Date(0);
-  return {
+}
+
+export function createPost(entry: RawEntry): Post {
+  const parsed = parsePostId(entry.id);
+  const date = new Date(parsed.year, parsed.month - 1, parsed.day);
+  const title = entry.data.title ?? parsed.title;
+  const description = entry.data.description ?? '';
+  const tags = entry.data.tags ?? [];
+  const updatedDate = entry.data.updatedDate;
+
+  if (title.length === 0) {
+    throw new InvariantViolation('title', entry.id, 'must not be empty');
+  }
+
+  if (updatedDate !== undefined && updatedDate <= date) {
+    throw new InvariantViolation('updatedDate', entry.id, 'must be after date');
+  }
+
+  return Object.freeze({
     slug: slugify(entry.id),
-    title: entry.data.title ?? titleFromId(entry.id),
-    description: entry.data.description ?? '',
+    title,
+    description,
     date,
-    updatedDate: entry.data.updatedDate,
-    tags: entry.data.tags ?? [],
+    updatedDate,
+    tags,
     lang: entry.data.lang ?? 'ko',
     draft: entry.data.draft ?? false,
     heroImage: entry.data.heroImage,
-    series: entry.data.series,
-  };
+    series: parsed.series,
+  });
 }
+
+/**
+ * @deprecated Use createPost() for strict validation. Kept for backward compatibility.
+ */
+export function entryToPost(entry: RawEntry): Post {
+  return createPost(entry);
+}
+
+// ── Query functions ─────────────────────────────────────────────────────────
 
 export function sortPostsByDate(posts: Post[]): Post[] {
   return [...posts].sort((a, b) => b.date.getTime() - a.date.getTime());

@@ -5,34 +5,31 @@ describe('modules/search/model', () => {
   it('builds a sorted page list from content entries and excludes drafts', () => {
     const result = buildSearchPageList([
       {
-        id: 'Draft Post',
+        id: '2025-03-03-Draft Post',
         body: 'Hidden body',
         data: {
           title: 'Draft Post',
           description: 'draft desc',
-          date: new Date('2025-03-03'),
           tags: ['hidden'],
           draft: true,
         },
       },
       {
-        id: 'Older Post',
+        id: '2025-03-01-Older Post',
         body: 'Older body',
         data: {
           title: 'Older Post',
           description: 'older desc',
-          date: new Date('2025-03-01'),
           tags: ['infra'],
           draft: false,
         },
       },
       {
-        id: 'Newer Post',
+        id: '2025-03-02-Newer Post',
         body: '## Heading\n\nNewer body',
         data: {
           title: 'Newer Post',
           description: 'newer desc',
-          date: new Date('2025-03-02'),
           tags: ['nix'],
           draft: false,
         },
