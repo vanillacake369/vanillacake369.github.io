@@ -7,6 +7,7 @@ import remarkBreaks from 'remark-breaks';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkFootnotes from 'remark-footnotes';
+import rehypeVideoEmbed from './remark-video-embed.mjs';
 
 export const markdownRemarkPlugins = [
   remarkGfm,
@@ -16,6 +17,7 @@ export const markdownRemarkPlugins = [
 
 export const markdownRehypePlugins = [
   rehypeKatex,
+  rehypeVideoEmbed,
 ];
 
 export function isSoftBreaksEnabled() {

@@ -1,0 +1,92 @@
+---
+interface Props {
+  id: string;
+  rows?: number;
+  cols?: number;
+  speed?: number;
+}
+
+const { id, rows = 24, cols = 80, speed = 1 } = Astro.props;
+---
+
+<div
+  class="asciinema-embed"
+  data-asciinema-id={id}
+  data-rows={rows}
+  data-cols={cols}
+  data-speed={speed}
+>
+  <a href={`https://asciinema.org/a/${id}`} target="_blank" rel="noopener noreferrer" class="asciinema-placeholder">
+    <img
+      src={`https://asciinema.org/a/${id}.svg`}
+      alt="Terminal recording"
+      loading="lazy"
+    />
+  </a>
+</div>
+
+<script>
+  const containers = document.querySelectorAll<HTMLElement>('.asciinema-embed');
+  let playerLoaded = false;
+
+  function loadPlayer(): Promise<void> {
+    if (playerLoaded) return Promise.resolve();
+    playerLoaded = true;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/asciinema-player@3/dist/bundle/asciinema-player.css';
+    document.head.appendChild(link);
+
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/asciinema-player@3/dist/bundle/asciinema-player.min.js';
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        observer.unobserve(entry.target);
+        const el = entry.target as HTMLElement;
+        const id = el.dataset.asciinemaId;
+        if (!id) continue;
+
+        loadPlayer().then(() => {
+          el.innerHTML = '';
+          const player = (window as any).AsciinemaPlayer;
+          if (player) {
+            player.create(`https://asciinema.org/a/${id}.cast`, el, {
+              rows: Number(el.dataset.rows) || 24,
+              cols: Number(el.dataset.cols) || 80,
+              speed: Number(el.dataset.speed) || 1,
+              fit: 'width',
+              theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'monokai' : 'asciinema',
+            });
+          }
+        });
+      }
+    },
+    { rootMargin: '200px' },
+  );
+
+  containers.forEach((c) => observer.observe(c));
+</script>
+
+<style>
+  .asciinema-embed {
+    margin: 1.5em 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .asciinema-placeholder img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

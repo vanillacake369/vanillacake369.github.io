@@ -1,0 +1,74 @@
+---
+interface Props {
+  title: string;
+  open?: boolean;
+}
+
+const { title, open = false } = Astro.props;
+---
+
+<details class="collapse" open={open || undefined}>
+  <summary class="collapse-summary">
+    <span>{title}</span>
+    <span class="collapse-icon" aria-hidden="true">▾</span>
+  </summary>
+  <div class="collapse-body">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .collapse {
+    margin: 1.5em 0;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .collapse-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.92rem;
+    list-style: none;
+    background: var(--color-surface);
+    transition: background 0.15s ease;
+  }
+
+  .collapse-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .collapse-summary:hover {
+    background: var(--color-hover-bg);
+  }
+
+  .collapse-icon {
+    transition: transform 0.2s ease;
+    color: var(--color-text-secondary);
+  }
+
+  .collapse[open] .collapse-icon {
+    transform: rotate(180deg);
+  }
+
+  .collapse-body {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .collapse-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .collapse-icon {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,82 @@
+---
+interface Props {
+  src: string;
+  title?: string;
+}
+
+const { src, title = '' } = Astro.props;
+
+function extractYouTubeId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+  return null;
+}
+
+function extractVimeoId(url: string): string | null {
+  const m = url.match(/vimeo\.com\/(\d+)/);
+  return m ? m[1] : null;
+}
+
+const youtubeId = extractYouTubeId(src);
+const vimeoId = !youtubeId ? extractVimeoId(src) : null;
+const isNative = !youtubeId && !vimeoId;
+---
+
+<figure class="video-embed">
+  {youtubeId && (
+    <iframe
+      src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
+      title={title || 'YouTube video'}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    />
+  )}
+  {vimeoId && (
+    <iframe
+      src={`https://player.vimeo.com/video/${vimeoId}`}
+      title={title || 'Vimeo video'}
+      loading="lazy"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen
+    />
+  )}
+  {isNative && (
+    <video controls preload="metadata" loading="lazy">
+      <source src={src} />
+    </video>
+  )}
+  {title && <figcaption>{title}</figcaption>}
+</figure>
+
+<style>
+  .video-embed {
+    margin: 1.5em 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .video-embed iframe,
+  .video-embed video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: none;
+  }
+
+  .video-embed figcaption {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    padding: 0.5rem 0.75rem;
+    font-style: italic;
+    font-family: var(--font-sans);
+    border-top: 1px solid var(--color-border);
+  }
+</style>
