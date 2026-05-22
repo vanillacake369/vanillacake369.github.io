@@ -8,14 +8,14 @@
     --font-size-meta: 0.82rem;
     --font-size-meta-compact: 0.74rem;
 
-    --font-size-post-title: clamp(1.55rem, 0.75vw + 1.25rem, 1.95rem);
+    --font-size-post-title: clamp(1.85rem, 1vw + 1.5rem, 2.4rem);
 
-    --prose-body: 0.95rem;
-    --prose-h1: 1.7rem;
-    --prose-h2: 1.35rem;
+    --prose-body: 1rem;
+    --prose-h1: 1.55rem;
+    --prose-h2: 1.3rem;
     --prose-h3: 1.1rem;
-    --prose-h4: 0.95rem;
-    --prose-line-height: 1.8;
+    --prose-h4: 1.02rem;
+    --prose-line-height: 1.65;
 }
 
 @media (min-width: 768px) {
@@ -23,12 +23,12 @@
         --font-size-page-title: 1.05rem;
         --font-size-list-title: 1.12rem;
         --font-size-list-title-compact: 0.98rem;
-        --font-size-post-title: clamp(1.55rem, 0.75vw + 1.25rem, 1.95rem);
 
-        --prose-body: 0.98rem;
-        --prose-h1: 1.9rem;
-        --prose-h2: 1.5rem;
+        --prose-body: 1rem;
+        --prose-h1: 1.7rem;
+        --prose-h2: 1.4rem;
         --prose-h3: 1.14rem;
+        --prose-h4: 1.04rem;
     }
 }
 
@@ -36,12 +36,12 @@
     :root {
         --font-size-page-title: 1.1rem;
         --font-size-list-title: 1.16rem;
-        --font-size-post-title: clamp(1.55rem, 0.75vw + 1.25rem, 1.95rem);
 
-        --prose-body: 0.93rem;
-        --prose-h1: 2.05rem;
-        --prose-h2: 1.6rem;
+        --prose-body: 1rem;
+        --prose-h1: 1.75rem;
+        --prose-h2: 1.45rem;
         --prose-h3: 1.18rem;
-        --prose-line-height: 1.82;
+        --prose-h4: 1.05rem;
+        --prose-line-height: 1.65;
     }
 }
