@@ -31,8 +31,13 @@ function collectPostMeta(dir: string, prefix = ''): PostMeta[] {
       const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
       const fm = fmMatch?.[1] ?? '';
 
-      const tagsMatch = fm.match(/^tags:\s*\[(.+)\]/m);
-      const tags = tagsMatch?.[1]?.split(',').map((t) => t.trim().replace(/['"]/g, '')) ?? [];
+      // Inline: tags: [foo, bar]
+      const inlineMatch = fm.match(/^tags:\s*\[(.+)\]/m);
+      // YAML list: tags:\n    - foo\n    - bar
+      const listMatches = [...fm.matchAll(/^[ \t]+-\s*["']?([^\n"']+?)["']?\s*$/gm)];
+      const tags = inlineMatch
+        ? inlineMatch[1].split(',').map((t) => t.trim().replace(/['"]/g, ''))
+        : listMatches.map((m) => m[1].trim());
       const draftMatch = fm.match(/^draft:\s*(true|false)/m);
 
       posts.push({

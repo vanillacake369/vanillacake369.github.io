@@ -49,7 +49,7 @@ describe('Markdown paragraph policy', () => {
 
   it('renders the NixOS IaC intro as separate paragraphs', async () => {
     const source = fs.readFileSync(
-      'src/content/posts/NixOS IaC 설계: 계약, 계층, 순수 함수로 홈랩 제어하기.md',
+      'src/content/posts/NixOS Ecosystem/03-2026-05-08-NixOS IaC 설계: 계약, 계층, 순수 함수로 홈랩 제어하기.md',
       'utf8',
     );
     const html = await renderMarkdownHtml(stripFrontmatter(source), {

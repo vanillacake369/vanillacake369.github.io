@@ -19,6 +19,7 @@ export const TAGS = [
   'database',
   'network',
   'system-design',
+  'algorithm',
   'java',
   'spring-boot',
   'effective-java',

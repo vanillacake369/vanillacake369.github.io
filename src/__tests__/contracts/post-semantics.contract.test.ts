@@ -35,7 +35,8 @@ function collectPosts(dir: string, prefix = ''): FrontmatterData[] {
 
       const titleMatch = fm.match(/^title:\s*["']?(.+?)["']?\s*$/m);
       const descMatch = fm.match(/^description:\s*["']?(.+?)["']?\s*$/m);
-      const tagsMatch = fm.match(/^tags:\s*\[(.+)\]/m);
+      const inlineTagsMatch = fm.match(/^tags:\s*\[(.+)\]/m);
+      const listTagMatches = [...fm.matchAll(/^[ \t]+-\s*["']?([^\n"']+?)["']?\s*$/gm)];
       const updatedMatch = fm.match(/^updatedDate:\s*(.+)$/m);
       const draftMatch = fm.match(/^draft:\s*(true|false)/m);
 
@@ -43,7 +44,9 @@ function collectPosts(dir: string, prefix = ''): FrontmatterData[] {
         id,
         title: titleMatch?.[1],
         description: descMatch?.[1],
-        tags: tagsMatch?.[1]?.split(',').map((t) => t.trim().replace(/['"]/g, '')),
+        tags: inlineTagsMatch
+          ? inlineTagsMatch[1].split(',').map((t) => t.trim().replace(/['"]/g, ''))
+          : listTagMatches.length > 0 ? listTagMatches.map((m) => m[1].trim()) : undefined,
         updatedDate: updatedMatch?.[1]?.trim(),
         draft: draftMatch?.[1] === 'true',
       });
