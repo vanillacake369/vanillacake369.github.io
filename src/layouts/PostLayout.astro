@@ -92,7 +92,11 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
           </time>
           {formattedUpdatedDate && (
             <span class="post-updated">
-              (Updated: <time datetime={updatedDate!.toISOString()}>{formattedUpdatedDate}</time>)
+              (<span
+                data-i18n="post.updated"
+                data-i18n-ko={translations.ko['post.updated']}
+                data-i18n-en={translations.en['post.updated']}
+              >{translations.ko['post.updated']}</span>: <time datetime={updatedDate!.toISOString()}>{formattedUpdatedDate}</time>)
             </span>
           )}
         </div>

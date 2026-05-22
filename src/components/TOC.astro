@@ -5,6 +5,8 @@
 // - Highlights the current section via IntersectionObserver
 // - Collapsible on mobile
 
+import { translations } from '../i18n/translations';
+
 export interface Heading {
   depth: number;
   slug: string;
@@ -24,7 +26,11 @@ const filtered = headings.filter((h) => h.depth >= 1 && h.depth <= 4);
 {filtered.length > 0 && (
   <nav class="toc" aria-label="Table of contents">
     <button class="toc-toggle" aria-expanded="true" aria-controls="toc-list">
-      Contents
+      <span
+        data-i18n="toc.title"
+        data-i18n-ko={translations.ko['toc.title']}
+        data-i18n-en={translations.en['toc.title']}
+      >{translations.ko['toc.title']}</span>
       <span class="toc-toggle-icon" aria-hidden="true">▾</span>
     </button>
     <ol id="toc-list" class="toc-list">
