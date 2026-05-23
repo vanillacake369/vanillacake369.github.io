@@ -67,14 +67,19 @@ describe('ref hover → footnote preview', () => {
     expect(tooltip.textContent).toContain('footnote 1 content');
   });
 
-  it('hides tooltip on mouseleave', () => {
+  it('hides tooltip on mouseleave after delay', () => {
+    vi.useFakeTimers();
     initFootnotePreview();
     const ref = document.querySelector('[data-footnote-ref]') as HTMLElement;
     ref.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     ref.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
 
     const tooltip = document.getElementById('fn-tooltip')!;
+    // Not hidden immediately — delayed to allow mouse to enter tooltip
+    expect(tooltip.hidden).toBe(false);
+    vi.advanceTimersByTime(200);
     expect(tooltip.hidden).toBe(true);
+    vi.useRealTimers();
   });
 });
 

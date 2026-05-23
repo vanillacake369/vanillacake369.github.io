@@ -12,6 +12,8 @@ const BACKREF_SELECTOR = 'a[data-footnote-backref]';
 const FOOTNOTES_SELECTOR = 'section.footnotes, .footnotes';
 
 let tooltip: HTMLElement | null = null;
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
+const HIDE_DELAY = 150; // ms — enough to move mouse from ref to tooltip
 
 function getOrCreateTooltip(): HTMLElement {
   if (tooltip && document.contains(tooltip)) return tooltip;
@@ -19,11 +21,14 @@ function getOrCreateTooltip(): HTMLElement {
   tooltip.id = 'fn-tooltip';
   tooltip.hidden = true;
   tooltip.setAttribute('role', 'tooltip');
+  tooltip.addEventListener('mouseenter', cancelHide);
+  tooltip.addEventListener('mouseleave', scheduleHide);
   document.body.appendChild(tooltip);
   return tooltip;
 }
 
 function showTooltip(anchor: HTMLElement, html: string): void {
+  cancelHide();
   const tip = getOrCreateTooltip();
 
   const rect = anchor.getBoundingClientRect();
@@ -41,9 +46,22 @@ function showTooltip(anchor: HTMLElement, html: string): void {
 }
 
 function hideTooltip(): void {
+  cancelHide();
   const tip = getOrCreateTooltip();
   tip.hidden = true;
   tip.innerHTML = '';
+}
+
+function scheduleHide(): void {
+  cancelHide();
+  hideTimer = setTimeout(hideTooltip, HIDE_DELAY);
+}
+
+function cancelHide(): void {
+  if (hideTimer !== null) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
 }
 
 function getFootnoteContent(href: string): string {
@@ -85,7 +103,7 @@ export function initFootnotePreview(): void {
   }, true);
 
   article.addEventListener('mouseleave', (e: Event) => {
-    if ((e.target as HTMLElement).closest?.(REF_SELECTOR)) hideTooltip();
+    if ((e.target as HTMLElement).closest?.(REF_SELECTOR)) scheduleHide();
   }, true);
 
   article.addEventListener('click', (e: Event) => {
@@ -113,7 +131,7 @@ export function initFootnotePreview(): void {
   }, true);
 
   footnotes.addEventListener('mouseleave', (e: Event) => {
-    if ((e.target as HTMLElement).closest?.(BACKREF_SELECTOR)) hideTooltip();
+    if ((e.target as HTMLElement).closest?.(BACKREF_SELECTOR)) scheduleHide();
   }, true);
 
   footnotes.addEventListener('click', (e: Event) => {

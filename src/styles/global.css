@@ -205,14 +205,21 @@ hr {
   border: 1px solid var(--vim-panel-border, var(--color-border));
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  pointer-events: none;
+  pointer-events: auto;
   overflow-wrap: anywhere;
 }
 
 #fn-tooltip a {
   color: var(--color-accent);
-  pointer-events: none;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 2px;
   word-break: break-all;
+  cursor: pointer;
+}
+
+#fn-tooltip a:hover {
+  opacity: 0.8;
 }
 
 #fn-tooltip code {
