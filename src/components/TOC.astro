@@ -138,17 +138,20 @@ const filtered = headings.filter((h) => h.depth >= 1 && h.depth <= 4);
     font-weight: 500;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .toc {
       position: static;
       max-height: none;
-      border: 1px solid rgba(128, 128, 128, 0.25);
-      border-radius: 6px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0;
     }
 
     .toc-toggle {
       display: block;
+    }
+
+    .toc-list {
+      max-height: 50vh;
+      overflow-y: auto;
     }
   }
 </style>
@@ -159,6 +162,12 @@ const filtered = headings.filter((h) => h.depth >= 1 && h.depth <= 4);
   const list = document.getElementById('toc-list');
 
   if (toggle && list) {
+    // Start collapsed when toggle is visible (inline mode)
+    if (window.getComputedStyle(toggle).display !== 'none') {
+      toggle.setAttribute('aria-expanded', 'false');
+      list.hidden = true;
+    }
+
     toggle.addEventListener('click', () => {
       const expanded = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!expanded));

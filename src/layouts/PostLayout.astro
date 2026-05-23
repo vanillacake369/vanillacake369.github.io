@@ -70,11 +70,9 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
   tags={tags}
 >
   <div class="post-with-toc">
-    <div class="toc-trigger">
-      <aside class="toc-sidebar">
-        <slot name="toc" />
-      </aside>
-    </div>
+    <aside class="toc-sidebar">
+      <slot name="toc" />
+    </aside>
 
     <article class="post">
       {heroImage && (
@@ -199,25 +197,20 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     position: relative;
   }
 
-  /* Hover trigger — invisible zone on right side, always receives pointer */
-  .toc-trigger {
+  /* Desktop: fixed sidebar on right, revealed on hover/scroll */
+  .toc-sidebar {
     position: fixed;
     top: 50%;
     right: 0;
     transform: translateY(-50%);
     width: 220px;
-    max-height: 60vh;
+    max-height: 55vh;
     z-index: 100;
     padding: 0.75rem;
-  }
-
-  /* TOC panel — hidden by default, shown on scroll or hover */
-  .toc-sidebar {
     opacity: 0;
     transition: opacity 0.4s ease;
-    pointer-events: none;
     overflow-y: auto;
-    max-height: 55vh;
+    overscroll-behavior: contain;
     scrollbar-width: none;
   }
 
@@ -225,10 +218,16 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     display: none;
   }
 
-  /* Show on hover over trigger zone */
-  .toc-trigger:hover .toc-sidebar {
+  .toc-sidebar:hover,
+  .toc-sidebar.visible {
     opacity: 1;
-    pointer-events: auto;
+  }
+
+  /* Reset inner .toc scroll — sidebar is the sole scroll container */
+  .toc-sidebar :global(.toc) {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   /* Post */
@@ -492,10 +491,20 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
     }
   }
 
-  /* Responsive */
+  /* Responsive: inline collapsible TOC on smaller screens */
   @media (max-width: 1024px) {
-    .toc-trigger {
-      display: none;
+    .toc-sidebar {
+      position: static;
+      transform: none;
+      width: 100%;
+      max-height: none;
+      opacity: 1;
+      pointer-events: auto;
+      padding: 0;
+      margin-bottom: var(--spacing-xl);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      overflow: visible;
     }
   }
 
@@ -503,26 +512,33 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
 
 <script>
   const toc = document.querySelector('.toc-sidebar') as HTMLElement | null;
-  const trigger = document.querySelector('.toc-trigger') as HTMLElement | null;
-  if (toc && trigger) {
-    let timer: ReturnType<typeof setTimeout>;
+  if (toc) {
+    const isDesktop = () => window.getComputedStyle(toc).position === 'fixed';
+    let hideTimer: ReturnType<typeof setTimeout>;
     let hovering = false;
 
-    trigger.addEventListener('mouseenter', () => { hovering = true; });
-    trigger.addEventListener('mouseleave', () => { hovering = false; });
+    toc.addEventListener('mouseenter', () => {
+      hovering = true;
+      clearTimeout(hideTimer);
+      toc!.classList.add('visible');
+    });
 
-    function show() {
-      toc!.style.opacity = '1';
-      toc!.style.pointerEvents = 'auto';
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (!hovering) {
-          toc!.style.removeProperty('opacity');
-          toc!.style.removeProperty('pointer-events');
-        }
+    toc.addEventListener('mouseleave', () => {
+      hovering = false;
+      scheduleHide();
+    });
+
+    function scheduleHide() {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        if (!hovering) toc!.classList.remove('visible');
       }, 1500);
     }
 
-    window.addEventListener('scroll', show, { passive: true });
+    window.addEventListener('scroll', () => {
+      if (!isDesktop()) return;
+      toc!.classList.add('visible');
+      if (!hovering) scheduleHide();
+    }, { passive: true });
   }
 </script>
