@@ -29,6 +29,7 @@
     "remark-breaks": "^4.0.0",
     "remark-footnotes": "^2.0.0",
     "remark-gfm": "^4.0.1",
+    "remark-github-blockquote-alert": "^2.1.0",
     "remark-math": "^6.0.0"
   },
   "devDependencies": {

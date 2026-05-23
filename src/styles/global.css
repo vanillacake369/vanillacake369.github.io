@@ -229,6 +229,72 @@ hr {
   border-radius: 3px;
 }
 
+/* ── GitHub-style alert/admonition blocks ── */
+.markdown-alert {
+  padding: 0.75rem 1rem;
+  margin: 1.5em 0;
+  border-left: 4px solid;
+  border-radius: 4px;
+  background-color: var(--color-bg);
+}
+
+.markdown-alert > :first-child {
+  margin-top: 0;
+}
+
+.markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+
+.markdown-alert-title svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+.markdown-alert-note {
+  border-color: #2f81f7;
+}
+.markdown-alert-note .markdown-alert-title {
+  color: #2f81f7;
+}
+
+.markdown-alert-tip {
+  border-color: #3fb950;
+}
+.markdown-alert-tip .markdown-alert-title {
+  color: #3fb950;
+}
+
+.markdown-alert-important {
+  border-color: #a371f7;
+}
+.markdown-alert-important .markdown-alert-title {
+  color: #a371f7;
+}
+
+.markdown-alert-warning {
+  border-color: #d29922;
+}
+.markdown-alert-warning .markdown-alert-title {
+  color: #d29922;
+}
+
+.markdown-alert-caution {
+  border-color: #f85149;
+}
+.markdown-alert-caution .markdown-alert-title {
+  color: #f85149;
+}
+
 /* Shiki dual theme — dark mode uses the second theme */
 [data-theme='dark'] .astro-code,
 [data-theme='dark'] .astro-code span,
