@@ -106,7 +106,24 @@ export function createPost(entry: RawEntry): Post {
 // ── Query functions ─────────────────────────────────────────────────────────
 
 export function sortPostsByDate(posts: Post[]): Post[] {
-  return [...posts].sort((a, b) => b.date.getTime() - a.date.getTime());
+  return [...posts].sort((a, b) => {
+    // 1. 날짜 내림차순
+    const dateDiff = b.date.getTime() - a.date.getTime();
+    if (dateDiff !== 0) return dateDiff;
+
+    // 2. 같은 날짜: 시리즈 → 시리즈 ID로 그룹핑, 같은 시리즈 내 order 오름차순
+    const aSeriesId = a.series?.id ?? '';
+    const bSeriesId = b.series?.id ?? '';
+    if (aSeriesId !== bSeriesId) {
+      return aSeriesId.localeCompare(bSeriesId);
+    }
+    if (a.series && b.series) {
+      return a.series.order - b.series.order;
+    }
+
+    // 3. 같은 날짜 + 비시리즈: 제목 오름차순
+    return a.title.localeCompare(b.title);
+  });
 }
 
 export function filterPublished(posts: Post[]): Post[] {
