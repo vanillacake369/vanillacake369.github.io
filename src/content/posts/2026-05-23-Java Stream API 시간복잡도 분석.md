@@ -2,9 +2,6 @@
 description: JDK 21 소스코드를 직접 열어 IntStream의 filter, map, count가 내부적으로 어떻게 실행되는지 분석하고, 파이프라인 구조와 시간·공간 복잡도를 JMH 벤치마크로 검증한다
 tags:
     - java
-    - jdk
-    - stream
-    - performance
 lang: ko
 draft: false
 ---
@@ -13,7 +10,7 @@ draft: false
 
 Java 개발자라면 `.filter().map().count()` 같은 Stream 체이닝을 자주 사용한다. 복잡하게 for, if 문을 덕지덕지 처리하는 것보다, 제공되는 메서드 체이닝을 통해 깔끔한 로직을 드러내어 비즈니스 로직의 가독성 및 개발 편의성을 챙길 수 있기 때문이다. 그러나 대부분 이 체인이 내부적으로 몇 번 순회하는지, 중간에 컬렉션이 생기는지, 시간·공간 복잡도가 어떻게 되는지를 모른 채 사용한다. 내부 인터페이스와 구현체들 속에 숨어 있기 때문이다.
 
-그러나 성능 민감한 코드를 짤 때는 Stream 을 쓸지 말지 판단하려면 내부 구조를 알아야 한다. 예를 들어 `IntStream.range(0, n).filter(x -> x % 2 == 0).map(x -> x * 2).count()` 이 한 줄이 O(N)인지 O(3N)인지, 중간 배열이 3개 생기는지 0개인지에 따라 선택이 달라진다.
+그러나 성능 민감한 코드를 짤 때는 Stream 을 쓸지 말지 판단하려면 내부 구조를 알아야 한다. 예를 들어 `IntStream.range(0, n).filter(x -> x % 2 == 0).map(x -> x * 2).count()` 이 한 줄이 O(N)인지 O(logN)인지, 중간 배열이 3개 생기는지 0개인지에 따라 선택이 달라진다.
 
 필자는 알고리즘 문제를 풀다가 stream API 사용에 따라 시간초과를 겪게 되었고, 문득 자주 쓰는 `filter()`, `map()`, `count()`가 내부적으로 어떻게 돌고 공간/시간 복잡도는 어떻게 되는지 궁금해졌다. 그래서 직접 JDK 21 소스코드를 열어 분석해 보았다.
 
@@ -164,8 +161,10 @@ final <P_IN, S extends Sink<E_OUT>> S wrapAndCopyInto(S wrappedSink,
 }
 ```
 
-여기서 `Spliterator`가 등장한다. **Spliterator**(*splitable iterator*)는 데이터 소스의 원소를 순차적으로 꺼내주는 반복자이다[^J20]. `Iterator`와 비슷하지만 두 가지가 다르다. 첫째, `tryAdvance(Consumer)`로 원소를 하나씩 소비하거나 `forEachRemaining(Consumer)`로 남은 원소를 일괄 소비할 수 있다. 둘째, `trySplit()`으로 자신을 반으로 분할하여 병렬 처리를 지원한다. Stream 파이프라인에서 Spliterator는 데이터 소스와 Sink 체인 사이의 접점이다 — Spliterator가 원소를 꺼내 첫 번째 Sink의 `accept()`에 전달하면, Sink 체인이 연쇄적으로 처리를 수행한다.
-> [!NOTE] > 
+여기서 `Spliterator`가 등장한다. **Spliterator**(_splitable iterator_)는 데이터 소스의 원소를 순차적으로 꺼내주는 반복자이다[^J20]. `Iterator`와 비슷하지만 두 가지가 다르다. 첫째, `tryAdvance(Consumer)`로 원소를 하나씩 소비하거나 `forEachRemaining(Consumer)`로 남은 원소를 일괄 소비할 수 있다. 둘째, `trySplit()`으로 자신을 반으로 분할하여 병렬 처리를 지원한다. Stream 파이프라인에서 Spliterator는 데이터 소스와 Sink 체인 사이의 접점이다 — Spliterator가 원소를 꺼내 첫 번째 Sink의 `accept()`에 전달하면, Sink 체인이 연쇄적으로 처리를 수행한다.
+
+> [!NOTE]
+> 
 > 여기서 `Spliterator` 세부 구현체를 다루지 않는 이유는 구현체의 종류가 워낙 다양하기 때문이다
 > 총 162 개나 되며 각각에 대해 세부적으로 다루는 건 본 포스트의 범위를 벗어나기에
 > `Spliterator`의 핵심개념만 확인하고 넘어간다.
@@ -175,8 +174,31 @@ final <P_IN, S extends Sink<E_OUT>> S wrapAndCopyInto(S wrappedSink,
 1. `wrapSink()` — 파이프라인을 역순으로 탐색하며 각 중간 연산의 Sink 체인을 조립한다
 2. `copyInto()` — Spliterator가 데이터 소스에서 원소를 하나씩 꺼내 조립된 Sink 체인에 밀어넣는다
 
-`wrapSink()`의 구현을 보면 역순 탐색이 명확하다. 마지막 중간 연산부터 시작하여 소스 방향으로 되짚으면서, 각 단계의 `opWrapSink()`가 현재 Sink를 감싸 새 Sink를 반환한다. 최종 결과는 소스에서 터미널까지 연결된 하나의 Sink 체인이다.
+`wrapSink()`의 구현을 보면 역순 탐색이 명확하다.
 
+```java
+// java.util.stream.AbstractPipeline#wrapSink
+@Override
+final <P_IN> Sink<P_IN> wrapSink(Sink<E_OUT> sink) {
+    for (AbstractPipeline p = AbstractPipeline.this;
+         p.depth > 0;
+         p = p.previousStage) {            // ← 마지막 단계부터 소스 방향으로
+        sink = p.opWrapSink(p.previousStage.combinedFlags, sink);  // ← Sink 감싸기
+    }
+    return (Sink<P_IN>) sink;
+}
+```
+
+마지막 중간 연산부터 시작하여 소스 방향으로 되짚으면서, 각 단계의 `opWrapSink()`가 현재 Sink를 감싸 새 Sink를 반환한다. 최종 결과는 소스에서 터미널까지 연결된 하나의 Sink 체인이다.
+
+`copyInto()`는 이 체인에 원소를 공급한다.
+
+```java
+// java.util.stream.AbstractPipeline#copyInto
+final <P_IN> void copyInto(Sink<P_IN> wrappedSink, Spliterator<P_IN> spliterator) {
+    if (!StreamOpFlag.SHORT_CIRCUIT.isKnown(getStreamAndOpFlags())) {
+        wrappedSink.begin(spliterator.getExactSizeIfKnown());  // ← 크기 전달
+        spliterator.forEachRemaining(wrappedSink);              // ← 단일 순회
         wrappedSink.end();
     } else {
         copyIntoWithCancel(wrappedSink, spliterator);
