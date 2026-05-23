@@ -41,6 +41,7 @@ export const SERIES = [
   'NixOS Ecosystem',
   'Effective Java',
   'Kubernetes CKA',
+  'OSSCA Valkey',
   'Proxmox Homelab',
 ] as const;
 export type Series = (typeof SERIES)[number];
