@@ -25,11 +25,11 @@ function getOrCreateTooltip(): HTMLElement {
 
 function showTooltip(anchor: HTMLElement, html: string): void {
   const tip = getOrCreateTooltip();
-  tip.innerHTML = html;
-  tip.hidden = false;
 
   const rect = anchor.getBoundingClientRect();
-  const tipWidth = 360;
+  tip.innerHTML = html;
+  tip.hidden = false;
+  const tipWidth = tip.offsetWidth;
   let left = rect.left;
   if (left + tipWidth > window.innerWidth) {
     left = window.innerWidth - tipWidth - 16;

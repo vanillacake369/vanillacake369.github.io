@@ -193,7 +193,8 @@ hr {
 /* ── Footnote tooltip ── */
 #fn-tooltip {
   z-index: 1100;
-  max-width: 360px;
+  max-width: min(420px, calc(100vw - 32px));
+  width: max-content;
   padding: 0.6rem 0.8rem;
   font-size: 0.82rem;
   line-height: 1.5;
@@ -205,12 +206,13 @@ hr {
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   pointer-events: none;
-  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 #fn-tooltip a {
   color: var(--color-accent);
   pointer-events: none;
+  word-break: break-all;
 }
 
 #fn-tooltip code {
