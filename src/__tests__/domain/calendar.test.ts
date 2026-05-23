@@ -1,20 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { generateCalendarGrid, countToLevel } from '../../modules/taxonomy/model';
+import { generateCalendarGrid, countToLevel, toLocalDateString } from '../../modules/taxonomy/model';
 import type { Post } from '../../modules/post/model';
-
-function makePost(overrides: Partial<Post> = {}): Post {
-  return {
-    slug: 'test-post',
-    title: 'Test Post',
-    description: 'desc',
-    date: new Date('2025-01-15'),
-    tags: [],
-
-    lang: 'ko',
-    draft: false,
-    ...overrides,
-  };
-}
+import { makePost } from '../helpers/make-post';
 
 // ---------------------------------------------------------------------------
 // countToLevel
@@ -134,7 +121,7 @@ describe('generateCalendarGrid — post data', () => {
     // Use today's date so it is always in range.
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const dateStr = today.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(today);
 
     const posts = [
       makePost({ slug: 'a', date: new Date(dateStr) }),
@@ -159,7 +146,7 @@ describe('generateCalendarGrid — post data', () => {
   it('populates posts array for a day with posts', () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const dateStr = today.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(today);
 
     const posts = [makePost({ slug: 'hello', title: 'Hello', date: new Date(dateStr) })];
     const grid = generateCalendarGrid(posts, 1);
@@ -180,7 +167,7 @@ describe('generateCalendarGrid — post data', () => {
   it('assigns level 4 for 5 or more posts on the same day', () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const dateStr = today.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(today);
 
     const posts = Array.from({ length: 5 }, (_, i) =>
       makePost({ slug: `post-${i}`, date: new Date(dateStr) }),

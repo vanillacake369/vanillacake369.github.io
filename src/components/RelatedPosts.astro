@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import { entryToPost, slugify, toLocalDateString } from '../modules/post/model';
+import { createPost, slugify } from '../modules/post/model';
+import { toLocalDateString } from '../modules/taxonomy/model';
 
 interface Props {
   currentSlug: string;
@@ -11,11 +12,11 @@ const { currentSlug, tags } = Astro.props;
 
 const allPosts = await getCollection('posts');
 const related = allPosts
-  .filter(p => !p.data.draft && slugify(p.id) !== currentSlug)
-  .map(p => ({
-    post: entryToPost(p),
-    sharedTags: p.data.tags.filter(t => tags.includes(t)),
-  }))
+  .map(p => {
+    const post = createPost(p);
+    return { post, sharedTags: post.tags.filter(t => tags.includes(t)) };
+  })
+  .filter(({ post }) => !post.draft && post.slug !== currentSlug)
   .filter(p => p.sharedTags.length > 0)
   .sort((a, b) => b.sharedTags.length - a.sharedTags.length || b.post.date.getTime() - a.post.date.getTime())
   .slice(0, 4);

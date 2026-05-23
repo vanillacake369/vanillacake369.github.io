@@ -3,11 +3,12 @@ import { z } from 'zod';
 
 // Mirror the content collection schema without importing from astro:content.
 // This tests the shape and validation rules independently of the Astro build pipeline.
+// Keep in sync with src/content.config.ts.
 const postSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  date: z.date(),
-  updatedDate: z.date().optional(),
+  title: z.string().optional(),
+  description: z.string().default(''),
+  date: z.coerce.date().optional(),
+  updatedDate: z.coerce.date().optional(),
   tags: z.array(z.string()).default([]),
   lang: z.enum(['ko', 'en']).default('ko'),
   draft: z.boolean().default(false),
@@ -25,7 +26,7 @@ function makeValidFrontmatter(overrides: Partial<PostFrontmatter> = {}): PostFro
     lang: 'ko',
     draft: false,
     ...overrides,
-  };
+  } as PostFrontmatter;
 }
 
 describe('Content Collections schema', () => {
@@ -53,14 +54,13 @@ describe('Content Collections schema', () => {
     });
 
     it('applies default values when optional fields are omitted', () => {
-      const minimal = {
-        title: 'Minimal Post',
-        description: 'No optional fields.',
-        date: new Date('2026-01-01'),
-      };
+      const minimal = {};
       const result = postSchema.safeParse(minimal);
       expect(result.success).toBe(true);
       if (result.success) {
+        expect(result.data.title).toBeUndefined();
+        expect(result.data.description).toBe('');
+        expect(result.data.date).toBeUndefined();
         expect(result.data.tags).toEqual([]);
         expect(result.data.lang).toBe('ko');
         expect(result.data.draft).toBe(false);
@@ -105,42 +105,39 @@ describe('Content Collections schema', () => {
   });
 
   describe('invalid frontmatter', () => {
-    it('rejects a post missing the required title field', () => {
-      const input = {
-        description: 'No title here.',
-        date: new Date('2026-05-01'),
-      };
+    it('accepts a post with no title (title is optional)', () => {
+      const input = { description: 'No title here.', date: new Date('2026-05-01') };
       const result = postSchema.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const paths = result.error.issues.map((i) => i.path[0]);
-        expect(paths).toContain('title');
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.title).toBeUndefined();
       }
     });
 
-    it('rejects a post missing the required description field', () => {
-      const input = {
-        title: 'No Description',
-        date: new Date('2026-05-01'),
-      };
+    it('accepts a post with no description (defaults to empty string)', () => {
+      const input = { title: 'No Description', date: new Date('2026-05-01') };
       const result = postSchema.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const paths = result.error.issues.map((i) => i.path[0]);
-        expect(paths).toContain('description');
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.description).toBe('');
       }
     });
 
-    it('rejects a post missing the required date field', () => {
-      const input = {
-        title: 'No Date',
-        description: 'Missing date.',
-      };
+    it('accepts a post with no date (date is optional)', () => {
+      const input = { title: 'No Date', description: 'Missing date.' };
       const result = postSchema.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const paths = result.error.issues.map((i) => i.path[0]);
-        expect(paths).toContain('date');
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.date).toBeUndefined();
+      }
+    });
+
+    it('coerces a date string to a Date object', () => {
+      const input = makeValidFrontmatter({ date: '2026-05-01' as unknown as Date });
+      const result = postSchema.safeParse(input);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.date).toBeInstanceOf(Date);
       }
     });
 

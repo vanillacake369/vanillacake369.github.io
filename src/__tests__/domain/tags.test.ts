@@ -1,20 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { extractTags, filterByTag, slugifyTag } from '../../modules/post/model';
-import type { Post } from '../../modules/post/model';
-
-function makePost(overrides: Partial<Post> = {}): Post {
-  return {
-    slug: 'test-post',
-    title: 'Test Post',
-    description: 'desc',
-    date: new Date('2025-01-15'),
-    tags: [],
-
-    lang: 'ko',
-    draft: false,
-    ...overrides,
-  };
-}
+import { makePost } from '../helpers/make-post';
 
 describe('extractTags', () => {
   it('returns an empty array when no posts have tags', () => {
@@ -140,9 +126,8 @@ describe('slugifyTag (edge cases)', () => {
     expect(slugifyTag('a--b')).toBe('a-b');
   });
 
-  it('converts leading and trailing whitespace to hyphens (trim removes only whitespace, not hyphens)', () => {
-    // spaces become hyphens before trim runs, so leading/trailing spaces yield surrounding hyphens
-    expect(slugifyTag('  go  ')).toBe('-go-');
+  it('strips leading and trailing whitespace', () => {
+    expect(slugifyTag('  go  ')).toBe('go');
   });
 
   it('handles an empty string', () => {

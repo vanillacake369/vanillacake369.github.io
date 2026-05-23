@@ -4,40 +4,45 @@ import '../styles/typography/page.css';
 import '../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { filterPublished, groupByCalendarDay, sortPostsByDate, entryToPost } from '../modules/post/model';
-import { generateCalendarGrid } from '../modules/taxonomy/model';
+import { filterPublished, sortPostsByDate, createPost, slugifyTag } from '../modules/post/model';
+import { generateCalendarGrid, toLocalDateString } from '../modules/taxonomy/model';
 import { translations } from '../i18n/translations';
 
 const rawEntries = await getCollection('posts');
 
-const posts = rawEntries.map(entryToPost);
+const posts = rawEntries.map(createPost);
 
 const publishedPosts = filterPublished(posts);
 const sortedPosts = sortPostsByDate(publishedPosts);
-const calendarDays = groupByCalendarDay(publishedPosts);
-
-// Build a map of date → posts for client-side lookup
-const postsBySlug = new Map(publishedPosts.map(p => [p.slug, p]));
-const dayPostsMap: Record<string, { slug: string; title: string; tags: string[] }[]> = {};
-for (const day of calendarDays) {
-  dayPostsMap[day.date] = day.posts.map(p => {
-    const full = postsBySlug.get(p.slug);
-    return { slug: p.slug, title: p.title, tags: full?.tags ?? [] };
-  });
-}
 
 // Get all years that have posts
-const postYears = [...new Set(publishedPosts.map(p => p.date.getFullYear()))].sort((a, b) => b - a);
 const currentYear = new Date().getFullYear();
-const availableYears = [...new Set([currentYear, ...postYears])].sort((a, b) => b - a);
+const availableYears = [...new Set([currentYear, ...publishedPosts.map(p => p.date.getFullYear())])].sort((a, b) => b - a);
 
 // Generate grids for each year
+const postsBySlug = new Map(publishedPosts.map(p => [p.slug, p]));
 const yearGrids: Record<number, ReturnType<typeof generateCalendarGrid>> = {};
 for (const year of availableYears) {
   const yearPosts = publishedPosts.filter(p => p.date.getFullYear() === year);
   // For the current year, use today as reference; for past years, use Dec 31 of that year
   const refDate = year === currentYear ? new Date() : new Date(year, 11, 31);
   yearGrids[year] = generateCalendarGrid(yearPosts, 12, refDate);
+}
+
+// Build a map of date → posts for client-side lookup using grid cell data (avoids redundant groupByCalendarDay)
+const dayPostsMap: Record<string, { slug: string; title: string; tags: string[] }[]> = {};
+for (const grid of Object.values(yearGrids)) {
+  for (const week of grid) {
+    for (const cell of week.cells) {
+      if (cell && cell.posts.length > 0) {
+        dayPostsMap[cell.date] = cell.posts.map(p => ({
+          slug: p.slug,
+          title: p.title,
+          tags: postsBySlug.get(p.slug)?.tags ?? [],
+        }));
+      }
+    }
+  }
 }
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -156,12 +161,12 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
           {sortedPosts.map(post => (
             <li class="post-item">
               <time class="post-item-date" datetime={post.date.toISOString()}>
-                {post.date.toLocaleDateString('en-CA')}
+                {toLocalDateString(post.date)}
               </time>
               <a href={`/posts/${post.slug}`} class="post-item-title">{post.title}</a>
               {post.tags.length > 0 && (
                 <div class="post-item-tags">
-                  {post.tags.map(tag => <a href={`/tags/${tag}`} class="post-item-tag">#{tag}</a>)}
+                  {post.tags.map(tag => <a href={`/tags/${slugifyTag(tag)}`} class="post-item-tag">#{tag}</a>)}
                 </div>
               )}
             </li>
@@ -173,15 +178,6 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
 </BaseLayout>
 
 <script define:vars={{ dayPostsMap, availableYears, currentYear }}>
-  // HTML escape helper to prevent XSS
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
   // Year navigation
   let activeYear = currentYear;
   const yearLabel = document.getElementById('year-label');
@@ -223,10 +219,17 @@ function getMonthLabels(weeks: ReturnType<typeof generateCalendarGrid>) {
       for (const p of posts) {
         const li = document.createElement('li');
         li.className = 'day-post-item';
-        li.innerHTML = `<a href="/posts/${encodeURIComponent(p.slug)}/" class="day-post-link">${escapeHtml(p.title)}</a>` +
-          (p.tags.length > 0
-            ? `<span class="day-post-tags">${p.tags.map(t => '#' + escapeHtml(t)).join(' ')}</span>`
-            : '');
+        const a = document.createElement('a');
+        a.href = `/posts/${encodeURIComponent(p.slug)}/`;
+        a.className = 'day-post-link';
+        a.textContent = p.title;
+        li.appendChild(a);
+        if (p.tags.length > 0) {
+          const span = document.createElement('span');
+          span.className = 'day-post-tags';
+          span.textContent = p.tags.map(t => '#' + t).join(' ');
+          li.appendChild(span);
+        }
         list.appendChild(li);
       }
       container.hidden = false;

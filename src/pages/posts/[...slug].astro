@@ -2,24 +2,35 @@
 import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import TOC from '../../components/TOC.astro';
-import { slugify, parsePostId, parseSeriesFromId } from '../../modules/post/model';
+import { slugify, createPost } from '../../modules/post/model';
+import { extractSeries } from '../../modules/taxonomy/model';
 
 export async function getStaticPaths() {
   const entries = await getCollection('posts');
-  return entries.map((entry) => ({
-    params: { slug: slugify(entry.id) },
-    props: { entry },
-  }));
+  const allPosts = entries.map(e => createPost(e));
+  const allSeries = extractSeries(allPosts);
+
+  return entries.map((entry) => {
+    const post = createPost(entry);
+    const seriesInfo = post.series
+      ? allSeries.find(s => s.id === post.series!.id)
+      : undefined;
+
+    return {
+      params: { slug: slugify(entry.id) },
+      props: {
+        entry,
+        seriesPosts: seriesInfo?.posts ?? [],
+        seriesSlug: seriesInfo?.slug ?? '',
+      },
+    };
+  });
 }
 
-const { entry } = Astro.props;
+const { entry, seriesPosts, seriesSlug } = Astro.props;
+const post = createPost(entry);
 const { Content, headings } = await render(entry);
-
-const parsed = parsePostId(entry.id);
-const { description, updatedDate, tags, lang, heroImage } = entry.data;
-const series = parsed.series;
-const title = entry.data.title || parsed.title;
-const date = new Date(parsed.year, parsed.month - 1, parsed.day);
+const { title, description, date, updatedDate, tags, lang, heroImage, series } = post;
 ---
 
 <PostLayout
@@ -32,6 +43,8 @@ const date = new Date(parsed.year, parsed.month - 1, parsed.day);
   lang={lang}
   heroImage={heroImage}
   currentSlug={slugify(entry.id)}
+  seriesPosts={seriesPosts}
+  seriesSlug={seriesSlug}
 >
   <TOC headings={headings} slot="toc" />
   <Content />

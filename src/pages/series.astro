@@ -3,17 +3,13 @@ import '../styles/typography/tokens.css';
 import '../styles/typography/page.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { entryToPost, filterPublished } from '../modules/post/model';
-import { extractSeries } from '../modules/taxonomy/model';
+import { createPost, filterPublished } from '../modules/post/model';
+import { extractSeries, toLocalDateString } from '../modules/taxonomy/model';
 import { translations } from '../i18n/translations';
 
 const rawEntries = await getCollection('posts');
-const publishedPosts = filterPublished(rawEntries.map(entryToPost));
+const publishedPosts = filterPublished(rawEntries.map(createPost));
 const seriesList = extractSeries(publishedPosts);
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-CA');
-}
 ---
 
 <BaseLayout
@@ -68,7 +64,7 @@ function formatDate(date: Date): string {
                   <li class="series-post">
                     <span class="series-post-num">{String(i + 1).padStart(2, '0')}</span>
                     <a href={`/posts/${post.slug}`} class="series-post-title">{post.title}</a>
-                    <time class="series-post-date" datetime={post.date.toISOString()}>{formatDate(post.date)}</time>
+                    <time class="series-post-date" datetime={post.date.toISOString()}>{toLocalDateString(post.date)}</time>
                   </li>
                 ))}
               </ol>

@@ -3,11 +3,11 @@ import '../../styles/typography/tokens.css';
 import '../../styles/typography/page.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { filterPublished, extractTags, entryToPost } from '../../modules/post/model';
+import { filterPublished, extractTags, createPost } from '../../modules/post/model';
 
 const rawEntries = await getCollection('posts');
 
-const posts = rawEntries.map(entryToPost);
+const posts = rawEntries.map(createPost);
 
 const publishedPosts = filterPublished(posts);
 const tags = extractTags(publishedPosts);

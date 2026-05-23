@@ -8,9 +8,8 @@ import MermaidInit from '../components/MermaidInit.astro';
 import CodeCopyButton from '../components/CodeCopyButton.astro';
 import Comments from '../components/Comments.astro';
 import RelatedPosts from '../components/RelatedPosts.astro';
-import { getCollection } from 'astro:content';
-import { entryToPost } from '../modules/post/model';
-import { extractSeries } from '../modules/taxonomy/model';
+import { slugifyTag } from '../modules/post/model';
+import type { SeriesPost } from '../modules/taxonomy/model';
 import { translations } from '../i18n/translations';
 
 interface Props {
@@ -23,6 +22,8 @@ interface Props {
   heroImage?: string;
   currentSlug?: string;
   series?: { id: string; order: number };
+  seriesPosts?: SeriesPost[];
+  seriesSlug?: string;
 }
 
 const {
@@ -35,18 +36,9 @@ const {
   heroImage,
   currentSlug = '',
   series,
+  seriesPosts = [],
+  seriesSlug = '',
 } = Astro.props;
-
-// 시리즈 정보 가져오기
-let seriesPosts: ReturnType<typeof extractSeries>[number]['posts'] = [];
-let seriesSlug = '';
-if (series) {
-  const allPosts = await getCollection('posts');
-  const allSeries = extractSeries(allPosts.map(entryToPost));
-  const currentSeries = allSeries.find((item) => item.id === series.id);
-  seriesPosts = currentSeries?.posts ?? [];
-  seriesSlug = currentSeries?.slug ?? '';
-}
 
 function formatDate(d: Date, locale: string): string {
   return d.toLocaleDateString(locale, {
@@ -102,7 +94,7 @@ const formattedUpdatedDate = updatedDate ? formatDate(updatedDate, locale) : nul
         {tags.length > 0 && (
           <div class="post-tags" aria-label="Tags">
             {tags.map((tag) => (
-              <a href={`/tags/${tag}`} class="post-tag">#{tag}</a>
+              <a href={`/tags/${slugifyTag(tag)}`} class="post-tag">#{tag}</a>
             ))}
           </div>
         )}

@@ -1,5 +1,41 @@
-import type { CalendarDay, Post } from '../post/model';
-import { groupByCalendarDay, slugifyTag, sortPostsByDate, toLocalDateString } from '../post/model';
+import type { Post } from '../post/model';
+import { slugifyTag, sortPostsByDate } from '../post/model';
+
+export interface CalendarDay {
+  date: string;
+  count: number;
+  posts: Pick<Post, 'slug' | 'title'>[];
+}
+
+export function toLocalDateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export function groupByCalendarDay(posts: Post[]): CalendarDay[] {
+  const dayMap = new Map<string, CalendarDay>();
+
+  for (const post of posts) {
+    const dateStr = toLocalDateString(post.date);
+    const existing = dayMap.get(dateStr);
+
+    if (existing) {
+      existing.count += 1;
+      existing.posts.push({ slug: post.slug, title: post.title });
+      continue;
+    }
+
+    dayMap.set(dateStr, {
+      date: dateStr,
+      count: 1,
+      posts: [{ slug: post.slug, title: post.title }],
+    });
+  }
+
+  return Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
 
 export const SERIES = [
   'NixOS Ecosystem',
@@ -57,12 +93,7 @@ export interface CalendarWeek {
 }
 
 export function slugifySeries(id: string): string {
-  return id
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+  return slugifyTag(id);
 }
 
 export function extractSeries(posts: Post[]): SeriesInfo[] {

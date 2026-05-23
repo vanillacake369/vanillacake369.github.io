@@ -1,21 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { extractSeries, slugifySeries } from '../../modules/taxonomy/model';
-import { createPost, parseSeriesFromId } from '../../modules/post/model';
-import type { Post } from '../../modules/post/model';
-
-function makePost(overrides: Partial<Post> = {}) {
-  return {
-    slug: 'test-post',
-    title: 'Test Post',
-    description: 'desc',
-    date: new Date('2025-01-15'),
-    tags: ['go'],
-
-    lang: 'ko' as const,
-    draft: false,
-    ...overrides,
-  };
-}
+import { createPost } from '../../modules/post/model';
+import { makePost } from '../helpers/make-post';
 
 describe('slugifySeries', () => {
   it('normalizes English names', () => {
@@ -30,7 +16,7 @@ describe('slugifySeries', () => {
 describe('extractSeries', () => {
   it('groups posts by series id and sorts series posts by order', () => {
     const series = extractSeries([
-      makePost({ slug: 'part-2', title: 'Part 2', date: new Date('2025-01-02'), series: { id: 'Astro Deep Dive', order: 2 } }),
+      makePost({ slug: 'part-2', title: 'Part 2', date: new Date('2025-01-02'), tags: ['go'], series: { id: 'Astro Deep Dive', order: 2 } }),
       makePost({ slug: 'standalone', title: 'Standalone' }),
       makePost({ slug: 'part-1', title: 'Part 1', date: new Date('2025-01-01'), tags: ['go', 'astro'], series: { id: 'Astro Deep Dive', order: 1 } }),
     ]);
@@ -49,22 +35,6 @@ describe('extractSeries', () => {
     ]);
 
     expect(series.map((entry) => entry.id)).toEqual(['New Series', 'Old Series']);
-  });
-});
-
-describe('parseSeriesFromId', () => {
-  it('returns series info from a directory-format entry id', () => {
-    const result = parseSeriesFromId('NixOS Ecosystem/01-2026-01-14-Nix Disko 설정');
-    expect(result).toEqual({ id: 'NixOS Ecosystem', order: 1 });
-  });
-
-  it('returns undefined for a flat (non-series) entry id', () => {
-    expect(parseSeriesFromId('2025-03-20-Standalone post')).toBeUndefined();
-  });
-
-  it('handles multi-digit order numbers', () => {
-    const result = parseSeriesFromId('Effective Java/12-2024-02-18-Generic Method');
-    expect(result).toEqual({ id: 'Effective Java', order: 12 });
   });
 });
 

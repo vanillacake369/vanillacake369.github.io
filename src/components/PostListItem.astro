@@ -1,5 +1,6 @@
 ---
 import { slugifyTag } from '../modules/post/model';
+import { toLocalDateString } from '../modules/taxonomy/model';
 import type { Post } from '../modules/post/model';
 
 interface Props {
@@ -7,16 +8,12 @@ interface Props {
 }
 
 const { post } = Astro.props;
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
-}
 ---
 
 <li class="post-item">
   <div class="post-item-meta">
     <time class="post-item-date" datetime={post.date.toISOString()}>
-      {formatDate(post.date)}
+      {toLocalDateString(post.date)}
     </time>
   </div>
   <a href={`/posts/${post.slug}`} class="post-item-title">

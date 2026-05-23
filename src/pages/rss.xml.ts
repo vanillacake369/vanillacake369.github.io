@@ -1,14 +1,14 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { getCollection } from "astro:content";
-import { filterPublished, sortPostsByDate, entryToPost } from "../modules/post/model";
+import { filterPublished, sortPostsByDate, createPost } from "../modules/post/model";
 import { SITE_CONFIG } from "../config";
 
 export async function GET(context: APIContext) {
     const rawEntries = await getCollection("posts");
 
     const posts = sortPostsByDate(
-        filterPublished(rawEntries.map(entryToPost)),
+        filterPublished(rawEntries.map(createPost)),
     );
 
     if (!context.site) {

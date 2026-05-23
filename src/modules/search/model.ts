@@ -1,5 +1,5 @@
 import {
-  entryToPost,
+  createPost,
   excerptFromBody,
   filterPublished,
   slugify,
@@ -36,7 +36,7 @@ export function buildSearchPageList(entries: SearchEntry[]): SearchPage[] {
     bodyMap.set(slugify(entry.id), excerptFromBody(entry.body ?? ''));
   }
 
-  const posts = sortPostsByDate(filterPublished(entries.map(entryToPost)));
+  const posts = sortPostsByDate(filterPublished(entries.map(createPost)));
 
   return posts.map((post) => ({
     url: `/posts/${post.slug}/`,

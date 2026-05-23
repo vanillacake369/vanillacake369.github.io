@@ -30,12 +30,6 @@ export interface TagInfo {
   slug: string;
 }
 
-export interface CalendarDay {
-  date: string;
-  count: number;
-  posts: Pick<Post, 'slug' | 'title'>[];
-}
-
 // ── Grammar-based derivation ────────────────────────────────────────────────
 
 export function dateFromId(id: string): Date | undefined {
@@ -60,11 +54,6 @@ export function slugify(id: string): string {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
     .trim();
-}
-
-export function parseSeriesFromId(id: string): { id: string; order: number } | undefined {
-  const parsed = parsePostIdSafe(id);
-  return parsed?.series;
 }
 
 // ── Smart Constructor (Level 1) ─────────────────────────────────────────────
@@ -109,15 +98,9 @@ export function createPost(entry: RawEntry): Post {
     lang: entry.data.lang ?? 'ko',
     draft: entry.data.draft ?? false,
     heroImage: entry.data.heroImage,
+    // series.id validated against SERIES enum via contract test (series-convention.test.ts)
     series: parsed.series,
   });
-}
-
-/**
- * @deprecated Use createPost() for strict validation. Kept for backward compatibility.
- */
-export function entryToPost(entry: RawEntry): Post {
-  return createPost(entry);
 }
 
 // ── Query functions ─────────────────────────────────────────────────────────
@@ -130,21 +113,22 @@ export function filterPublished(posts: Post[]): Post[] {
   return posts.filter((post) => !post.draft);
 }
 
-export function filterByLang(posts: Post[], lang: Post['lang']): Post[] {
-  return posts.filter((post) => post.lang === lang);
-}
-
 export function filterByTag(posts: Post[], tag: string): Post[] {
   return posts.filter((post) => post.tags.includes(tag));
 }
 
-export function slugifyTag(tag: string): string {
-  return tag
+function slugifyBase(s: string): string {
+  return s
     .toLowerCase()
     .replace(/[^a-z0-9가-힣\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
     .trim();
+}
+
+export function slugifyTag(tag: string): string {
+  return slugifyBase(tag);
 }
 
 export function extractTags(posts: Post[]): TagInfo[] {
@@ -160,40 +144,12 @@ export function extractTags(posts: Post[]): TagInfo[] {
     .sort((a, b) => b.count - a.count);
 }
 
-export function toLocalDateString(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-export function groupByCalendarDay(posts: Post[]): CalendarDay[] {
-  const dayMap = new Map<string, CalendarDay>();
-
-  for (const post of posts) {
-    const dateStr = toLocalDateString(post.date);
-    const existing = dayMap.get(dateStr);
-
-    if (existing) {
-      existing.count += 1;
-      existing.posts.push({ slug: post.slug, title: post.title });
-      continue;
-    }
-
-    dayMap.set(dateStr, {
-      date: dateStr,
-      count: 1,
-      posts: [{ slug: post.slug, title: post.title }],
-    });
-  }
-
-  return Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
-}
-
 export function excerptFromBody(body: string, maxLength = 300): string {
   return body
     .replace(/^---[\s\S]*?---\n*/m, '')
     .replace(/```[\s\S]*?```/g, '')
+    .replace(/^\|.*\|$/gm, '')
+    .replace(/<[^>]+>/g, '')
     .replace(/!\[.*?\]\(.*?\)/g, '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/[#*>`~_\-|]/g, '')

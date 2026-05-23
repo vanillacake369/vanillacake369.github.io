@@ -7,20 +7,7 @@ import {
   generateCalendarGrid,
   slugifySeries,
 } from '../../modules/taxonomy/model';
-import type { Post } from '../../modules/post/model';
-
-function makePost(overrides: Partial<Post> = {}): Post {
-  return {
-    slug: 'test-post',
-    title: 'Test Post',
-    description: 'desc',
-    date: new Date('2025-01-15'),
-    tags: ['go', 'k8s'],
-    lang: 'ko',
-    draft: false,
-    ...overrides,
-  };
-}
+import { makePost } from '../helpers/make-post';
 
 describe('modules/taxonomy/model', () => {
   it('slugifies a series name', () => {

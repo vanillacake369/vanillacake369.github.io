@@ -7,28 +7,14 @@ import {
   excerptFromBody,
   sortPostsByDate,
   filterPublished,
-  filterByLang,
   filterByTag,
   extractTags,
-  groupByCalendarDay,
   slugifyTag,
   InvalidPostIdError,
   InvariantViolation,
 } from '../../modules/post/model';
-import type { Post } from '../../modules/post/model';
-
-function makePost(overrides: Partial<Post> = {}): Post {
-  return {
-    slug: 'test-post',
-    title: 'Test Post',
-    description: 'desc',
-    date: new Date('2025-01-15'),
-    tags: ['go', 'k8s'],
-    lang: 'ko',
-    draft: false,
-    ...overrides,
-  };
-}
+import { groupByCalendarDay } from '../../modules/taxonomy/model';
+import { makePost } from '../helpers/make-post';
 
 // ── titleFromId ──────────────────────────────────────────────────────────────
 
@@ -237,6 +223,14 @@ describe('excerptFromBody', () => {
   it('returns empty for empty input', () => {
     expect(excerptFromBody('')).toBe('');
   });
+
+  it('strips HTML tags', () => {
+    expect(excerptFromBody('<details><summary>Title</summary>Content</details>')).toBe('TitleContent');
+  });
+
+  it('strips table rows', () => {
+    expect(excerptFromBody('| A | B |\n|---|---|\n| 1 | 2 |\nAfter')).toBe('After');
+  });
 });
 
 // ── sortPostsByDate ──────────────────────────────────────────────────────────
@@ -269,16 +263,6 @@ describe('filterPublished', () => {
       makePost({ slug: 'draft', draft: true }),
     ];
     expect(filterPublished(posts).map((p) => p.slug)).toEqual(['published']);
-  });
-});
-
-describe('filterByLang', () => {
-  it('filters by language', () => {
-    const posts = [
-      makePost({ slug: 'ko', lang: 'ko' }),
-      makePost({ slug: 'en', lang: 'en' }),
-    ];
-    expect(filterByLang(posts, 'en').map((p) => p.slug)).toEqual(['en']);
   });
 });
 

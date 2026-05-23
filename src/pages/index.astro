@@ -5,12 +5,12 @@ import '../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostListItem from '../components/PostListItem.astro';
-import { sortPostsByDate, filterPublished, entryToPost } from '../modules/post/model';
+import { sortPostsByDate, filterPublished, createPost } from '../modules/post/model';
 import { translations } from '../i18n/translations';
 import { SITE_CONFIG } from '../config';
 
 const rawEntries = await getCollection('posts');
-const posts = rawEntries.map(entryToPost);
+const posts = rawEntries.map(createPost);
 const publishedPosts = sortPostsByDate(filterPublished(posts));
 ---
 

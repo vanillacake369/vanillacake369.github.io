@@ -5,11 +5,11 @@ import '../../styles/typography/list.css';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostListItem from '../../components/PostListItem.astro';
-import { filterPublished, filterByTag, sortPostsByDate, extractTags, entryToPost } from '../../modules/post/model';
+import { filterPublished, filterByTag, sortPostsByDate, extractTags, createPost } from '../../modules/post/model';
 
 export async function getStaticPaths() {
   const rawEntries = await getCollection('posts');
-  const posts = rawEntries.map(entryToPost);
+  const posts = rawEntries.map(createPost);
   const publishedPosts = filterPublished(posts);
   const tags = extractTags(publishedPosts);
 

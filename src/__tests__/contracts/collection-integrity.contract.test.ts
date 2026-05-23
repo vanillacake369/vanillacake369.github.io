@@ -5,54 +5,11 @@
  * @invariant Every tag used by a post exists in the TAGS enum
  */
 import { describe, expect, it } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'fs';
-import path from 'path';
-import { slugify } from '../../modules/post/model';
 import { TAGS } from '../../modules/taxonomy/model';
-
-const POSTS_DIR = path.resolve(process.cwd(), 'src/content/posts');
-
-interface PostMeta {
-  id: string;
-  slug: string;
-  tags: string[];
-  draft: boolean;
-}
-
-function collectPostMeta(dir: string, prefix = ''): PostMeta[] {
-  const posts: PostMeta[] = [];
-  for (const entry of readdirSync(dir)) {
-    const fullPath = path.join(dir, entry);
-    if (statSync(fullPath).isDirectory()) {
-      posts.push(...collectPostMeta(fullPath, `${prefix}${entry}/`));
-    } else if (entry.endsWith('.md') || entry.endsWith('.mdx')) {
-      const id = `${prefix}${entry}`.replace(/\.mdx?$/, '');
-      const content = readFileSync(fullPath, 'utf-8');
-      const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-      const fm = fmMatch?.[1] ?? '';
-
-      // Inline: tags: [foo, bar]
-      const inlineMatch = fm.match(/^tags:\s*\[(.+)\]/m);
-      // YAML list: tags:\n    - foo\n    - bar
-      const listMatches = [...fm.matchAll(/^[ \t]+-\s*["']?([^\n"']+?)["']?\s*$/gm)];
-      const tags = inlineMatch
-        ? inlineMatch[1].split(',').map((t) => t.trim().replace(/['"]/g, ''))
-        : listMatches.map((m) => m[1].trim());
-      const draftMatch = fm.match(/^draft:\s*(true|false)/m);
-
-      posts.push({
-        id,
-        slug: slugify(id),
-        tags,
-        draft: draftMatch?.[1] === 'true',
-      });
-    }
-  }
-  return posts;
-}
+import { collectPosts, POSTS_DIR } from '../helpers/collect-posts';
 
 describe('collection integrity contract', () => {
-  const allPosts = collectPostMeta(POSTS_DIR);
+  const allPosts = collectPosts(POSTS_DIR);
   const publishedPosts = allPosts.filter((p) => !p.draft);
 
   if (allPosts.length === 0) {

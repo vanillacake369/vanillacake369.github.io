@@ -5,28 +5,12 @@
  * @invariant Slug derivation is deterministic and collision-free
  */
 import { describe, expect, it } from 'vitest';
-import { readdirSync, statSync } from 'fs';
-import path from 'path';
 import { parsePostId } from '../../modules/post/grammar';
 import { slugify } from '../../modules/post/model';
-
-const POSTS_DIR = path.resolve(process.cwd(), 'src/content/posts');
-
-function collectPostIds(dir: string, prefix = ''): string[] {
-  const ids: string[] = [];
-  for (const entry of readdirSync(dir)) {
-    const fullPath = path.join(dir, entry);
-    if (statSync(fullPath).isDirectory()) {
-      ids.push(...collectPostIds(fullPath, `${prefix}${entry}/`));
-    } else if (entry.endsWith('.md') || entry.endsWith('.mdx')) {
-      ids.push(`${prefix}${entry}`.replace(/\.mdx?$/, ''));
-    }
-  }
-  return ids;
-}
+import { collectPosts, POSTS_DIR } from '../helpers/collect-posts';
 
 describe('post filename grammar contract', () => {
-  const postIds = collectPostIds(POSTS_DIR);
+  const postIds = collectPosts(POSTS_DIR).map((p) => p.id);
 
   if (postIds.length === 0) {
     it.skip('no posts found', () => {});
