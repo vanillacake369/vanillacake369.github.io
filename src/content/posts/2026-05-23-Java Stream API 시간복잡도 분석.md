@@ -165,7 +165,7 @@ final <P_IN, S extends Sink<E_OUT>> S wrapAndCopyInto(S wrappedSink,
 
 > [!NOTE]
 > 
-> 여기서 `Spliterator` 세부 구현체를 다루지 않는 이유는 구현체의 종류가 워낙 다양하기 때문이다
+> 여기서 `Spliterator` 세부 구현체를 다루지 않는 이유는 구현체의 종류가 워낙 다양하기 때문이다.
 > 총 162 개나 되며 각각에 대해 세부적으로 다루는 건 본 포스트의 범위를 벗어나기에
 > `Spliterator`의 핵심개념만 확인하고 넘어간다.
 
