@@ -15,7 +15,10 @@
     "test:coverage": "vitest run --coverage",
     "optimize-images": "node scripts/optimize-images.mjs",
     "lint:md": "node scripts/lint-markdown.mjs",
-    "lint:md:fix": "node scripts/lint-markdown.mjs --fix"
+    "lint:md:fix": "node scripts/lint-markdown.mjs --fix",
+    "prefix-dates": "node scripts/prefix-dates.mjs",
+    "prefix-dates:apply": "node scripts/prefix-dates.mjs --apply",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.4",
@@ -29,8 +32,11 @@
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@testing-library/dom": "^10.4.1",
     "happy-dom": "^20.9.0",
+    "husky": "^9.1.7",
     "pagefind": "^1.5.2",
     "vitest": "^4.1.6"
   }
