@@ -1,0 +1,59 @@
+name: GSC Sitemap Resubmit
+
+on:
+  workflow_run:
+    workflows: ["Deploy to GitHub Pages"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  resubmit:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Check secret availability
+        id: check
+        env:
+          SA_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [[ -z "${SA_JSON}" ]]; then
+            echo "GSC_SERVICE_ACCOUNT_JSON not set; skipping (see workflow README)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Authenticate to Google
+        if: steps.check.outputs.skip != 'true'
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/webmasters
+
+      - name: Submit sitemap to GSC
+        if: steps.check.outputs.skip != 'true'
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          SITE_URL: https://vanillacake369.github.io/
+          SITEMAP_URL: https://vanillacake369.github.io/sitemap-index.xml
+        run: |
+          set -euo pipefail
+          SITE_ENC=$(jq -sRr @uri <<< "${SITE_URL}" | tr -d '\n')
+          SM_ENC=$(jq -sRr @uri <<< "${SITEMAP_URL}" | tr -d '\n')
+          ENDPOINT="https://www.googleapis.com/webmasters/v3/sites/${SITE_ENC}/sitemaps/${SM_ENC}"
+          echo "PUT ${ENDPOINT}"
+          HTTP_CODE=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+            -X PUT \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            "${ENDPOINT}")
+          echo "HTTP ${HTTP_CODE}"
+          cat /tmp/resp.txt || true; echo
+          case "${HTTP_CODE}" in
+            200|204) echo "✓ GSC sitemap resubmitted" ;;
+            *) echo "✗ GSC rejected (HTTP ${HTTP_CODE})"; exit 1 ;;
+          esac
