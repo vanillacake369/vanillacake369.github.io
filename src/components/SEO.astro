@@ -7,8 +7,10 @@ interface Props {
   url: string;
   type: 'article' | 'website';
   publishedDate?: Date;
+  updatedDate?: Date;
   tags?: string[];
   lang?: 'ko' | 'en';
+  robots?: string;
 }
 
 const {
@@ -17,8 +19,10 @@ const {
   url,
   type,
   publishedDate,
+  updatedDate,
   tags = [],
   lang = 'ko',
+  robots = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
 } = Astro.props;
 
 const siteTitle = SITE_CONFIG.title;
@@ -34,16 +38,22 @@ const jsonLd = type === 'article'
       description: description,
       url: url,
       datePublished: publishedDate?.toISOString(),
+      dateModified: (updatedDate || publishedDate)?.toISOString(),
       author: {
         '@type': 'Person',
         name: SITE_CONFIG.author,
         url: SITE_CONFIG.site,
       },
       keywords: tags.join(', '),
+      image: ogImage,
       publisher: {
         '@type': 'Person',
         name: SITE_CONFIG.author,
         url: SITE_CONFIG.site,
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': url,
       },
     })
   : JSON.stringify({
@@ -55,8 +65,17 @@ const jsonLd = type === 'article'
     });
 ---
 
+<!-- Standard Meta Tags -->
+<meta name="title" content={fullTitle} />
+<meta name="description" content={description} />
+<meta name="robots" content={robots} />
+
 <!-- Canonical URL -->
 <link rel="canonical" href={url} />
+
+<!-- Language -->
+<link rel="alternate" hreflang="ko" href={url} />
+<link rel="alternate" hreflang="x-default" href={url} />
 
 <!-- Open Graph -->
 <meta property="og:type" content={type} />
@@ -65,9 +84,13 @@ const jsonLd = type === 'article'
 <meta property="og:url" content={url} />
 <meta property="og:site_name" content={siteTitle} />
 <meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={fullTitle} />
 <meta property="og:locale" content={ogLocale} />
 {publishedDate && (
   <meta property="article:published_time" content={publishedDate.toISOString()} />
+)}
+{updatedDate && (
+  <meta property="article:modified_time" content={updatedDate.toISOString()} />
 )}
 {tags.map((tag) => (
   <meta property="article:tag" content={tag} />
@@ -78,6 +101,7 @@ const jsonLd = type === 'article'
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={fullTitle} />
 
 <!-- JSON-LD Structured Data -->
 <script type="application/ld+json" set:html={jsonLd} />

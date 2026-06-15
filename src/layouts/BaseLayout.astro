@@ -20,7 +20,9 @@ interface Props {
   lang?: 'ko' | 'en';
   seoType?: 'article' | 'website';
   publishedDate?: Date;
+  updatedDate?: Date;
   tags?: string[];
+  robots?: string;
 }
 
 const {
@@ -29,7 +31,9 @@ const {
   lang = 'ko',
   seoType = 'website',
   publishedDate,
+  updatedDate,
   tags,
+  robots = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1, noai, noimageai',
 } = Astro.props;
 
 const siteTitle = SITE_CONFIG.title;
@@ -44,13 +48,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     <LangInitScript />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
-    <meta name="robots" content="noai, noimageai" />
     <meta name="google-site-verification" content="asg_2F_KmOxwHb_7NT5kzoX7XnduxDV6qxig_73WPJU" />
     <link rel="icon" type="image/png" href="/favicon.png" sizes="any" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
-    <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
@@ -64,7 +65,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       url={canonicalUrl}
       type={seoType}
       publishedDate={publishedDate}
+      updatedDate={updatedDate}
       tags={tags}
+      robots={robots}
     />
     <slot name="head" />
   </head>
