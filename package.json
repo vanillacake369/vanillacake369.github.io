@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && npx pagefind --site dist",
+    "build": "astro build && node scripts/sitemap-clean.mjs && npx pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
